@@ -9,7 +9,7 @@ tmax = 100;
 load('runNumber.mat','runNumber'); runNumber = 0; %-%-
 
 if runNumber == 0
-    U0 = 15; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
+    U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
     % #--- 
     N = 20; % Number of harmonics contributing to the oscillation
@@ -167,7 +167,7 @@ if runNumber == 0
     
      
     % # ---
-    z(1) = 1-1* zs_from_spherical(pi, oscillation_handle(oscillation_amplitudes(:, 1)));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
+    z(1) = -1* zs_from_spherical(pi, oscillation_handle(oscillation_amplitudes(:, 1)));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
   
     % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
     % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
@@ -204,6 +204,7 @@ if runNumber == 0
     
     jj1 = 1; %partial results savings  counter
 end
+%% hey
 % 
 % elseif runNumber>0
 %     load('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
@@ -340,7 +341,7 @@ end
 %     exit
 % end
 
-%Main Loop
+%% Main Loop
 while (t<tend || jj1>.5) 
     jj = jj+1;
     t = tvec(jj+1);
