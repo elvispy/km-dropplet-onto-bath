@@ -9,14 +9,14 @@ tmax = 100;
 %load('runNumber.mat','runNumber'); 
 runNumber = 0; %-%-
 if exist('z.mat', 'file') == 2
-   throw("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
+    throw("Exporting data is going to overwrite on existing files. Realocate those files to avoid loss of data");
 end
 
 if runNumber == 0
     U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
     % #--- 
-    N = 50; % Number of harmonics contributing to the oscillation
+    N = 40; % Number of harmonics contributing to the oscillation
     % #---0
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
