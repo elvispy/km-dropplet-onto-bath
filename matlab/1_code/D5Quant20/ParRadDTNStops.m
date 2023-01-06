@@ -217,7 +217,7 @@ if runNumber == 0
             else
                 disp('No pool exists.')
             end
-            exit
+            % exit
         end 
     end
     save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
@@ -231,7 +231,7 @@ if runNumber == 0
     else
         disp('No pool exists.')
     end  
-    exit
+    % exit
 elseif runNumber > 0
     load('nr.mat','nr')
     load('D.mat','D')
@@ -248,7 +248,7 @@ elseif runNumber > 0
     dtheta = 2*pi/numer;%use pi/even number
     
     if reStartAt > nr
-        exit
+        % exit
     else
         load(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
         for ll = reStartAt:poolnum*workerload:nr 
@@ -311,7 +311,7 @@ elseif runNumber > 0
                 else
                     disp('No pool exists.')
                 end
-                exit
+                % exit
             end
         end
         save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
@@ -325,6 +325,6 @@ elseif runNumber > 0
         else
             disp('No pool exists.')
         end  
-        exit
+        % exit
     end
 end

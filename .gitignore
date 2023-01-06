@@ -29,3 +29,6 @@ Manifest.toml
 
 # Julia files
 *.jld2
+
+# Other files
+.DS_Store
