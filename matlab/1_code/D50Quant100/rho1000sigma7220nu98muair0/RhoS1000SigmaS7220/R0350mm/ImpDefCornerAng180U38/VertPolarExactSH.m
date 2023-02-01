@@ -166,10 +166,6 @@ if runNumber == 0
     % #---oscillation_amplitudes = zeros(N, steps + 1);
     amplitudes_old = oscillation_amplitudes(:, 1);
     amplitudes_velocities_old = oscillation_velocities(:, 1);
-    Y_old  = zeros(2, N);
-    Y_tent = zeros(2, N);
-    %Y = zeros(2, 1, N); % Y = P * amplitudes, is the change of basis vector
-    
      
     % # ---
     z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
@@ -177,6 +173,30 @@ if runNumber == 0
     % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
     % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
     vz(1) = -1; %Initial velocity of the CoM in dimesionless units
+    
+    current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
+        "Deformation_velocities", amplitudes_velocities_old, ...
+        "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_old, ...
+        "current_time", 0, ...
+        "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
+        "nb_contact_points", 0);
+    
+    previous_conditions = {current_conditions, current_conditions}; 
+    
+    f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
+    previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
+    previous_conditions{1}.center_of_mass_velocity = ...
+        previous_conditions{2}.center_of_mass_velocity + dt/Fr;
+    previous_conditions{1}.center_of_mass = ...
+        previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
+    
+    g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
+        + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
+
+    for idx = 1:harmonics_qtt
+        previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
+        previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
+    end
     
     jj = 0;%iteration counter
 
@@ -208,6 +228,20 @@ if runNumber == 0
     zs = zeros(nr,1);
     
     jj1 = 1; %partial results savings  counter
+    
+    PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", WeS, ...
+        "nb_harmonics", N, ...
+        "omegas_frequencies", omegas_frequencies, ...
+        "spatial_tol", dr, ...
+        "angle_tol", angle_tol, ...
+        "DEBUG_FLAG", true, ...
+        "Ra", Ra);
+                                %"pressure_unit", pressure_unit, ...
+                                %"CM", 9, ...
+                                %"PG", 2, ...
+                                %"KILL_OUTSIDE", true, ...
+                                %"wigner3j", {precomputed_wigner(harmonics_qtt)}, ...
+        
 end
 %% hey
 % 
@@ -368,28 +402,27 @@ while (t<tend) %#-- || jj1>.5)
     %function_amplitudes_prime = oscillation_handle_prime(oscillation_amplitudes(:, jj));
     %function_amplitudes_prime_prime = oscillation_handle_prime_prime(oscillation_amplitudes(:, jj));
     
-    RmaxOld = rs_from_spherical(theta_max_radius(function_amplitudes, function_amplitudes_prime, ...
-    function_amplitudes_prime_prime), function_amplitudes);
+    RmaxOld = rs_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, jj)), oscillation_amplitudes(:, jj));
   
     %(i.e. where the tangent plane to the droplet is vertical)
     nlmax(jj) = floor(RmaxOld/dr)+1;%max number of contact points
     % #---
     %nlmax_dummy = floor(max_radius/dr)+1;
     
-    thetaVec = zeros(1,nlmax(jj));%initialising vector of angles of pressed positions
-    thetaVec(1) = pi;%bottom of droplet
-    for ii = 2:nlmax(jj)
-        %-%-thetaVec(ii) = mod(abs(thetaofxs(dr*(ii-1),A2(jj),A3(jj),thetaVec(ii-1))),pi); % #--- I think we could make this analytic.
-        thetaVec(ii) = theta_from_cylindrical(dr*(ii-1), oscillation_handle(oscillation_amplitudes(:, jj)), ...
-                        oscillation_handle_prime(oscillation_amplitudes(:, jj)), thetaVec(ii-1));
-    end
-    xi = cos(thetaVec); %Variable change to use the Legendre polynomials
+    thetaVec = theta_from_cylindrical(dr*(0:(nlmax(jj)-1)), oscillation_amplitudes(:, jj)); % zeros(1,nlmax(jj));%initialising vector of angles of pressed positions
+%     thetaVec(1) = pi;%bottom of droplet
+%     for ii = 2:nlmax(jj)
+%         %-%-thetaVec(ii) = mod(abs(thetaofxs(dr*(ii-1),A2(jj),A3(jj),thetaVec(ii-1))),pi); % #--- I think we could make this analytic.
+%         thetaVec(ii) = theta_from_cylindrical(dr*(ii-1), oscillation_handle(oscillation_amplitudes(:, jj)), ...
+%                         oscillation_handle_prime(oscillation_amplitudes(:, jj)), thetaVec(ii-1));
+%     end
+    % xi = cos(thetaVec); %Variable change to use the Legendre polynomials
     %finding tentative B2 and B3, i.e. projection of the pressure onto the
     %Spherical Harmonic modes
     %downward incline at origin
     if norm(psTent,1) == 0
-        B2Tent = 0;
-        B3Tent = 0;
+        %B2Tent = 0;
+        %B3Tent = 0;
         B_l_ps_tent = zeros(1, N);
     else
         nb_contact_points = nlmax(jj)-find(flipud(psTent),1)+1; %Number of nodes contact points%
@@ -397,148 +430,53 @@ while (t<tend) %#-- || jj1>.5)
         
         %%#---
         % We have that B_l = (2l+1)/2 * int(Ps * P_m * sin(theta))
-        B_l_ps_tent = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
-                    psTent(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
-%         vector = psTent(1:nb_contact_points) .* sin(thetaVec(1:nb_contact_points));
-%         legendre_matrix = zeros(nb_contact_points, N); %a column corresponds to a legendre matrix
-%         for ii = 1:N
-%             legendre_matrix(1:nb_contact_points, ii) =  legendrep(ii, xi(1:nb_contact_points));
-%         end
-% 
-%         %Every column represents the projection vector to be intergrated
-%         vector_to_integrate = repmat(vector', 1, N) .* legendre_matrix;
-%         
-%         %Integrate the endpoint 
-%         B_l_ps_tent = (thetaVec(nb_contact_points) + thetaVec(nb_contact_points + 1))/2 * vector_to_integrate(end, :) / 2;
-%         
-%         %Integrate the middle
-%         if nb_contact_points > 1
-%             B_l_ps_tent = B_l_ps_tent + trapz(thetaVec(1:nb_contact_points), vector_to_integrate);
-%         end
-        %%#---
+%         B_l_ps_tent = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
+%                     psTent(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
         
-        %finding tentative B2
-        %downward incline at origin (in the linear interpolation on variable xi)
-%         B2Tent = -15*psTent(1)*((xi(1)^2+xi(2)^2)*(xi(1)+xi(2))/4 ...
-%                  -xi(2)*(xi(1)^2+xi(1)*xi(2)+xi(2)^2)/3)/4 ...
-%                  +5*psTent(1)*(xi(1)-xi(2))/8;
-%         for ii = 2:nb_contact_points-1
-%             %downward incline (in the linear interpolation on variable xi)
-%             B2Tent = B2Tent ...
-%                      -15*psTent(ii)*((xi(ii)^2+xi(ii+1)^2)*(xi(ii)+xi(ii+1))/4 ...
-%                      -xi(ii+1)*(xi(ii)^2+xi(ii)*xi(ii+1)+xi(ii+1)^2)/3)/4 ...
-%                      +5*psTent(ii)*(xi(ii)-xi(ii+1))/8;
-%             %upward incline (in the linear interpolation on variable xi)
-%             B2Tent = B2Tent ...
-%                      +15*psTent(ii)*((xi(ii)^2+xi(ii-1)^2)*(xi(ii)+xi(ii-1))/4 ...
-%                      -xi(ii-1)*(xi(ii)^2+xi(ii)*xi(ii-1)+xi(ii-1)^2)/3)/4 ...
-%                      -5*psTent(ii)*(xi(ii)-xi(ii-1))/8;
-%         end
-%         %upward incline at outer rim
-%         if nb_contact_points > 1
-%             B2Tent = B2Tent ...
-%                      +15*psTent(nb_contact_points)*((xi(nb_contact_points)^2+xi(nb_contact_points-1)^2)*(xi(nb_contact_points)+xi(nb_contact_points-1))/4 ...
-%                      -xi(nb_contact_points-1)*(xi(nb_contact_points)^2+xi(nb_contact_points)*xi(nb_contact_points-1)+xi(nb_contact_points-1)^2)/3)/4 ...
-%                      -5*psTent(nb_contact_points)*(xi(nb_contact_points)-xi(nb_contact_points-1))/8;
-%             %it may be possible to improve this approximation by including the
-%             %downward incline at the last point going half way to the next point
-%         end
-% 
-%         %finding tentative B3
-%         %downward incline at origin (in the linear interpolation on variable xi)
-%         B3Tent = -35*psTent(1)*((xi(1)^4+xi(1)^3*xi(2)+xi(1)^2*xi(2)^2+xi(1)*xi(2)^3+xi(2)^4)/5 ...
-%                  -xi(2)*(xi(1)^2+xi(2)^2)*(xi(1)+xi(2))/4)/4 ...
-%                  +21*psTent(1)*((xi(1)^2+xi(1)*xi(2)+xi(2)^2)/4-xi(2)*(xi(1)+xi(2))/2)/4;
-%         for ii = 2:nb_contact_points-1
-%             %downward incline (in the linear interpolation on variable xi)
-%             B3Tent = B3Tent ...
-%                      -35*psTent(ii)*((xi(ii)^4+xi(ii)^3*xi(ii+1)+xi(ii)^2*xi(ii+1)^2+xi(ii)*xi(ii+1)^3+xi(ii+1)^4)/5 ...
-%                      -xi(ii+1)*(xi(ii)^2+xi(ii+1)^2)*(xi(ii)+xi(ii+1))/4)/4 ...
-%                      +21*psTent(ii)*((xi(ii)^2+xi(ii)*xi(ii+1)+xi(ii+1)^2)/4-xi(ii+1)*(xi(ii)+xi(ii+1))/2)/4;
-%             %upward incline (in the linear interpolation on variable xi)
-%             B3Tent = B3Tent+...
-%                      35*psTent(ii)*((xi(ii)^4+xi(ii)^3*xi(ii-1)+xi(ii)^2*xi(ii-1)^2+xi(ii)*xi(ii-1)^3+xi(ii-1)^4)/5 ...
-%                      -xi(ii-1)*(xi(ii)^2+xi(ii-1)^2)*(xi(ii)+xi(ii-1))/4)/4 ...
-%                      -21*psTent(ii)*((xi(ii)^2+xi(ii)*xi(ii-1)+xi(ii-1)^2)/4-xi(ii-1)*(xi(ii)+xi(ii-1))/2)/4;
-%         end
-%         %upward incline at outer rim
-%         if nb_contact_points > 1
-%             B3Tent = B3Tent+...
-%                      35*psTent(nb_contact_points)*((xi(nb_contact_points)^4+xi(nb_contact_points)^3*xi(nb_contact_points-1)+xi(nb_contact_points)^2*xi(nb_contact_points-1)^2+xi(nb_contact_points)*xi(nb_contact_points-1)^3+xi(nb_contact_points-1)^4)/5 ...
-%                      -xi(nb_contact_points-1)*(xi(nb_contact_points)^2+xi(nb_contact_points-1)^2)*(xi(nb_contact_points)+xi(nb_contact_points-1))/4)/4 ...
-%                      -21*psTent(nb_contact_points)*((xi(nb_contact_points)^2+xi(nb_contact_points)*xi(nb_contact_points-1)+xi(nb_contact_points-1)^2)/4-xi(nb_contact_points-1)*(xi(nb_contact_points)+xi(nb_contact_points-1))/2)/4;
-%             %it may be possible to improve this approximation by including the
-%             %downward incline at the last point going half way to the next point
-%         end
+        f = @(thetas) interp1(thtaVec(1:nb_contact_points), psTent(1:nb_contact_points), thetas, 'linear',  0); 
+        endpoints = [thetaVec(nb_contact_points), thetaVec(1)];
+        B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
+
+        
     end
     
-    %Solving the ode for each SH mode
-    %mode 2
-    %-%-Y2old = P2inv*[A2old;V2old]; %Changing old deformation variables to the basis of eigenvectors
-    %-%-C2old = P2inv*[0;-2*B2old/Ra]; %Changing old pressure variables to the basis of eigenvectors
-    %-%-C2Tent = P2inv*[0;-2*B2Tent/Ra];%Changing new pressure variables to the basis of eigenvectors
-    %Evolution of ODE in the basis of the eigenvectors
-    %-%-Y2Tent(1) = Y2old(1)*exp( 1i*omega2*dt)+dt*C2Tent(1)/2+dt*C2old(1)*exp( 1i*omega2*dt)/2; 
-    %-%-Y2Tent(2) = Y2old(2)*exp(-1i*omega2*dt)+dt*C2Tent(2)/2+dt*C2old(2)*exp(-1i*omega2*dt)/2;
-    %-%-VecTent2 = P2*Y2Tent; % returning to the basis of physical relevance
-    %-%-A2Tent = VecTent2(1);
-%     V2Tent = VecTent2(2);
-    %mode 3
-    %-%-Y3old = P3inv*[A3old;V3old];
-    %-%-C3old = P3inv*[0;-3*B3old/Ra];
-    %-%-C3Tent = P3inv*[0;-3*B3Tent/Ra];
-    %-%-Y3Tent(1) = Y3old(1)*exp( 1i*omega3*dt)+dt*C3Tent(1)/2+dt*C3old(1)*exp( 1i*omega3*dt)/2;
-    %-%-Y3Tent(2) = Y3old(2)*exp(-1i*omega3*dt)+dt*C3Tent(2)/2+dt*C3old(2)*exp(-1i*omega3*dt)/2;
-    %-%-VecTent3 = P3*Y3Tent;
-    %-%-A3Tent = VecTent3(1);
-%     V3Tent = VecTent3(2);
-
+    
     %#--- Solving the ODE
-    
     %C_tent = zeros(2, N);
-    [amplitudes_tent, ~] = solve_EDO(N, dt, Ra, ...
-        omegas_frequencies, B_l_ps_old, B_l_ps_tent, ODE_inverse_matrices, ...
-        ODE_matrices, amplitudes_old, amplitudes_velocities_old);%zeros(1, N);
-%     for ii = 2:N % We dont care about ii = 1!
-%         Y_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [amplitudes_old(ii); amplitudes_velocities_old(ii)];
-%         %C_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [0; -ii*B_l_ps_tent(ii)/Ra];
-%         C_tent(:, ii) = ODE_inverse_matrices(:, :, ii)* [0; -ii*B_l_ps_tent(ii)/Ra];
-%         
-%         Y_tent(:, ii) = (eye(2)-dt*diag([1.0i * omegas_frequencies(ii, jj), -1.0i * omegas_frequencies(ii, jj)]))\(dt*C_tent(:, ii) + Y_old(:, ii));
-%         
-%         X = ODE_matrices(:, :, ii) * Y_tent(:, ii);
-%         amplitudes_tent(ii) = X(1);
-%     end
+%     [amplitudes_tent, ~] = solve_EDO(N, dt, Ra, ...
+%         omegas_frequencies, B_l_ps_old, B_l_ps_tent, ODE_inverse_matrices, ...
+%         ODE_matrices, amplitudes_old, amplitudes_velocities_old);%zeros(1, N);
+    [amplitudes_tent, velocities_tent] = solve_ODE_unkown(nan, B_l_ps_tent, dt, ...
+        previous_conditions, PROBLEM_CONSTANTS);
     %#---
     
     
     %#---
-    function_amplitudes = oscillation_handle(amplitudes_tent);
-    function_amplitudes_prime = oscillation_handle_prime(amplitudes_tent);
-    function_amplitudes_prime_prime = oscillation_handle_prime_prime(amplitudes_tent);
+%     function_amplitudes = oscillation_handle(amplitudes_tent);
+%     function_amplitudes_prime = oscillation_handle_prime(amplitudes_tent);
+%     function_amplitudes_prime_prime = oscillation_handle_prime_prime(amplitudes_tent);
     
-    RmaxTent = rs_from_spherical(theta_max_radius(function_amplitudes, function_amplitudes_prime, ...
-        function_amplitudes_prime_prime), function_amplitudes);
+%     RmaxTent = rs_from_spherical(theta_max_radius(function_amplitudes, function_amplitudes_prime, ...
+%         function_amplitudes_prime_prime), function_amplitudes);
+    RmaxTent = rs_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, jj)), oscillation_amplitudes(:, jj));
   
     %RmaxTent = rs_from_spherical(theta_max_radius(amplitudes_tent), amplitudes_tent);
     %Tentative shape
     %-%-RmaxTent = xsoftheta(mod(abs(thetaMax(A2Tent,A3Tent)),pi),A2Tent,A3Tent);
     nlmaxTent = floor(RmaxTent/dr)+1;
-    thetaVec = zeros(1,nlmaxTent);
-    thetaVec(1) = pi;
-    for ii = 2:nlmaxTent
-        %-%-thetaVec(ii) = mod(abs(thetaofxs(dr*(ii-1),A2Tent,A3Tent,thetaVec(ii-1))),pi);
-        thetaVec(ii) = theta_from_cylindrical(dr*(ii-1), oscillation_handle(amplitudes_tent), ...
-                        oscillation_handle_prime(amplitudes_tent), thetaVec(ii-1));
-    end
-    xi = cos(thetaVec);
-    
-    
-
+    thetaVec  = theta_from_cylindrical(dr*(0:(nlmaxTent(jj)-1)), oscillation_amplitudes(:, jj)); % zeros(1,nlmaxTent);
+%     thetaVec(1) = pi;
+%     for ii = 2:nlmaxTent
+%         %-%-thetaVec(ii) = mod(abs(thetaofxs(dr*(ii-1),A2Tent,A3Tent,thetaVec(ii-1))),pi);
+%         thetaVec(ii) = theta_from_cylindrical(dr*(ii-1), oscillation_handle(amplitudes_tent), ...
+%                         oscillation_handle_prime(amplitudes_tent), thetaVec(ii-1));
+%     end
+%     xi = cos(thetaVec);
+%     
     %-%-RvTent = zsoftheta(pi,A2Tent,A3Tent);%height of the south pole with respect to the centre of mass
     %#---
-    RvTent = zs_from_spherical(pi, oscillation_handle(amplitudes_tent));
-    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, oscillation_handle(amplitudes_tent))' - RvTent;
+    RvTent = zs_from_spherical(pi, amplitudes_tent);
+    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent; %TODO: Check that matrix dimensions agree.
     zs((nlmaxTent+1):nr) = Inf;
     %#---
     %-%-zs(1:nlmaxTent) = zsoftheta(thetaVec,A2Tent,A3Tent)-RvTent;%Height of the bottom boundary of the
@@ -894,88 +832,20 @@ while (t<tend) %#-- || jj1>.5)
                 
                 % the next line will project the pressur field onto th
                 % spherical harmonics (i.e Legendre Polynomials)
-                B_l_ps_new = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
-                    psNew(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
-                %%#---
+%                 B_l_ps_new = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
+%                     psNew(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
                 
-%                 B2New = -15*psNew(1)*((xi(1)^2+xi(2)^2)*(xi(1)+xi(2))/4 ...
-%                         -xi(2)*(xi(1)^2+xi(1)*xi(2)+xi(2)^2)/3)/4 ...
-%                         +5*psNew(1)*(xi(1)-xi(2))/8;
-%                 for ii = 2:nb_contact_points-1
-%                     %downward incline
-%                     B2New = B2New ...
-%                             -15*psNew(ii)*((xi(ii)^2+xi(ii+1)^2)*(xi(ii)+xi(ii+1))/4 ...
-%                             -xi(ii+1)*(xi(ii)^2+xi(ii)*xi(ii+1)+xi(ii+1)^2)/3)/4 ...
-%                             +5*psNew(ii)*(xi(ii)-xi(ii+1))/8;
-%                     %upward incline
-%                     B2New = B2New ...
-%                             +15*psNew(ii)*((xi(ii)^2+xi(ii-1)^2)*(xi(ii)+xi(ii-1))/4 ...
-%                             -xi(ii-1)*(xi(ii)^2+xi(ii)*xi(ii-1)+xi(ii-1)^2)/3)/4 ...
-%                             -5*psNew(ii)*(xi(ii)-xi(ii-1))/8;
-%                 end
-%                 %upward incline at outer rim
-%                 if nb_contact_points > 1
-%                     B2New = B2New ...
-%                             +15*psNew(nb_contact_points)*((xi(nb_contact_points)^2+xi(nb_contact_points-1)^2)*(xi(nb_contact_points)+xi(nb_contact_points-1))/4 ...
-%                             -xi(nb_contact_points-1)*(xi(nb_contact_points)^2+xi(nb_contact_points)*xi(nb_contact_points-1)+xi(nb_contact_points-1)^2)/3)/4 ...
-%                             -5*psNew(nb_contact_points)*(xi(nb_contact_points)-xi(nb_contact_points-1))/8;
-%                     %it may be possible to improve this approximation by including the
-%                     %downward incline at the last point going half way to the next point
-%                 end
-% 
-%                 %finding tentative B3
-%                 %downward incline at origin
-%                 B3New = -35*psNew(1)*((xi(1)^4+xi(1)^3*xi(2)+xi(1)^2*xi(2)^2+xi(1)*xi(2)^3+xi(2)^4)/5 ...
-%                         -xi(2)*(xi(1)^2+xi(2)^2)*(xi(1)+xi(2))/4)/4 ...
-%                         +21*psNew(1)*((xi(1)^2+xi(1)*xi(2)+xi(2)^2)/4-xi(2)*(xi(1)+xi(2))/2)/4;
-%                 for ii = 2:nb_contact_points-1
-%                     %downward incline
-%                     B3New = B3New ...
-%                             -35*psNew(ii)*((xi(ii)^4+xi(ii)^3*xi(ii+1)+xi(ii)^2*xi(ii+1)^2+xi(ii)*xi(ii+1)^3+xi(ii+1)^4)/5 ...
-%                             -xi(ii+1)*(xi(ii)^2+xi(ii+1)^2)*(xi(ii)+xi(ii+1))/4)/4 ...
-%                             +21*psNew(ii)*((xi(ii)^2+xi(ii)*xi(ii+1)+xi(ii+1)^2)/4-xi(ii+1)*(xi(ii)+xi(ii+1))/2)/4;
-%                     %upward incline
-%                     B3New = B3New ...
-%                             +35*psNew(ii)*((xi(ii)^4+xi(ii)^3*xi(ii-1)+xi(ii)^2*xi(ii-1)^2+xi(ii)*xi(ii-1)^3+xi(ii-1)^4)/5 ...
-%                             -xi(ii-1)*(xi(ii)^2+xi(ii-1)^2)*(xi(ii)+xi(ii-1))/4)/4 ...
-%                             -21*psNew(ii)*((xi(ii)^2+xi(ii)*xi(ii-1)+xi(ii-1)^2)/4-xi(ii-1)*(xi(ii)+xi(ii-1))/2)/4;
-%                 end
-%                 %upward incline at outer rim
-%                 if nb_contact_points > 1
-%                     B3New = B3New...
-%                             +35*psNew(nb_contact_points)*((xi(nb_contact_points)^4+xi(nb_contact_points)^3*xi(nb_contact_points-1)+xi(nb_contact_points)^2*xi(nb_contact_points-1)^2+xi(nb_contact_points)*xi(nb_contact_points-1)^3+xi(nb_contact_points-1)^4)/5 ...
-%                             -xi(nb_contact_points-1)*(xi(nb_contact_points)^2+xi(nb_contact_points-1)^2)*(xi(nb_contact_points)+xi(nb_contact_points-1))/4)/4 ...
-%                             -21*psNew(nb_contact_points)*((xi(nb_contact_points)^2+xi(nb_contact_points)*xi(nb_contact_points-1)+xi(nb_contact_points-1)^2)/4-xi(nb_contact_points-1)*(xi(nb_contact_points)+xi(nb_contact_points-1))/2)/4;
-%                     %it may be possible to improve this approximation by including the
-%                     %downward incline at the last point going half way to the next point
-%                 end
-             end
-%             %Solving the ODE for each SH mode
-%             %Mode 2
-%             C2New = P2inv*[0;-2*B2New/Ra];%Projecting the pressure onto the SH mode eigenvectors
-%             %Solving the evolution for the eigenvectors of the SH mode
-%             Y2New(1) = Y2old(1)*exp( 1i*omega2*dt)+dt*C2New(1)/2+dt*C2old(1)*exp( 1i*omega2*dt)/2;
-%             Y2New(2) = Y2old(2)*exp(-1i*omega2*dt)+dt*C2New(2)/2+dt*C2old(2)*exp(-1i*omega2*dt)/2;
-%             %Recovering the physically meaningful variables
-%             VecNew2 = P2*Y2New;
-%             A2New = VecNew2(1);
-%             V2New = VecNew2(2);
-%             %mode 3
-%             C3New = P3inv*[0;-3*B3New/Ra];
-%             Y3New(1) = Y3old(1)*exp( 1i*omega3*dt)+dt*C3New(1)/2+dt*C3old(1)*exp( 1i*omega3*dt)/2;
-%             Y3New(2) = Y3old(2)*exp(-1i*omega3*dt)+dt*C3New(2)/2+dt*C3old(2)*exp(-1i*omega3*dt)/2;
-%             VecNew3 = P3*Y3New;
-%             A3New = VecNew3(1);
-%             V3New = VecNew3(2);
+                f = @(thetas) interp1(thtaVec(1:nb_contact_points), psNew(1:nb_contact_points), thetas, 'linear',  0); 
+                endpoints = [thetaVec(nb_contact_points), thetaVec(1)];
+                B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);   
+            end
+             
             
-            %#--- Solving the ODE
-            %Y_old  = zeros(2, N);
-            C_new = zeros(2, N);
-            Y_new = zeros(2, N);
-            
-            [amplitudes_new, amplitudes_velocities_new] = solve_EDO(N, dt, Ra, ...
-                omegas_frequencies, B_l_ps_old, B_l_ps_new,  ODE_inverse_matrices, ...
-                ODE_matrices, amplitudes_old, amplitudes_velocities_old);
+            %[amplitudes_new, amplitudes_velocities_new] = solve_ODE_unkown(N, dt, Ra, ...
+            %    omegas_frequencies, B_l_ps_old, B_l_ps_new,  ODE_inverse_matrices, ...
+            %    ODE_matrices, amplitudes_old, amplitudes_velocities_old);
+            [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
+                previous_conditions, PROBLEM_CONSTANTS);
             %#---
             
             nb_points = max(length(psTent),length(psNew));%number of points in which the pressure needs to be compared
@@ -1005,19 +875,16 @@ while (t<tend) %#-- || jj1>.5)
                 amplitudes_old = amplitudes_new;
                 amplitudes_velocities_old = amplitudes_velocities_new;
                 B_l_ps_old = B_l_ps_new;
-                %#---
-                %-%-A2(jj+1) = A2New;
-                %-%-A3(jj+1) = A3New;
-                %-%-V2(jj+1) = V2New;
-                %-%-V3(jj+1) = V3New;
-                %-%-A2old = A2New;
-                %-%-A3old = A3New;
-                %-%-V2old = V2New;
-                %-%-V3old = V3New;
-                %#---
-                %-%-B2old = B2New;
-                %-%-B3old = B3New;
-                %#---
+                
+                previous_conditions{1} = previous_conditions{2};
+                
+                previous_conditions{2} = struct("deformation_amplitudes", amplitudes_new, ...
+                    "Deformation_velocities", velocities_new, ...
+                    "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_new, ...
+                    "current_time", previous_conditions{1}.curren_time + dt, ...
+                    "center_of_mass", z(jj+1), "center_of_mass_velocity", vz(jj+1), ...
+                    "nb_contact_points", numlTent);
+
                 nlmax(jj+1) = nlmaxTent;
                 etaOri(jj+1) = eta1(1);
 
@@ -1057,8 +924,8 @@ while (t<tend) %#-- || jj1>.5)
                 thetaplot = linspace(0, thetaVec(end), 200);%-%-0:thetaVec(end)/400:thetaVec(end);
                 %-%-xsTop = xsoftheta(thetaplot,A2New,A3New);
                 %-%-zsTop = zsoftheta(thetaplot,A2New,A3New);
-                zsTop = zs_from_spherical(thetaplot, oscillation_handle(amplitudes_new));
-                xsTop = rs_from_spherical(thetaplot, oscillation_handle(amplitudes_new)); 
+                zsTop = zs_from_spherical(thetaplot, amplitudes_new);
+                xsTop = rs_from_spherical(thetaplot, amplitudes_new); 
                 plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+zTent,'k','Linewidth',2);
                 width = min(nr, 200);
                 plot([-fliplr(xplot(2:width)),xplot(1:width)],[flipud(eta1(2:width));eta1(1:width)],'LineWidth',2);
@@ -1084,32 +951,19 @@ while (t<tend) %#-- || jj1>.5)
                 B_l_ps_tent = B_l_ps_new;
                 %#---
 
-                %Tentative shape
-                function_amplitudes = oscillation_handle(amplitudes_tent);
-                function_amplitudes_prime = oscillation_handle_prime(amplitudes_tent);
-                function_amplitudes_prime_prime = oscillation_handle_prime_prime(amplitudes_tent);
-
-                RmaxTent = rs_from_spherical(theta_max_radius(function_amplitudes, function_amplitudes_prime, ...
-                    function_amplitudes_prime_prime), function_amplitudes);
+                RmaxTent = rs_from_spherical(maximum_contact_radius(amplitudes_tent), amplitudes_tent);
                 
                 %RmaxTent = rs_from_spherical(theta_max_radius(amplitudes_tent), amplitudes_tent);
                 %-%-RmaxTent = xsoftheta(mod(abs(thetaMax(A2Tent,A3Tent)),pi),A2Tent,A3Tent);
                 nlmaxTent = floor(RmaxTent/dr)+1;
-                thetaVec = zeros(1,nlmaxTent);
-                thetaVec(1) = pi;
-                for ii = 2:nlmaxTent
-                    %-%-thetaVec(ii) = mod(abs(thetaofxs(dr*(ii-1),A2Tent,A3Tent,thetaVec(ii-1))),pi);
-                    %#---
-                    thetaVec(ii) = theta_from_cylindrical(dr*(ii-1), oscillation_handle(amplitudes_tent), ...
-                        oscillation_handle_prime(amplitudes_tent), thetaVec(ii-1));
-                end
-                xi = cos(thetaVec);
                 
+                thetaVec = theta_from_cylindrical(dr*(0:(nlmaxTent-1)), oscillation_amplitudes(:, jj));
+                 
                 %-%-RvTent = zsoftheta(pi,A2Tent,A3Tent);
                 
                 %#---
-                RvTent = zs_from_spherical(pi, oscillation_handle(amplitudes_tent));
-                zs(1:nlmaxTent) = zs_from_spherical(thetaVec, oscillation_handle(amplitudes_tent))' - RvTent;
+                RvTent = zs_from_spherical(pi, amplitudes_tent);
+                zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent;
                 zs((nlmaxTent+1):nr) = Inf;
                 %#---
                 
@@ -1117,7 +971,7 @@ while (t<tend) %#-- || jj1>.5)
                 %-%-zs(nlmaxTent+1:end) = Inf;
                 
                 %#---
-                tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, oscillation_handle(amplitudes_tent), oscillation_handle_prime(amplitudes_tent))';
+                tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, amplitudes_tent)';
                 angleDropMP(1:(nlmaxTent)) = atan(tanDrop(1:(nlmaxTent))); %% TODO: Check these for boundary points
                 %finding angle at tangent direction
 
@@ -1217,47 +1071,47 @@ runNumber = -10;
 save('runNumber.mat','runNumber');
 
 
-
-function [amplitudes_tent, amplitudes_velocities_tent] = solve_EDO(N, dt, Ra,...
-    omegas_frequencies, B_l_ps_old, B_l_ps_tent, ODE_inverse_matrices, ODE_matrices, amplitudes_old, amplitudes_velocities_old)
-%     if norm(B_l_ps_old) + norm(B_l_ps_tent) == 0
+% 
+% function [amplitudes_tent, amplitudes_velocities_tent] = solve_EDO(N, dt, Ra,...
+%     omegas_frequencies, B_l_ps_old, B_l_ps_tent, ODE_inverse_matrices, ODE_matrices, amplitudes_old, amplitudes_velocities_old)
+% %     if norm(B_l_ps_old) + norm(B_l_ps_tent) == 0
+% %         
+% %        return 
+% %     end
+%     
+%     Y_old = zeros(2, N);
+%     C_tent= zeros(2, N);
+%     C_old = zeros(2, N);
+%     Y_tent= zeros(2, N);
+%     amplitudes_tent = zeros(1, N);
+%     amplitudes_velocities_tent = zeros(1, N);
+%     
+%     for ii = 2:N % We dont care about ii = 1!
+%         Y_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [amplitudes_old(ii); amplitudes_velocities_old(ii)];
+%         C_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [0; -ii*B_l_ps_old(ii)/Ra];
+%         C_tent(:, ii) = ODE_inverse_matrices(:, :, ii)* [0; -ii*B_l_ps_tent(ii)/Ra];
 %         
-%        return 
+%         %Y_tent(:, ii) = (eye(2)-dt*diag([1.0i * omegas_frequencies(ii), -1.0i * omegas_frequencies(ii)]))\(dt*C_tent(:, ii) + Y_old(:, ii));
+%         Y_tent(:, ii) = diag(exp([1.0i * dt * omegas_frequencies(ii), -1.0i * dt* omegas_frequencies(ii)])) * ...
+%             (Y_old(:, ii) + dt/2 * C_old(:, ii)) + dt/2 * C_tent(:, ii);
+%         X = ODE_matrices(:, :, ii) * Y_tent(:, ii);
+%         amplitudes_tent(ii) = X(1);
+%         amplitudes_velocities_tent(ii) = X(2);
 %     end
-    
-    Y_old = zeros(2, N);
-    C_tent= zeros(2, N);
-    C_old = zeros(2, N);
-    Y_tent= zeros(2, N);
-    amplitudes_tent = zeros(1, N);
-    amplitudes_velocities_tent = zeros(1, N);
-    
-    for ii = 2:N % We dont care about ii = 1!
-        Y_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [amplitudes_old(ii); amplitudes_velocities_old(ii)];
-        C_old(:, ii) = ODE_inverse_matrices(:, :, ii) * [0; -ii*B_l_ps_old(ii)/Ra];
-        C_tent(:, ii) = ODE_inverse_matrices(:, :, ii)* [0; -ii*B_l_ps_tent(ii)/Ra];
-        
-        %Y_tent(:, ii) = (eye(2)-dt*diag([1.0i * omegas_frequencies(ii), -1.0i * omegas_frequencies(ii)]))\(dt*C_tent(:, ii) + Y_old(:, ii));
-        Y_tent(:, ii) = diag(exp([1.0i * dt * omegas_frequencies(ii), -1.0i * dt* omegas_frequencies(ii)])) * ...
-            (Y_old(:, ii) + dt/2 * C_old(:, ii)) + dt/2 * C_tent(:, ii);
-        X = ODE_matrices(:, :, ii) * Y_tent(:, ii);
-        amplitudes_tent(ii) = X(1);
-        amplitudes_velocities_tent(ii) = X(2);
-    end
-end
-
-function I = find_harmonic_coefficient(angles, pressure_vector, m, nb_contact_points, legendrePol)
-    % This function will return the coefficient corresponding to the
-    % expansion in Legendre POlynomials of the pressure vector,
-    % corresponding to the mth Legendre Polynomial.
-    
-    if m < 2
-        I = 0;
-    else
-        if size(pressure_vector, 1) > 1; pressure_vector = pressure_vector'; end
-        pressure_extended = [pressure_vector(1:nb_contact_points), -pressure_vector(nb_contact_points)];
-        y = @(angle) interp1(angles, pressure_extended, angle) .* ...
-                legendrePol(cos(angle)) .* sin(angle); % TODO: Interpolate assuming linearity on radius
-        I = (m + 1/2) * integral(y, (angles(nb_contact_points) + angles(nb_contact_points+1))/2, pi, "RelTol", 1e-4);
-    end
-end
+% end
+% 
+% function I = find_harmonic_coefficient(angles, pressure_vector, m, nb_contact_points, legendrePol)
+%     % This function will return the coefficient corresponding to the
+%     % expansion in Legendre POlynomials of the pressure vector,
+%     % corresponding to the mth Legendre Polynomial.
+%     
+%     if m < 2
+%         I = 0;
+%     else
+%         if size(pressure_vector, 1) > 1; pressure_vector = pressure_vector'; end
+%         pressure_extended = [pressure_vector(1:nb_contact_points), -pressure_vector(nb_contact_points)];
+%         y = @(angle) interp1(angles, pressure_extended, angle) .* ...
+%                 legendrePol(cos(angle)) .* sin(angle); % TODO: Interpolate assuming linearity on radius
+%         I = (m + 1/2) * integral(y, (angles(nb_contact_points) + angles(nb_contact_points+1))/2, pi, "RelTol", 1e-4);
+%     end
+% end

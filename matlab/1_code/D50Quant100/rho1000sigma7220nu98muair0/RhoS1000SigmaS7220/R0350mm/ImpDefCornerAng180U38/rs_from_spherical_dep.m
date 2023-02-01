@@ -1,4 +1,4 @@
-function zs = rs_from_spherical(theta, zeta)
+function zs = rs_from_spherical(theta, amplitudes)
     if size(theta, 1) > 1; theta = theta'; end
     zs = sin(theta) .* (1 + zeta(theta));
     
