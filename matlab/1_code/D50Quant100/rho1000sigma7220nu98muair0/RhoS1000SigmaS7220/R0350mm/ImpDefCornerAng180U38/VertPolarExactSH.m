@@ -17,7 +17,7 @@ if runNumber == 0
     U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
     % #--- 
-    N = 150; % Number of harmonics contributing to the oscillation
+    N = 50; % Number of harmonics contributing to the oscillation
     % #---0
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
@@ -166,6 +166,7 @@ if runNumber == 0
     % #---oscillation_amplitudes = zeros(N, steps + 1);
     amplitudes_old = oscillation_amplitudes(:, 1);
     amplitudes_velocities_old = oscillation_velocities(:, 1);
+    B_l_ps_old = zeros(1, N);
      
     % # ---
     z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
@@ -173,10 +174,11 @@ if runNumber == 0
     % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
     % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
     vz(1) = -1; %Initial velocity of the CoM in dimesionless units
+    dt = tvec(2) - tvec(1);
     
     current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
-        "Deformation_velocities", amplitudes_velocities_old, ...
-        "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_old, ...
+        "deformation_velocities", amplitudes_velocities_old, ...
+        "pressure_amplitudes", B_l_ps_old, "dt", dt, "nb_harmonics", N,  ...
         "current_time", 0, ...
         "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
         "nb_contact_points", 0);
@@ -193,7 +195,7 @@ if runNumber == 0
     g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
         + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
 
-    for idx = 1:harmonics_qtt
+    for idx = 1:N
         previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
         previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
     end
@@ -208,10 +210,9 @@ if runNumber == 0
     ps1 = [];
     
     % #---
-    B_l_ps_old = zeros(1, N);
+    
 
-    %B2old = 0;%2nd SH component of initial pressure
-    %B3old = 0;%3rd SH component of initial pressure
+    
     %If there were some initial pressure acting on the surface and sphere I
     %would have to change this bit here to reflect the presure distribution
     
@@ -233,7 +234,6 @@ if runNumber == 0
         "nb_harmonics", N, ...
         "omegas_frequencies", omegas_frequencies, ...
         "spatial_tol", dr, ...
-        "angle_tol", angle_tol, ...
         "DEBUG_FLAG", true, ...
         "Ra", Ra);
                                 %"pressure_unit", pressure_unit, ...
@@ -433,7 +433,7 @@ while (t<tend) %#-- || jj1>.5)
 %         B_l_ps_tent = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
 %                     psTent(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
         
-        f = @(thetas) interp1(thtaVec(1:nb_contact_points), psTent(1:nb_contact_points), thetas, 'linear',  0); 
+        f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psTent(1:nb_contact_points), 0], thetas, 'linear',  0); 
         endpoints = [thetaVec(nb_contact_points), thetaVec(1)];
         B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
 
@@ -487,7 +487,7 @@ while (t<tend) %#-- || jj1>.5)
     %at midle point
     
     %#---
-    tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, oscillation_handle(amplitudes_tent), oscillation_handle_prime(amplitudes_tent))';
+    tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, amplitudes_tent)';
     angleDropMP(1:(nlmaxTent)) = atan(tanDrop(1:(nlmaxTent)));
     
     %for ii  = 2:nlmaxTent
@@ -835,7 +835,7 @@ while (t<tend) %#-- || jj1>.5)
 %                 B_l_ps_new = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
 %                     psNew(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
                 
-                f = @(thetas) interp1(thtaVec(1:nb_contact_points), psNew(1:nb_contact_points), thetas, 'linear',  0); 
+                f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psNew(1:nb_contact_points), 0], thetas, 'linear',  0); 
                 endpoints = [thetaVec(nb_contact_points), thetaVec(1)];
                 B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);   
             end
@@ -873,7 +873,7 @@ while (t<tend) %#-- || jj1>.5)
                 %#---
                 oscillation_amplitudes(:, jj + 1) = amplitudes_new;
                 amplitudes_old = amplitudes_new;
-                amplitudes_velocities_old = amplitudes_velocities_new;
+                amplitudes_velocities_old = velocities_new;
                 B_l_ps_old = B_l_ps_new;
                 
                 previous_conditions{1} = previous_conditions{2};
@@ -881,7 +881,7 @@ while (t<tend) %#-- || jj1>.5)
                 previous_conditions{2} = struct("deformation_amplitudes", amplitudes_new, ...
                     "Deformation_velocities", velocities_new, ...
                     "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_new, ...
-                    "current_time", previous_conditions{1}.curren_time + dt, ...
+                    "current_time", previous_conditions{1}.current_time + dt, ...
                     "center_of_mass", z(jj+1), "center_of_mass_velocity", vz(jj+1), ...
                     "nb_contact_points", numlTent);
 

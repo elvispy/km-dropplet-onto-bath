@@ -35,24 +35,28 @@ function angle = theta_from_cylindrical(r, A_l)
     % Derivative of the function
     f_prime = @(theta) cos(theta) .* (1 + zeta(theta)) - sin(theta).^2 .* sum(times(A_l, collectdnPl(length(A_l), cos(theta))), 1);
     
-    % Function to be minimized00
-    f_objective = @(theta) sin(theta) * (1 + zeta(theta)) - r;
-
-    theta = pi - 0.1;
-    tol_theta = 1e-7;
-    n = 1;
+    
+    angle = zeros(size(r));
 
     % Newton Method!
-    while abs(f_objective(theta)) >= tol_theta && n < 150
-        theta = mod(theta - f_objective(theta)/f_prime(theta) - 1e-4, pi/2) + 1e-4 + pi/2; % If solution is close to pi, theta is unstable with mod function (therefore 1e-4 added)
-        n = n + 1;
-        if n == 50
-            theta = 3.14159;
-        elseif n == 100
-            theta = rand() * pi/2 + pi/2;
-        end
-    end
+    for ii = 1:length(r)
+        % Function to be minimized00
+        f_objective = @(theta) sin(theta) .* (1 + zeta(theta)) - r(ii);
 
-    angle = theta;
+        theta = pi - 0.1;
+        tol_theta = 1e-7;
+        n = 1;
+        
+        while abs(f_objective(theta)) >= tol_theta && n < 150
+            theta = mod(theta - f_objective(theta)/f_prime(theta) - 1e-4, pi/2) + 1e-4 + pi/2; % If solution is close to pi, theta is unstable with mod function (therefore 1e-4 added)
+            n = n + 1;
+            if n == 50
+                theta = 3.14159;
+            elseif n == 100
+                theta = rand() * pi/2 + pi/2;
+            end
+        end
+        angle(ii) = theta;
+    end
 
 end
