@@ -17,7 +17,7 @@ if runNumber == 0
     U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
     % #--- 
-    N = 50; % Number of harmonics contributing to the oscillation
+    N = 150; % Number of harmonics contributing to the oscillation
     % #---0
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
@@ -107,40 +107,40 @@ if runNumber == 0
     f = @(n) sqrt(n.*(n+2).*(n-1)./WeS);
     omegas_frequencies = f(1:N)';
     
-    % SAVING LEGENDRE POLYNOMIALS INFORMATION
-    syms ang;
-    LEGENDRE_POLYNOMIALS = cell(N, 1);
-    LEGENDRE_DERIVATIVES = cell(N, 1);
-    LEGENDRE_SECOND_DERIVATIVES = cell(N, 1);
-    
-    for ii = 1:N
-        P = legendreP(ii, cos(ang));
-        LEGENDRE_POLYNOMIALS{ii} = matlabFunction(P);
-        LEGENDRE_DERIVATIVES{ii} = matlabFunction(diff(P));
-        LEGENDRE_SECOND_DERIVATIVES{ii} = matlabFunction(diff(P, 2));
-    end
-    [oscillation_handle, oscillation_handle_prime, oscillation_handle_prime_prime] = ...
-        create_function_handle(LEGENDRE_POLYNOMIALS, LEGENDRE_DERIVATIVES, LEGENDRE_SECOND_DERIVATIVES);
-    clear ang;
+%     % SAVING LEGENDRE POLYNOMIALS INFORMATION
+%     syms ang;
+%     LEGENDRE_POLYNOMIALS = cell(N, 1);
+%     LEGENDRE_DERIVATIVES = cell(N, 1);
+%     LEGENDRE_SECOND_DERIVATIVES = cell(N, 1);
+%     
+%     for ii = 1:N
+%         P = legendreP(ii, cos(ang));
+%         LEGENDRE_POLYNOMIALS{ii} = matlabFunction(P);
+%         LEGENDRE_DERIVATIVES{ii} = matlabFunction(diff(P));
+%         LEGENDRE_SECOND_DERIVATIVES{ii} = matlabFunction(diff(P, 2));
+%     end
+%     [oscillation_handle, oscillation_handle_prime, oscillation_handle_prime_prime] = ...
+%         create_function_handle(LEGENDRE_POLYNOMIALS, LEGENDRE_DERIVATIVES, LEGENDRE_SECOND_DERIVATIVES);
+%     clear ang;
     % #--- 
     
     %omega2 = sqrt(2*(2+2)*(2-1)/WeS); save('omega2.mat','omega2')%Angular frequency of 2nd SH mode
     %omega3 = sqrt(3*(3+2)*(3-1)/WeS); save('omega3.mat','omega3')%Angular frequency of 3rd SH mode
     
-    % #--- 
-    ODE_matrices = zeros(2, 2, N);
-    ODE_matrices(1, 1, :) =  ones(1, N);
-    ODE_matrices(1, 2, :) =  ones(1, N);
-    ODE_matrices(2, 1, :) =  1.0i * omegas_frequencies;
-    ODE_matrices(2, 2, :) = -1.0i * omegas_frequencies;
+%     % #--- 
+%     ODE_matrices = zeros(2, 2, N);
+%     ODE_matrices(1, 1, :) =  ones(1, N);
+%     ODE_matrices(1, 2, :) =  ones(1, N);
+%     ODE_matrices(2, 1, :) =  1.0i * omegas_frequencies;
+%     ODE_matrices(2, 2, :) = -1.0i * omegas_frequencies;
+%     
+%     ODE_inverse_matrices = 1/2 * ones(2, 2, N);
+%     ODE_inverse_matrices(1, 2, :) = -0.5i ./ omegas_frequencies;
+%     ODE_inverse_matrices(2, 2, :) =  0.5i ./ omegas_frequencies;
+%     % #---
     
-    ODE_inverse_matrices = 1/2 * ones(2, 2, N);
-    ODE_inverse_matrices(1, 2, :) = -0.5i ./ omegas_frequencies;
-    ODE_inverse_matrices(2, 2, :) =  0.5i ./ omegas_frequencies;
-    % #---
     
-    
-    % PDP^-1 = M, where dv/dt = Mv + B, diagonalization gives 1.0iw, -1.0iw
+    % PDP^-1 = -M, where dv/dt = Mv + B, diagonalization gives 1.0iw, -1.0iw
     %-%-P2 = [1 1; 1i*omega2 -1i*omega2]; save('P2.mat','P2')%Matrix whose columns are the eigenvectors of the matrix of 
     %coefficients of the 2x2 ODE system for the 2nd SH mode
     %-%-P2inv = [.5 -1i*.5/omega2; .5 1i*.5/omega2]; save('P2inv.mat','P2inv')%its inverse
@@ -172,7 +172,7 @@ if runNumber == 0
     
      
     % # ---
-    z(1) = -1* zs_from_spherical(pi, oscillation_handle(oscillation_amplitudes(:, 1)));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
+    z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
   
     % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
     % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
@@ -190,8 +190,8 @@ if runNumber == 0
     % #---
     B_l_ps_old = zeros(1, N);
 
-    B2old = 0;%2nd SH component of initial pressure
-    B3old = 0;%3rd SH component of initial pressure
+    %B2old = 0;%2nd SH component of initial pressure
+    %B3old = 0;%3rd SH component of initial pressure
     %If there were some initial pressure acting on the surface and sphere I
     %would have to change this bit here to reflect the presure distribution
     
@@ -354,8 +354,8 @@ while (t<tend) %#-- || jj1>.5)
     %zeroing the tentative solution variables
     etaprob = zeros(nr,5);
     phiprob = zeros(nr,5);
-    vzprob = zeros(1,5);
-    zprob = zeros(1,5);
+    vzprob  = zeros(1,5);
+    zprob   = zeros(1,5);
     errortan(:,jj+1) = 4*ones(5,1);
     
     psTent = ps1; %Tentative pressure distribution (we start with the previous pressure)
@@ -364,9 +364,9 @@ while (t<tend) %#-- || jj1>.5)
     %x that corresponds to the max pressed radius
     %-%-RmaxOld = xsoftheta(mod(abs(thetaMax(A2(jj),A3(jj))),pi),A2(jj),A3(jj)); 
     %#---
-    function_amplitudes = oscillation_handle(oscillation_amplitudes(:, jj));
-    function_amplitudes_prime = oscillation_handle_prime(oscillation_amplitudes(:, jj));
-    function_amplitudes_prime_prime = oscillation_handle_prime_prime(oscillation_amplitudes(:, jj));
+    %function_amplitudes = oscillation_handle(oscillation_amplitudes(:, jj));
+    %function_amplitudes_prime = oscillation_handle_prime(oscillation_amplitudes(:, jj));
+    %function_amplitudes_prime_prime = oscillation_handle_prime_prime(oscillation_amplitudes(:, jj));
     
     RmaxOld = rs_from_spherical(theta_max_radius(function_amplitudes, function_amplitudes_prime, ...
     function_amplitudes_prime_prime), function_amplitudes);
