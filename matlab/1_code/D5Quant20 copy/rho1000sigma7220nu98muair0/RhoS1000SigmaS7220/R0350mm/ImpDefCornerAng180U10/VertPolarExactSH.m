@@ -10,7 +10,7 @@ tmax = 100;
 runNumber = 0; %-%-
 
 if exist('z.mat', 'file') == 2
-   throw("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
+   error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
 
 if runNumber == 0
@@ -87,7 +87,7 @@ if runNumber == 0
     z = zeros(1,steps+1);%height of the centre of mass
     vz = zeros(1,steps+1);%speed of the centre of mass
     numl = zeros(1,steps+1);%number of pressed mesh points at each time step
-    tvec = t:dtb:tend+1; %vector of times assuming no refinement has happened
+    tvec = t:(0.5*dtb):tend+1; %vector of times assuming no refinement has happened
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
@@ -433,8 +433,8 @@ while (t<tend) %#-- || jj1>.5)
 %         B_l_ps_tent = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
 %                     psTent(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
         
-        f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psTent(1:nb_contact_points), 0], thetas, 'linear',  0); 
-        endpoints = [thetaVec(nb_contact_points), thetaVec(1)]; %T
+        f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psTent(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+        endpoints = [thetaVec(nb_contact_points+1), thetaVec(1)]; %TODO: Check integration ends
         B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
 
         
@@ -835,8 +835,8 @@ while (t<tend) %#-- || jj1>.5)
 %                 B_l_ps_new = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
 %                     psNew(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
                 
-                f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psNew(1:nb_contact_points), 0], thetas, 'linear',  0); 
-                endpoints = [thetaVec(nb_contact_points), thetaVec(1)];
+                f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+                endpoints = [thetaVec(nb_contact_points+1), thetaVec(1)];
                 B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);   
             end
              
@@ -877,7 +877,6 @@ while (t<tend) %#-- || jj1>.5)
                 B_l_ps_old = B_l_ps_new;
                 
                 previous_conditions{1} = previous_conditions{2};
-                
                 previous_conditions{2} = struct("deformation_amplitudes", amplitudes_new, ...
                     "deformation_velocities", velocities_new, ...
                     "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_new, ...
@@ -939,12 +938,6 @@ while (t<tend) %#-- || jj1>.5)
                 
                 %i.e. didn't attain convergence yet
                 psTent = psNew;
-                %-%-B2Tent = B2New;
-                %-%-B3Tent = B3New;
-                %-%-A2Tent = A2New;
-                %-%-A3Tent = A3New;
-                %-%-V2Tent = V2New;
-                %#---V3Tent = V3New;
                 
                 %#---
                 amplitudes_tent = amplitudes_new;
@@ -1033,7 +1026,7 @@ while (t<tend) %#-- || jj1>.5)
         if runNumber == 1
             save('tiempoComp.mat','tiempoComp')
         end
-        exit
+        %exit
     end
 end
 
