@@ -3,6 +3,7 @@ close all
 clc
 
 tstart = tic;
+tic
 %data in cgs
 tmax = 100;
 
@@ -16,9 +17,7 @@ end
 if runNumber == 0
     U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
-    % #--- 
-    N = 80; % Number of harmonics contributing to the oscillation
-    % #---0
+   
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
     
@@ -57,6 +56,10 @@ if runNumber == 0
 
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
+    % #--- 
+    N = 4*quant; % Number of harmonics contributing to the oscillation
+    % #---0
+    
     %Unit of time
     T = Ro/U0; save('T.mat','T')%base time is seconds
 
@@ -78,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 200; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
@@ -87,7 +90,7 @@ if runNumber == 0
     z = zeros(1,steps+1);%height of the centre of mass
     vz = zeros(1,steps+1);%speed of the centre of mass
     numl = zeros(1,steps+1);%number of pressed mesh points at each time step
-    tvec = t:(0.5*dtb):tend+1; %vector of times assuming no refinement has happened
+    tvec = t:(dtb):tend+1; %vector of times assuming no refinement has happened
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
@@ -100,7 +103,7 @@ if runNumber == 0
     %-%-V3 = zeros(1,steps+1);%Variable to store the time dependent velocity  of the 3nd SH mode
     nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
     
-    tolP = 1E-10; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation ??? What tolerance?
+    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation 
     
     %Drop oscillation frequencies
     % #--- 
@@ -324,6 +327,9 @@ end
 
 %% Main Loop
 while (t<tend) %#-- || jj1>.5) 
+%     if toc > 120
+%         break;
+%     end
     jj = jj+1;
     t = tvec(jj+1);
     dt = t - tvec(jj);
@@ -460,10 +466,6 @@ while (t<tend) %#-- || jj1>.5)
     ll = 0; % Limiting while loop to 100 iterations
     while abs(errorP)>=tolP && reduc == 0 
         ll = ll + 1;
-        
-        if ll == 100
-            reduc = 1;
-        end
         
         if numl(jj) < .5 %i.e. if previously in flight (I need to define this as integer)
             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),errortan(3,jj+1)] = ...
@@ -764,6 +766,12 @@ while (t<tend) %#-- || jj1>.5)
             end
         end
         
+        if ll == 100
+            tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+            jj = jj-1;
+            reduc = 1;
+        end
+        
 
         % verifying convergence of the pressure field
         if reduc == 0 %if there was no reduction of time step
@@ -934,6 +942,11 @@ while (t<tend) %#-- || jj1>.5)
 %                     angleDropMP(1:nlmaxTent) = atan(tanDrop(1:nlmaxTent));
 %                 end
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
+            end
+        else
+            if 1/(dt * nsteps) >= 2^12
+                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
+                t = inf;
             end
         end
     end

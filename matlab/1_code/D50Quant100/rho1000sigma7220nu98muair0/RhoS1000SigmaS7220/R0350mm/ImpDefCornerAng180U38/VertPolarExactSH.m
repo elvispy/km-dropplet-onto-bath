@@ -3,6 +3,7 @@ close all
 clc
 
 tstart = tic;
+tic
 %data in cgs
 tmax = 100;
 
@@ -16,9 +17,7 @@ end
 if runNumber == 0
     U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
-    % #--- 
-    N = 80; % Number of harmonics contributing to the oscillation
-    % #---0
+   
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
     
@@ -56,6 +55,10 @@ if runNumber == 0
     cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
+    
+    % #--- 
+    N = 4*quant; % Number of harmonics contributing to the oscillation
+    % #---0
     
     %Unit of time
     T = Ro/U0; save('T.mat','T')%base time is seconds
@@ -100,7 +103,7 @@ if runNumber == 0
     %-%-V3 = zeros(1,steps+1);%Variable to store the time dependent velocity  of the 3nd SH mode
     nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
     
-    tolP = 1E-10; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation ??? What tolerance?
+    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation 
     
     %Drop oscillation frequencies
     % #--- 
@@ -324,6 +327,9 @@ end
 
 %% Main Loop
 while (t<tend) %#-- || jj1>.5) 
+%     if toc > 120
+%         break;
+%     end
     jj = jj+1;
     t = tvec(jj+1);
     dt = t - tvec(jj);
@@ -937,6 +943,11 @@ while (t<tend) %#-- || jj1>.5)
 %                 end
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
+        else
+            if 1/(dt * nsteps) >= 2^12
+                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
+                t = inf;
+            end
         end
     end
     
@@ -976,6 +987,7 @@ while (t<tend) %#-- || jj1>.5)
         if runNumber == 1
             save('tiempoComp.mat','tiempoComp')
         end
+        
         %exit
     end
 end

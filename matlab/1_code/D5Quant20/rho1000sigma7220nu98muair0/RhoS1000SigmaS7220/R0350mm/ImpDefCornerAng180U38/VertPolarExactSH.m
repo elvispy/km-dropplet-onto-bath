@@ -3,6 +3,7 @@ close all
 clc
 
 tstart = tic;
+tic
 %data in cgs
 tmax = 100;
 
@@ -14,11 +15,9 @@ if exist('z.mat', 'file') == 2
 end
 
 if runNumber == 0
-    U0 = 10; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
+    U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
-    % #--- 
-    N = 50; % Number of harmonics contributing to the oscillation
-    % #---0
+   
     cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
     
@@ -57,6 +56,10 @@ if runNumber == 0
 
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
+    % #--- 
+    N = 200; % Number of harmonics contributing to the oscillation
+    % #---0
+    
     %Unit of time
     T = Ro/U0; save('T.mat','T')%base time is seconds
 
@@ -78,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 200; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
@@ -87,7 +90,7 @@ if runNumber == 0
     z = zeros(1,steps+1);%height of the centre of mass
     vz = zeros(1,steps+1);%speed of the centre of mass
     numl = zeros(1,steps+1);%number of pressed mesh points at each time step
-    tvec = t:(0.5*dtb):tend+1; %vector of times assuming no refinement has happened
+    tvec = t:(dtb):tend+1; %vector of times assuming no refinement has happened
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
@@ -100,68 +103,12 @@ if runNumber == 0
     %-%-V3 = zeros(1,steps+1);%Variable to store the time dependent velocity  of the 3nd SH mode
     nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
     
-    tolP = 1E-10; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation ??? What tolerance?
+    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation ??? What tolerance?
     
     %Drop oscillation frequencies
     % #--- 
     f = @(n) sqrt(n.*(n+2).*(n-1)./WeS);
     omegas_frequencies = f(1:N)';
-    
-%     % SAVING LEGENDRE POLYNOMIALS INFORMATION
-%     syms ang;
-%     LEGENDRE_POLYNOMIALS = cell(N, 1);
-%     LEGENDRE_DERIVATIVES = cell(N, 1);
-%     LEGENDRE_SECOND_DERIVATIVES = cell(N, 1);
-%     
-%     for ii = 1:N
-%         P = legendreP(ii, cos(ang));
-%         LEGENDRE_POLYNOMIALS{ii} = matlabFunction(P);
-%         LEGENDRE_DERIVATIVES{ii} = matlabFunction(diff(P));
-%         LEGENDRE_SECOND_DERIVATIVES{ii} = matlabFunction(diff(P, 2));
-%     end
-%     [oscillation_handle, oscillation_handle_prime, oscillation_handle_prime_prime] = ...
-%         create_function_handle(LEGENDRE_POLYNOMIALS, LEGENDRE_DERIVATIVES, LEGENDRE_SECOND_DERIVATIVES);
-%     clear ang;
-    % #--- 
-    
-    %omega2 = sqrt(2*(2+2)*(2-1)/WeS); save('omega2.mat','omega2')%Angular frequency of 2nd SH mode
-    %omega3 = sqrt(3*(3+2)*(3-1)/WeS); save('omega3.mat','omega3')%Angular frequency of 3rd SH mode
-    
-%     % #--- 
-%     ODE_matrices = zeros(2, 2, N);
-%     ODE_matrices(1, 1, :) =  ones(1, N);
-%     ODE_matrices(1, 2, :) =  ones(1, N);
-%     ODE_matrices(2, 1, :) =  1.0i * omegas_frequencies;
-%     ODE_matrices(2, 2, :) = -1.0i * omegas_frequencies;
-%     
-%     ODE_inverse_matrices = 1/2 * ones(2, 2, N);
-%     ODE_inverse_matrices(1, 2, :) = -0.5i ./ omegas_frequencies;
-%     ODE_inverse_matrices(2, 2, :) =  0.5i ./ omegas_frequencies;
-%     % #---
-    
-    
-    % PDP^-1 = -M, where dv/dt = Mv + B, diagonalization gives 1.0iw, -1.0iw
-    %-%-P2 = [1 1; 1i*omega2 -1i*omega2]; save('P2.mat','P2')%Matrix whose columns are the eigenvectors of the matrix of 
-    %coefficients of the 2x2 ODE system for the 2nd SH mode
-    %-%-P2inv = [.5 -1i*.5/omega2; .5 1i*.5/omega2]; save('P2inv.mat','P2inv')%its inverse
-    %-%-P3 = [1 1; 1i*omega3 -1i*omega3]; save('P3.mat','P3')%Matrix whose columns are the eigenvectors of the matrix of 
-    %coefficients of the 2x2 ODE system for the 3rd SH mode
-    %-%-P3inv = [.5 -1i*.5/omega3; .5 1i*.5/omega3]; save('P3inv.mat','P3inv')%its inverse
-    
-    %Initial conditions for the drop (shape and deformation speed for each SH mode)
-    %-%-A2(1) = 0;%Initial amplitude of SH mode 2
-    %-%-A2old = A2(1);
-    %-%-V2(1) = 0;%Initial velocity of SH mode 2
-    %-%-V2old = V2(1);
-    %-%-A3(1) = 0;%Initial amplitude of SH mode 3
-    %-%-A3old = A3(1);
-    %-%-V3(1) = 0;%Initial velocity of SH mode 3
-    %-%-V3old = V3(1);
-
-    %-%-Y2Tent = zeros(2,1);%Intialising canonical variables for drop oscillation integration ??? Canonical variables
-    %-%-Y3Tent = zeros(2,1);
-    %-%-Y2New = zeros(2,1);%Intialising canonical variables for drop oscillation integration
-    %-%-Y3New = zeros(2,1);
 
     % #---oscillation_amplitudes = zeros(N, steps + 1);
     amplitudes_old = oscillation_amplitudes(:, 1);
@@ -210,8 +157,6 @@ if runNumber == 0
     ps1 = [];
     
     % #---
-    
-
     
     %If there were some initial pressure acting on the surface and sphere I
     %would have to change this bit here to reflect the presure distribution
@@ -382,6 +327,9 @@ end
 
 %% Main Loop
 while (t<tend) %#-- || jj1>.5) 
+%     if toc > 120
+%         break;
+%     end
     jj = jj+1;
     t = tvec(jj+1);
     dt = t - tvec(jj);
@@ -515,8 +463,10 @@ while (t<tend) %#-- || jj1>.5)
     psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
     errorP = 1; %error in the pressure field and amplitude of modes
     reduc = 0; %indicator of whether there was a reduction in the time-step size or not
-    
-    while abs(errorP)>=tolP && reduc == 0
+    ll = 0; % Limiting while loop to 100 iterations
+    while abs(errorP)>=tolP && reduc == 0 
+        ll = ll + 1;
+        
         if numl(jj) < .5 %i.e. if previously in flight (I need to define this as integer)
             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),errortan(3,jj+1)] = ...
                 solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
@@ -816,6 +766,12 @@ while (t<tend) %#-- || jj1>.5)
             end
         end
         
+        if ll == 100
+            tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+            jj = jj-1;
+            reduc = 1;
+        end
+        
 
         % verifying convergence of the pressure field
         if reduc == 0 %if there was no reduction of time step
@@ -986,6 +942,11 @@ while (t<tend) %#-- || jj1>.5)
 %                     angleDropMP(1:nlmaxTent) = atan(tanDrop(1:nlmaxTent));
 %                 end
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
+            end
+        else
+            if 1/(dt * nsteps) >= 2^12
+                warning("Step size has been made too small (%.5g). Stopped the execution of the program", dt);
+                t = inf;
             end
         end
     end
