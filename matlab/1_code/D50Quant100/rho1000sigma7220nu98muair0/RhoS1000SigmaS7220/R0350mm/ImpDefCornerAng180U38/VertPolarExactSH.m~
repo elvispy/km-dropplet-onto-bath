@@ -987,7 +987,6 @@ while (t<tend) %#-- || jj1>.5)
         if runNumber == 1
             save('tiempoComp.mat','tiempoComp')
         end
-        
         %exit
     end
 end
