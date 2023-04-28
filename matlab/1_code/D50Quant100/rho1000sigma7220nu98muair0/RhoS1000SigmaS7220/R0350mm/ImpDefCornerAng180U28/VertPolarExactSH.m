@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 30; % Number of harmonics contributing to the oscillation
+    N = 3; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -94,6 +94,7 @@ if runNumber == 0
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
+    Rv = ones(1, steps+1);
     % the time dependent amplitude of all the SH
     oscillation_velocities = zeros(N, steps+1);
     % #--- 
@@ -103,7 +104,7 @@ if runNumber == 0
     %-%-V3 = zeros(1,steps+1);%Variable to store the time dependent velocity  of the 3nd SH mode
     nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
     
-    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation ??? What tolerance?
+    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation 
     
     %Drop oscillation frequencies
     % #--- 
@@ -828,6 +829,7 @@ while (t<tend) %#-- || jj1>.5)
                 vz(jj+1) = vzTent;
                 %#---
                 oscillation_amplitudes(:, jj + 1) = amplitudes_new;
+                Rv(jj+1) = zs_from_spherical(pi, amplitudes_new);
                 amplitudes_old = amplitudes_new;
                 amplitudes_velocities_old = velocities_new;
                 B_l_ps_old = B_l_ps_new;
@@ -945,7 +947,7 @@ while (t<tend) %#-- || jj1>.5)
             end
         else
             if 1/(dt * nsteps) >= 2^12
-                warning("Step size has been made too small (%.5e). Stopped the execution of the program", dt);
+                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
                 t = inf;
             end
         end
@@ -987,6 +989,7 @@ while (t<tend) %#-- || jj1>.5)
         if runNumber == 1
             save('tiempoComp.mat','tiempoComp')
         end
+        
         %exit
     end
 end
@@ -1011,6 +1014,7 @@ save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
 
 save('etaOri.mat','etaOri')
 save('z.mat','z')
+save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
 %-%-save('A2.mat','A2')
 %-%-save('V2.mat','V2')
 %-%-save('A3.mat','A3')
@@ -1021,6 +1025,7 @@ save('nlmax.mat','nlmax');
 save('numl.mat','numl');
 save('errortan.mat','errortan');
 save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+save('Rv.mat', 'Rv');
 runNumber = -10;
 save('runNumber.mat','runNumber');
 

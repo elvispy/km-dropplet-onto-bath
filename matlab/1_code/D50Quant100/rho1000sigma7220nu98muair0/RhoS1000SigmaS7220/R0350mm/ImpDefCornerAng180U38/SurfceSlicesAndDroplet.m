@@ -145,14 +145,14 @@ zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb(1:end-1);
 
 for ii = 1:size(etaMatPer,2)
-    RvCurr = Rv(ii); 
-    Rh = sqrt(1/RvCurr);
-    nlmax = floor(Rh/dr)+1;
-    zs(1:nlmax) = RvCurr-RvCurr*sqrt(1-RvCurr*(0:dr:(nlmax-1)*dr).^2);
-    zsplot = [(zplot(ii)-RvCurr)+[flipud(zs(2:nlmax));zs(1:nlmax)];flipud((z(ii)+RvCurr)...
-        -[flipud(zs(2:nlmax));zs(1:nlmax)]);(z(ii)-RvCurr)+zs(nlmax)];
-    xs = [xplot(nr-nlmax+2:nr+nlmax),fliplr(xplot(nr-nlmax+2:nr+nlmax)),xplot(nr-nlmax+2)];
-    plot(xs,(zbplot(ii)+zsplot),'k','LineWidth',2)
+%     RvCurr = Rv(ii); 
+%     Rh = sqrt(1/RvCurr);
+%     nlmax = floor(Rh/dr)+1;
+%     zs(1:nlmax) = RvCurr-RvCurr*sqrt(1-RvCurr*(0:dr:(nlmax-1)*dr).^2);
+%     zsplot = [(zplot(ii)-RvCurr)+[flipud(zs(2:nlmax));zs(1:nlmax)];flipud((z(ii)+RvCurr)...
+%         -[flipud(zs(2:nlmax));zs(1:nlmax)]);(z(ii)-RvCurr)+zs(nlmax)];
+%     xs = [xplot(nr-nlmax+2:nr+nlmax),fliplr(xplot(nr-nlmax+2:nr+nlmax)),xplot(nr-nlmax+2)];
+%     plot(xs,(zbplot(ii)+zsplot),'k','LineWidth',2)
     hold on
     axis equal
 
