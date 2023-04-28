@@ -17,6 +17,11 @@ load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
 load('Fr.mat')
+load('oscillation_amplitudes.mat');
+Rv = zeros(1, length(oscillation_amplitudes, 2));
+for ii = 1:length(oscillation_amplitudes, 2)
+    Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
+end
 
 %%
 
@@ -77,7 +82,7 @@ load('xplot.mat')
 
 %cd(['ImpDefAng',num2str(round((pi-Cang)*180/pi)),'U',num2str(U0)])
 %load('Rv.mat')
-Rv = ones(size(etaMatPer, 2), 1);
+%Rv = ones(size(etaMatPer, 2), 1);
 %load('Fr.mat')
 
 
@@ -133,11 +138,14 @@ vidObj = VideoWriter('WavesAndDrop.mp4','MPEG-4');
 set(vidObj,'FrameRate',10)
 open(vidObj);
 
+Gamma = 0; %%
+wzero = 1; %%
+thetaZero = 0; %%
 zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb(1:end-1);
 
 for ii = 1:size(etaMatPer,2)
-    RvCurr = 1; %Rv(ii); %% TEMP CHANGE
+    RvCurr = Rv(ii); 
     Rh = sqrt(1/RvCurr);
     nlmax = floor(Rh/dr)+1;
     zs(1:nlmax) = RvCurr-RvCurr*sqrt(1-RvCurr*(0:dr:(nlmax-1)*dr).^2);
