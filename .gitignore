@@ -26,8 +26,8 @@ docs/site/
 Manifest.toml
 
 # For matlab
-*.mat
-!DTN*.mat
+#*.mat
+#!DTN*.mat
 
 # Julia files
 *.jld2
