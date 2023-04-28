@@ -94,7 +94,6 @@ if runNumber == 0
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
-    Rv = ones(1, steps+1);
     % the time dependent amplitude of all the SH
     oscillation_velocities = zeros(N, steps+1);
     % #--- 
@@ -1025,7 +1024,6 @@ save('nlmax.mat','nlmax');
 save('numl.mat','numl');
 save('errortan.mat','errortan');
 save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-save('Rv.mat', 'Rv');
 runNumber = -10;
 save('runNumber.mat','runNumber');
 
