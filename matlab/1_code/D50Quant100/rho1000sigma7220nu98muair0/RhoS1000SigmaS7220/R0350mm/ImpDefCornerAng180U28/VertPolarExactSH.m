@@ -11,7 +11,7 @@ tmax = 100;
 runNumber = 0; %-%-
 
 if exist('z.mat', 'file') == 2
-   error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
+   % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
 
 if runNumber == 0
@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 4*quant; % Number of harmonics contributing to the oscillation
+    N = 30; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -945,7 +945,7 @@ while (t<tend) %#-- || jj1>.5)
             end
         else
             if 1/(dt * nsteps) >= 2^12
-                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
+                warning("Step size has been made too small (%.5e). Stopped the execution of the program", dt);
                 t = inf;
             end
         end

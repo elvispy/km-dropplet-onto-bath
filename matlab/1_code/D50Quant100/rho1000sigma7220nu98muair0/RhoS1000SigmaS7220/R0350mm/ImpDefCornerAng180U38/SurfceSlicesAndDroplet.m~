@@ -133,9 +133,6 @@ vidObj = VideoWriter('WavesAndDrop.mp4','MPEG-4');
 set(vidObj,'FrameRate',10)
 open(vidObj);
 
-Gamma = 0; %%
-wzero = 1; %%
-thetaZero = 0; %%
 zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb(1:end-1);
 
