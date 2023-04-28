@@ -1,6 +1,7 @@
-clc
-clear
-close all
+%clc
+%clear
+close all;
+p = pwd;
 
 load('U0.mat')
 load('Ang.mat'); Cang = Ang * pi / 180;
@@ -18,8 +19,8 @@ load('etaOri.mat')
 load('tvec.mat')
 load('Fr.mat')
 load('oscillation_amplitudes.mat');
-Rv = zeros(1, length(oscillation_amplitudes, 2));
-for ii = 1:length(oscillation_amplitudes, 2)
+Rv = zeros(1, size(oscillation_amplitudes, 2));
+for ii = 1:size(oscillation_amplitudes, 2)
     Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
 end
 
@@ -124,6 +125,8 @@ load('xplot.mat')
 % etaMatPer = [etaMatPer1,etaMatPer2,etaMatPer3,etaMatPer4,etaMatPer5,etaMatPer6,...
 %     etaMatPer7,etaMatPer8,etaMatPer9,etaMatPer10,etaMatPer11,etaMatPer12,etaMatPer13,...
 %     etaMatPer14,etaMatPer15,etaMatPer16];
+cd(p);
+
 
 ntimes = size(etaMatPer,2);
 
@@ -135,7 +138,7 @@ zmax = max(max(etaMatPer));
 
 
 vidObj = VideoWriter('WavesAndDrop.mp4','MPEG-4');
-set(vidObj,'FrameRate',10)
+set(vidObj,'FrameRate',50)
 open(vidObj);
 
 Gamma = 0; %%
@@ -153,11 +156,36 @@ for ii = 1:size(etaMatPer,2)
 %         -[flipud(zs(2:nlmax));zs(1:nlmax)]);(z(ii)-RvCurr)+zs(nlmax)];
 %     xs = [xplot(nr-nlmax+2:nr+nlmax),fliplr(xplot(nr-nlmax+2:nr+nlmax)),xplot(nr-nlmax+2)];
 %     plot(xs,(zbplot(ii)+zsplot),'k','LineWidth',2)
-    hold on
-    axis equal
 
+%%
+%RmaxTent = rs_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, ii)), oscillation_amplitudes(:, ii));    
+%nlmax = floor(RmaxTent/dr)+1;
+
+%xs = dr*(0:nlmax-1);
+%zsplot = zs(1:nlmax)+Rv(ii)+z(ii);
+%plot([-fliplr(xs(2:end)),xs],[flipud(zsplot(2:end));zsplot],'k','Linewidth',2);
+%thetaVec = theta_from_cylindrical(dr*(0:(nlmax-1)), oscillation_amplitudes(:, ii)); % zeros(1,nlmaxTent);
+
+thetaplot = linspace(0, pi, 100);%-%-0:thetaVec(end)/400:thetaVec(end);
+%-%-xsTop = xsoftheta(thetaplot,A2New,A3New);
+%-%-zsTop = zsoftheta(thetaplot,A2New,A3New);
+zsTop = zs_from_spherical(thetaplot, oscillation_amplitudes(:, ii));
+xsTop = rs_from_spherical(thetaplot, oscillation_amplitudes(:, ii)); 
+plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+z(ii),'k','Linewidth',2);
+hold on
+%width = min(nr, 200);
+%plot([-fliplr(xplot(2:width)),xplot(1:width)],[flipud(eta1(2:width));eta1(1:width)],'LineWidth',2);
+%hold off
+%axis equal
+%title(['   t = ',num2str(t),'   ','nl = ',num2str(numl(jj+1))],'FontSize',16);
+%grid on
+
+
+%%
     plot([fliplr(-1*r),r(2:end)],(zbplot(ii)+[0;flipud(etaMatPer(:,ii));etaMatPer(2:end,ii);0]),...
         'color',[.4 .4 .4],'LineWidth',2)
+    hold on
+    axis equal
     grid on
     set(gca,'xlim',[-5 5],'ylim',[-1.5 3],'Xtick',-5:5,'FontName','Times','FontSize',24);
     xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',24)
