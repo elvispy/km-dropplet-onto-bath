@@ -13,7 +13,7 @@ for i = 1:N
     load(files(i).name);
     etaAux = [etaAux, etaMatPer];
 end
-etaMatPer = etaAux;
+etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
@@ -87,44 +87,7 @@ load('xplot.mat')
 %load('Fr.mat')
 
 
-%Vo = abs(vz(1));
 
-% load('etaMatPer1.mat')
-% etaMatPer1 = etaMatPer;
-% load('etaMatPer2.mat')
-% etaMatPer2 = etaMatPer;
-% load('etaMatPer3.mat')
-% etaMatPer3 = etaMatPer;
-% load('etaMatPer4.mat')
-% etaMatPer4 = etaMatPer;
-% load('etaMatPer5.mat')
-% etaMatPer5 = etaMatPer;
-% load('etaMatPer6.mat')
-% etaMatPer6 = etaMatPer;
-% load('etaMatPer7.mat')
-% etaMatPer7 = etaMatPer;
-% load('etaMatPer8.mat')
-% etaMatPer8 = etaMatPer;
-% load('etaMatPer9.mat')
-% etaMatPer9 = etaMatPer;
-% load('etaMatPer10.mat')
-% etaMatPer10 = etaMatPer;
-% load('etaMatPer11.mat')
-% etaMatPer11 = etaMatPer;
-% load('etaMatPer12.mat')
-% etaMatPer12 = etaMatPer;
-% load('etaMatPer13.mat')
-% etaMatPer13 = etaMatPer;
-% load('etaMatPer14.mat')
-% etaMatPer14 = etaMatPer;
-% load('etaMatPer15.mat')
-% etaMatPer15 = etaMatPer;
-% load('etaMatPer16.mat')
-% etaMatPer16 = etaMatPer;
-% 
-% etaMatPer = [etaMatPer1,etaMatPer2,etaMatPer3,etaMatPer4,etaMatPer5,etaMatPer6,...
-%     etaMatPer7,etaMatPer8,etaMatPer9,etaMatPer10,etaMatPer11,etaMatPer12,etaMatPer13,...
-%     etaMatPer14,etaMatPer15,etaMatPer16];
 cd(p);
 
 
