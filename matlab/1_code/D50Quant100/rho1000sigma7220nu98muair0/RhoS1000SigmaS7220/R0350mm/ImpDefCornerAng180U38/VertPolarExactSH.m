@@ -94,7 +94,7 @@ if runNumber == 0
     %plus some extra time just in case the simulation needs to run longer
     % #--- 
     oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
-    Rv = ones(1, steps+1);
+    Rv = -ones(1, steps+1);
     % the time dependent amplitude of all the SH
     oscillation_velocities = zeros(N, steps+1);
     % #--- 
