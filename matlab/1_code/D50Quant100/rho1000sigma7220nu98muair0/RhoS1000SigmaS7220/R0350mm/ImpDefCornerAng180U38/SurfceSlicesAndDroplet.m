@@ -187,8 +187,8 @@ hold on
     hold on
     axis equal
     grid on
-    set(gca,'xlim',[-5 5],'ylim',[-1.5 3],'Xtick',-5:5,'FontName','Times','FontSize',24);
-    xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',24)
+    set(gca,'xlim',[-5 5],'ylim',[-1.5 3],'Xtick',-5:5,'FontName','Times','FontSize',18);
+    xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     ylabel('   $\frac{z}{R_o}\ \ \ $   ','interpreter','Latex','FontName','Times',...
         'FontSize',24,'rotation',0)
     t = (ii-1)/360;
@@ -204,7 +204,7 @@ hold on
         to = to+1;
     end
 	ti = round(tvec(ii)*100);
-    title(['$   tV_0/R_o =\ $',num2str(floor(ti/100)),'.',num2str(floor(mod(ti,100)/10)),num2str(mod(ti,10))],'FontSize',24,...
+    title(['$   tV_0/R_o =\ $',num2str(floor(ti/100)),'.',num2str(floor(mod(ti,100)/10)),num2str(mod(ti,10))],'FontSize',18,...
             'interpreter','latex','FontName','Times')    
     drawnow
     currFrame = getframe(gcf);
