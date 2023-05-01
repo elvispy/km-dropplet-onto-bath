@@ -11,7 +11,7 @@ aux_files = [ ...
     "legendre_ddx.m", "collectPl.m", "my_legendre.m"];
 
 % A folder which MUST have all the dependencies needed
-safe_folder = "D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38";
+safe_folder = ".\D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38";
 
 % Initial folder to go back to
 root = pwd;
