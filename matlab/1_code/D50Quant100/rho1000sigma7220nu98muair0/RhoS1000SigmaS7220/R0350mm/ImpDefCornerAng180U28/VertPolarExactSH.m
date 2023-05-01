@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 3; % Number of harmonics contributing to the oscillation
+    N = 30; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -73,7 +73,7 @@ if runNumber == 0
     Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
     
     %Physical parameters
-    tend = 8; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
+    tend = 2; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
     
     %Inintial conditions for the fluid
     t = 0;
