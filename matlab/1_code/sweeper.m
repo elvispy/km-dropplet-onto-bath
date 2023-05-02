@@ -1,5 +1,7 @@
-% This sript will try to sweep in the folder Structure all the empty
-% folders
+% This sript will try to sweep simulations according to two
+% rules:
+% 1) Parameters set in this sweep
+% 2) All empty folders will be swept. 
 
 % List of files needed to perform the operation
 aux_files = [ ...

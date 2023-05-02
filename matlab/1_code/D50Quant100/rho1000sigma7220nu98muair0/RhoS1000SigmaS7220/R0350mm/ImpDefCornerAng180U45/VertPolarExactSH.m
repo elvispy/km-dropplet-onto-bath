@@ -1,6 +1,6 @@
-clear
+%clear
 close all
-clc
+%clc
 
 tstart = tic;
 tic
