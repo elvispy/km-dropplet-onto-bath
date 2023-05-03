@@ -68,7 +68,7 @@ root = pwd;
 
 % A folder which MUST have all the dependencies needed (and all its
 % parents, too. 
-safe_folder = fullfile(root, "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38");
+safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
 % To force and repeat sweeps (.mat)
 force_sweep = false;

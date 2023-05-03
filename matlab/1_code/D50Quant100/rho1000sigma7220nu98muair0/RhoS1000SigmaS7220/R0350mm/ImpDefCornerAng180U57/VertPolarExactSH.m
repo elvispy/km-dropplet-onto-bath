@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 30; % Number of harmonics contributing to the oscillation
+    N = 20; % Number of harmonics contributing to the oscillation
     % #---
     
     %Unit of time
@@ -947,8 +947,9 @@ while (t<tend) %#-- || jj1>.5)
             end
         else
             if 1/(dt * nsteps) >= 2^12
-                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
+                warning("Step size has been made too small (%.5g). Stopped the execution of the program", dt);
                 t = inf;
+                break;
             end
         end
     end
@@ -994,6 +995,7 @@ while (t<tend) %#-- || jj1>.5)
     end
 end
 
+if t < inf
 runNumber = runNumber+1;
 tstop = t;
 save(['tstop',num2str(runNumber),'.mat'],'tstop')
@@ -1028,7 +1030,7 @@ save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
 save('Rv.mat', 'Rv');
 runNumber = -10;
 save('runNumber.mat','runNumber');
-
+end
 
 % 
 % function [amplitudes_tent, amplitudes_velocities_tent] = solve_EDO(N, dt, Ra,...
