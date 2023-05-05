@@ -2,7 +2,8 @@
 % metrics of the simulation.
 
 % STEP 3: Actually run the simulations. 
-files = dir("**/etaOri*.mat");
+
+files = dir("**/etaOri.mat");
 for ii = 1:length(files)
     cd(files(ii).folder);
     
@@ -30,9 +31,9 @@ for ii = 1:length(files)
         
         north = z + 1 + sum(oscillation_amplitudes, 1);
         index1 = find(north<=2,1);
-        index2 = find(north(index1:end)>=2,1);
+        index2 = find(north((index1+1):end)>=2,1);
         N = size(oscillation_amplitudes, 1);
-        south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^(1:N)), 1));
+        south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^((1:N)')), 1));
         
         tImpact = (tvec(index1)+tvec(index1+1))/2; 
         Uo = (vz(index1)+vz(index1+1))/2;
