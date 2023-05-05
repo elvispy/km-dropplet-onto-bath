@@ -859,16 +859,14 @@ while (t<tend) %#-- || jj1>.5)
                     save(['etaMatPer',num2str(jj0+1),'.mat'],'etaMatPer')
                     save(['phiMatPer',num2str(jj0+1),'.mat'],'phiMatPer')
                     save(['psMatPer',num2str(jj0+1),'.mat'],'psMatPer')
-            %         save('qq.mat','qq')
-                    %-%-save('A2.mat','A2')
-                    %-%-save('A3.mat','A3')
+
                     save('etaOri.mat','etaOri')
                     save('z.mat','z')
                     save('vz.mat','vz')
                     save('tvec.mat','tvec')
                     save('numl.mat','numl')
                     save('errortan.mat','errortan')
-                    save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+                    % s ave('oscillation_amplitudes.mat', 'oscillation_amplitudes');
                 end
                 etao = eta1;
                 phio = phi1;
@@ -1014,11 +1012,7 @@ save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
 
 save('etaOri.mat','etaOri')
 save('z.mat','z')
-save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-%-%-save('A2.mat','A2')
-%-%-save('V2.mat','V2')
-%-%-save('A3.mat','A3')
-%-%-save('V3.mat','V3')
+
 save('vz.mat','vz')
 save('tvec.mat','tvec');
 save('nlmax.mat','nlmax');
