@@ -13,7 +13,7 @@ nu = 9.78E-3; % Multiply by x10000
 muair = 0;
 RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
-R = linspace(0.02, 0.05, 5)'; % must multiply by x10
+R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
 U = linspace(28, 50, 5)';
 
