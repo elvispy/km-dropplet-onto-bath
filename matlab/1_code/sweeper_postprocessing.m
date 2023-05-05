@@ -2,12 +2,12 @@
 % metrics of the simulation.
 
 % STEP 3: Actually run the simulations. 
-files = dir("**/etaOri.m");
+files = dir("**/etaOri*.mat");
 for ii = 1:length(files)
     cd(files(ii).folder);
     
     % Check if etaOri exists (the center of the bath)
-    if isempty(dir("oscillation*.mat")) == true
+    if isempty(dir("oscillation*.mat")) == false
         load('U0.mat');
         load('vz.mat'); Vo = abs(vz(1));
         if exist('etas.m', 'file')

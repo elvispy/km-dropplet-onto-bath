@@ -5,17 +5,17 @@
 
 % STEP 1: Define which simulations are to be run. 
 
-D = 50;
-Quant = 100;
+D = 5;
+Quant = 20;
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
 nu = 9.78E-3; % Multiply by x10000
 muair = 0;
 RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
-R = linspace(0.02, 0.05, 5)'; % must multiply by x10
+R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(28, 50, 5)';
+U = 18; %linspace(28, 50, 5)';
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx] = ...
@@ -34,8 +34,10 @@ simulations_cgs = array2table(cartesian_product, ...
     "SigmaS", "R", "Ang", "U"]);
 % Now you can manually add any simulations that you would like to run, such
 % as:
-simulations_cgs = [simulations_cgs; ...
-    {50, 100, 1, 72.20, 0, 9.78E-3, 1, 72.20, 0.001, 180, 1}];
+%  simulations_cgs = [simulations_cgs; ...
+%      {50, 100, 1, 72.20, 0, 9.78E-3, 1, 72.20, 0.001, 180, 1}];
+nrow = size(simulations_cgs, 1);
+simulations_cgs.folder = repmat("", nrow, 1);
 
 % STEP 2: Recursively create folders and scripts needed
 % Exmple of folder structure:
@@ -53,7 +55,7 @@ simulations_cgs = [simulations_cgs; ...
 %                   - And many others ...
 
 for ii = 1:height(simulations_cgs)
-    create_folder_stucture(simulations_cgs(ii, :));
+    simulations_cgs.folder(ii)  = create_folder_stucture(simulations_cgs(ii, :));
 end
 
 
@@ -67,36 +69,54 @@ aux_files = [ ...
     "zeta_generator.m", "collectdnPl.m", "legendre_dx.m", ...
     "legendre_ddx.m", "collectPl.m", "my_legendre.m"];
 
-
-% Initial folder to go back to
-root = pwd;
-
-% A folder which MUST have all the dependencies needed (and all its
-% parents, too. 
-safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", ...
-    "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
-
 % To force and repeat sweeps (.mat)
 force_sweep = false;
 
 
 % STEP 3: Actually run the simulations. 
-files = dir("**/*ExactSH.m");
-for ii = 1:length(files)
-    cd(files(ii).folder);
-    
-    % Check if etaOri exists (the center of the bath)
+
+% Initial folder to go back to
+root = pwd;
+% A folder which MUST have all the dependencies needed (and all its
+% parents, too. 
+safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", ...
+    "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
+
+for ii = 1:height(simulations_cgs)
+    %Check if etaOri exists (the center of the bath)
+    cd(simulations_cgs.folder(ii));
+
     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
         for file = aux_files
             if ~exist(file, "file")
                 copyfile(fullfile(safe_folder, file), pwd)
             end
         end
+    
         VertPolarExactSH;
     end
+    
+
 end
 
-function create_folder_stucture(entry)
+% files = dir("**/*ExactSH.m");
+% for ii = 1:length(files)
+%     cd(files(ii).folder);
+%     
+%     % Check if etaOri exists (the center of the bath)
+%     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
+%         for file = aux_files
+%             if ~exist(file, "file")
+%                 copyfile(fullfile(safe_folder, file), pwd)
+%             end
+%         end
+% 
+%         
+%             VertPolarExactSH;
+%     end
+% end
+
+function final_folder = create_folder_stucture(entry)
     base =  pwd;
     safe_folder = fullfile(base, "D50Quant100");
     
@@ -166,5 +186,14 @@ function create_folder_stucture(entry)
 
     end
 
+    final_folder = pwd;
+
     cd(base);
+end
+
+function folder = return_folder(entry)
+    folder = sprintf("D%gQuant%grho%gsigma%gnu%.2gmuair%grhoS%gsigmaS%gR%04.4gmmImpDefCornerAng%gU%2.3g", ...
+                entry.D, entry.Quant, entry.rho*1000, entry.sigma*100, ...
+                entry.nu*10000, entry.muair, entry.RhoS*1000, entry.SigmaS*100, ...
+                entry.R*10000, entry.Ang, entry.U);
 end
