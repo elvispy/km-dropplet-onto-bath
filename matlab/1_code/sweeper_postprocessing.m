@@ -3,9 +3,9 @@
 
 % STEP 3: Actually run the simulations. 
 
-files = dir("**/etaOri.mat");
-for ii = 1:length(files)
-    cd(files(ii).folder);
+files_folder = dir("**/etaOri.mat");
+for ii = 1:length(files_folder)
+    cd(files_folder(ii).folder);
     
     % Check if etaOri exists (the center of the bath)
     if isempty(dir("oscillation*.mat")) == false

@@ -43,21 +43,21 @@ for ii = 1:length(files)
 
         load("simulation_postprocessing.mat");        
         max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
-        coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
-        contact_time = tcont; if isempty(contact_time) == true; contact_time = NaN; end
+        coef_restitution = CRref;
+        contact_time = tcont;
 
-        plotting_data = [plotting_data; {We, Bo, Oh, max_deflection, contact_time, coef_restitution}];
+        plotting_data = [plotting_data; {We, Bo, Oh, max_deflection, coef_restitution, contact_time}];
    
     end
 end
 
 % Maximum deflection pot
-Max_Def_Plot = scatter(plotting_data.We,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
-grid on;
+Max_Def_Plot = scatter(plotting_data.We,plotting_data.max_deflection,'color',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+
 %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
 xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); xlim([0, 2]);
-ylabel('   $z / R_o \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 0.6]);
+ylabel('   $z / R_o \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0);
 
 title(sprintf("Maximum Deflection for \n Bo = %.2g, Oh = %.2e", plotting_data.Bo(1), plotting_data.Oh(1)),'interpreter','LaTeX','FontSize',20);
 
