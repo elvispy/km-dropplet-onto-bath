@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 30; % Number of harmonics contributing to the oscillation
+    N = 75; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -73,7 +73,7 @@ if runNumber == 0
     Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
     
     %Physical parameters
-    tend = 6; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
+    tend = 7; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
     
     %Inintial conditions for the fluid
     t = 0;
@@ -81,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 1000; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
@@ -859,16 +859,14 @@ while (t<tend) %#-- || jj1>.5)
                     save(['etaMatPer',num2str(jj0+1),'.mat'],'etaMatPer')
                     save(['phiMatPer',num2str(jj0+1),'.mat'],'phiMatPer')
                     save(['psMatPer',num2str(jj0+1),'.mat'],'psMatPer')
-            %         save('qq.mat','qq')
-                    %-%-save('A2.mat','A2')
-                    %-%-save('A3.mat','A3')
+
                     save('etaOri.mat','etaOri')
                     save('z.mat','z')
                     save('vz.mat','vz')
                     save('tvec.mat','tvec')
                     save('numl.mat','numl')
                     save('errortan.mat','errortan')
-                    save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+                    % s ave('oscillation_amplitudes.mat', 'oscillation_amplitudes');
                 end
                 etao = eta1;
                 phio = phi1;
@@ -1014,11 +1012,7 @@ save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
 
 save('etaOri.mat','etaOri')
 save('z.mat','z')
-save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-%-%-save('A2.mat','A2')
-%-%-save('V2.mat','V2')
-%-%-save('A3.mat','A3')
-%-%-save('V3.mat','V3')
+
 save('vz.mat','vz')
 save('tvec.mat','tvec');
 save('nlmax.mat','nlmax');

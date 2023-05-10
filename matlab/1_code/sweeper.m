@@ -5,8 +5,8 @@
 
 % STEP 1: Define which simulations are to be run. 
 
-D = 5;
-Quant = 20;
+D = 25;
+Quant = 200;
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
 nu = 9.78E-3; % Multiply by x10000
@@ -15,23 +15,24 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = 18; %linspace(28, 50, 5)';
+U = 51; %linspace(28, 50, 5)';
+modes = 40;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
-    RhoSidx, SigmaSidx, Ridx, Angidx, Uidx] = ...
+    RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx] = ...
     ndgrid(1:length(D), 1:length(Quant), 1:length(rho), 1:length(sigma), ...
     1:length(muair), 1:length(nu), 1:length(RhoS), 1:length(SigmaS), ...
-    1:length(R), 1:length(Ang), 1:length(U));
+    1:length(R), 1:length(Ang), 1:length(U), 1:length(modes));
 
 cartesian_product = [D(Didx, :), Quant(Quantidx, :), rho(rhoidx, :), ...
     sigma(sigmaidx, :), muair(muairidx, :), nu(nuidx, :), RhoS(RhoSidx, :), ...
-    SigmaS(SigmaSidx, :), R(Ridx, :), Ang(Angidx, :), U(Uidx, :)];
+    SigmaS(SigmaSidx, :), R(Ridx, :), Ang(Angidx, :), U(Uidx, :), modes(modesidx, :)];
 
 % Turn simulations into table
 if isempty(cartesian_product) == true; cartesian_product = double.empty(0, 10); end
 simulations_cgs = array2table(cartesian_product, ...
     "VariableNames", ["D", "Quant", "rho", "sigma", "muair", "nu", "RhoS", ...
-    "SigmaS", "R", "Ang", "U"]);
+    "SigmaS", "R", "Ang", "U", "modes"]);
 % Now you can manually add any simulations that you would like to run, such
 % as:
 %  simulations_cgs = [simulations_cgs; ...
@@ -133,7 +134,7 @@ function final_folder = create_folder_stucture(entry)
         mkdir(physical_space);
         cd(physical_space);
         copyfile(fullfile(safe_folder, "DomainMaker.m"), pwd);
-        copyfile(fullfile(safe_folder, "DTNnew345nr2500D100refp10.m"), pwd);
+        copyfile(fullfile(safe_folder, "ParRadDTNStops.m"), pwd);
 
         warning("This section is still to be resolved. Do not run this simultion");
     end
@@ -180,6 +181,7 @@ function final_folder = create_folder_stucture(entry)
         % Modify This file accordingly
         s = fileread(fullfile(safe_folder, "VertPolarExactSH.m"));
         s = regexprep(s, "U0 = 38;", sprintf("U0 = %g;", entry.U));
+        s = regexprep(s, "N = \d+;", sprintf("N = %g;", entry.modes));
         writeID = fopen("VertPolarExactSH.m", 'w+');
         fprintf(writeID, "%s", s);
         fclose(writeID);

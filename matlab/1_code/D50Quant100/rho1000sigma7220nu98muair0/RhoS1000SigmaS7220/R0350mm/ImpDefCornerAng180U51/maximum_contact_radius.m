@@ -49,7 +49,13 @@ function rmax = maximum_contact_radius(amplitudes)
             theta = rand()/100 + pi/2;
         end
         if n== 149
-            disp("Method for finding the maximum contact radius didnt converge.")
+            % We will calculate it manually
+            theta_min = pi/3;
+            theta_max = 4*pi/5;
+            thetas = linspace(theta_min, theta_max, 1000);
+            rmax = max(r_from_spherical(thetas, amplitudes));
+            
+            return
         end
     end
 
