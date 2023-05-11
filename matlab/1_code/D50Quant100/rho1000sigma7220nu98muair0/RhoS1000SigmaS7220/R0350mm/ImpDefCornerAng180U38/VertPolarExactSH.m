@@ -73,7 +73,7 @@ if runNumber == 0
     Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
     
     %Physical parameters
-    tend = 7; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
+    tend = 9; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
     
     %Inintial conditions for the fluid
     t = 0;
@@ -81,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 100; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
