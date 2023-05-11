@@ -15,7 +15,7 @@ if exist('z.mat', 'file') == 2
 end
 
 if runNumber == 0
-    U0 = 18; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
+    U0 = 49; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
    
     cd ..
@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 50; % Number of harmonics contributing to the oscillation
+    N = 40; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -73,7 +73,7 @@ if runNumber == 0
     Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
     
     %Physical parameters
-    tend = .2; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
+    tend = 7; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
     
     %Inintial conditions for the fluid
     t = 0;

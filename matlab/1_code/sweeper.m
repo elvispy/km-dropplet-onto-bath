@@ -15,7 +15,7 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = 5; %linspace(28, 50, 5)';
+U = linspace(1, 50, 15);
 modes = 40;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
@@ -59,7 +59,6 @@ for ii = 1:height(simulations_cgs)
     simulations_cgs.folder(ii)  = create_folder_stucture(simulations_cgs(ii, :));
 end
 
-
 % List of files needed to run the simulation and that do not need to change
 % from simul to simul.
 aux_files = [ ...
@@ -67,12 +66,10 @@ aux_files = [ ...
     "maximum_contact_radius.m", "theta_from_cylindrical.m", ...
     "project_amplitudes.m", "solve_ODE_unkown.m" , ...
     "calculate_tan.m", "solveDD0.m", "solvenDDCusp.m", ...
-    "zeta_generator.m", "collectdnPl.m", "legendre_dx.m", ...
-    "legendre_ddx.m", "collectPl.m", "my_legendre.m"];
+    "zeta_generator.m", "collectdnPl.m", "collectPl.m"];
 
 % To force and repeat sweeps (.mat)
 force_sweep = false;
-
 
 % STEP 3: Actually run the simulations. 
 
@@ -89,9 +86,7 @@ for ii = 1:height(simulations_cgs)
 
     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
         for file = aux_files
-            if ~exist(file, "file")
-                copyfile(fullfile(safe_folder, file), pwd)
-            end
+            copyfile(fullfile(safe_folder, file), pwd)    
         end
     
         VertPolarExactSH;
@@ -128,41 +123,70 @@ function final_folder = create_folder_stucture(entry)
     radius_folder = sprintf("R%04.4gmm", entry.R*10000);
     velocity_folder = sprintf("ImpDefCornerAng%gU%.3g", entry.Ang, entry.U);
 
-    if isfolder(physical_space)
-       cd(physical_space);
-    else
+    if ~isfolder(physical_space)
         mkdir(physical_space);
-        cd(physical_space);
-        copyfile(fullfile(safe_folder, "DomainMaker.m"), pwd);
-        copyfile(fullfile(safe_folder, "ParRadDTNStops.m"), pwd);
-
-        warning("This section is still to be resolved. Do not run this simultion");
     end
+
+    cd(physical_space);
+    if ~isfile("zdrop.mat")
+        copyfile(fullfile(safe_folder, "ParRadDTNStops.m"), pwd);
+        
+        s = fileread(fullfile(safe_folder, "DomainMaker.m"));
+        s = regexprep(s, "D = [^\s]+;", sprintf("D = %g;", entry.D));
+        s = regexprep(s, "quant = [^\s]+;", sprintf("quant = %g;", entry.Quant));
+       
+        writeID = fopen("DomainMaker.m", 'w+');
+        fprintf(writeID, "%s", s);
+        fclose(writeID);
+        DomainMaker;
+        if ~isfile("DTN*.mat")
+            error("Integration matrix for fluid contact not found. Maually run ParRadDTNStops.m");
+        end
+    end
+
 
     safe_folder = fullfile(safe_folder, "rho1000sigma7220nu98muair0");
-    if isfolder(fluid_parameters)
-        cd(fluid_parameters)
-    else
+    if ~isfolder(fluid_parameters)
         mkdir(fluid_parameters);
-        cd(fluid_parameters);
-        copyfile(fullfile(safe_folder, "BathMaker.m"), pwd);
+    end
+    cd(fluid_parameters);
+    if ~isfile("muair.mat")
+        s = fileread(fullfile(safe_folder, "BathMaker.m"));
+        s = regexprep(s, "rho = [^\s]+;", sprintf("rho = %g;", entry.rho));
+        s = regexprep(s, "sigma = [^\s]+;", sprintf("sigma = %g;", entry.sigma));
+        s = regexprep(s, "nu = [^\s]+;", sprintf("nu = %.2e;", entry.nu));
+        s = regexprep(s, "muair = [^\s]+;", sprintf("muair = %g;", entry.muair));
+        
+        writeID = fopen("BathMaker.m", 'w+');
+        fprintf(writeID, "%s", s);
+        fclose(writeID);
+        BathMaker;
     end
 
+
     safe_folder = fullfile(safe_folder, "RhoS1000SigmaS7220");
-    if isfolder(sphere_parameters)
-        cd(sphere_parameters)
-    else
+    if ~isfolder(sphere_parameters)
         mkdir(sphere_parameters);
-        cd(sphere_parameters);
-        copyfile(fullfile(safe_folder, "DropFluidMaker.m"), pwd);
+       %  copyfile(fullfile(safe_folder, "DropFluidMaker.m"), pwd);
+    end
+    cd(sphere_parameters);
+    if ~isfile("sigmaS.mat")
+        s = fileread(fullfile(safe_folder, "DropFluidMaker.m"));
+        s = regexprep(s, "rhoS = [^\s]+;", sprintf("rhoS = %g;", entry.RhoS));
+        s = regexprep(s, "sigmaS = [^\s]+;", sprintf("sigmaS = %g;", entry.SigmaS));
+        
+        writeID = fopen("DropFluidMaker.m", 'w+');
+        fprintf(writeID, "%s", s);
+        fclose(writeID);
+        DropFluidMaker;
     end
 
     safe_folder = fullfile(safe_folder, "R0350mm");
-    if isfolder(radius_folder)
-        cd(radius_folder)
-    else
+    if ~isfolder(radius_folder)
         mkdir(radius_folder);
-        cd(radius_folder);
+    end
+    cd(radius_folder);
+    if ~isfile("Ro.mat")
         s = sprintf("Ro = %d; save('Ro.mat','Ro') % Ball radius in cm. This will be our unit length", entry.R);
         writeID = fopen("RoMaker.m", "w+");
         fprintf(writeID, "%s", s);
@@ -171,23 +195,18 @@ function final_folder = create_folder_stucture(entry)
     end
 
     safe_folder = fullfile(safe_folder, "ImpDefCornerAng180U38");
-    if isfolder(velocity_folder)
-        cd(velocity_folder)
-    else
-        mkdir(velocity_folder);
-        cd(velocity_folder);
-        % copyfile(fullfile(safe_folder, "VertPolarExactSH.m"), pwd);
-
-        % Modify This file accordingly
-        s = fileread(fullfile(safe_folder, "VertPolarExactSH.m"));
-        s = regexprep(s, "U0 = 38;", sprintf("U0 = %g;", entry.U));
-        s = regexprep(s, "N = \d+;", sprintf("N = %g;", entry.modes));
-        writeID = fopen("VertPolarExactSH.m", 'w+');
-        fprintf(writeID, "%s", s);
-        fclose(writeID);
-
+    if ~isfolder(velocity_folder)
+        mkdir(velocity_folder);    
     end
-
+    cd(velocity_folder);
+    
+    % Modify This file accordingly
+    s = fileread(fullfile(safe_folder, "VertPolarExactSH.m"));
+    s = regexprep(s, "U0 = 38;", sprintf("U0 = %g;", entry.U));
+    s = regexprep(s, "N = \d+;", sprintf("N = %g;", entry.modes));
+    writeID = fopen("VertPolarExactSH.m", 'w+');
+    fprintf(writeID, "%s", s);
+    fclose(writeID);
     final_folder = pwd;
 
     cd(base);

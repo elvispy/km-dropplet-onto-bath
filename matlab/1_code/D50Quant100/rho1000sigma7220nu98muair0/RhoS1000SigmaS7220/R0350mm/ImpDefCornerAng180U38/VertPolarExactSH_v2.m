@@ -7,180 +7,175 @@ tic
 %data in cgs
 tmax = 100;
 
-%load('runNumber.mat','runNumber'); 
-runNumber = 0; %-%-
 
-if exist('z.mat', 'file') == 2
-   % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
+if exist('oscillation_amplitudes.mat', 'file') == 2
+   error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
 
-if runNumber == 0
-    U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
-    Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
-   
-    cd ..
-    load('Ro.mat','Ro')%Sphere's radius in CGS
-    
-    cd ..
-    load('rhoS.mat','rhoS')%Sphere density
-    load('sigmaS.mat')%Sphere's surface tension
-    
-    cd ..
-    load('rho.mat','rho')
-    load('sigma.mat','sigma')
-    load('nu.mat','nu')
-    load('muair.mat')
-    load('g.mat','g') %gravitational constant
-    
-    cd ..
-    load('D.mat')%Domain diameter in units of droplet radii
-    load('quant.mat')%number of dr's contained in an undeformed dropelt radius
-    load('nr.mat','nr')
-    load('dr.mat','dr')
-    load('Delta.mat','Delta')
-    load('IntMat.mat','IntMat')
-    load(sprintf('DTNnew345nr%dD%drefp10.mat', nr, D),'DTNnew345')
-    DTN = DTNnew345;
-    clear DTNnew345
-    xplot = dr*(0:nr-1); save('xplot.mat','xplot')%I might remove or relocate this
-    
-    cd(['rho',num2str(1000*rho),'sigma',num2str(round(100*sigma)),'nu',num2str(round(10000*nu)),'muair',num2str(muair)])
-    
-    cd(['RhoS',num2str(rhoS*1000),'SigmaS',num2str(round(100*sigmaS))])
-    load('Ma.mat','Ma')%Dimensionless mass of sphere
-    load('Ra.mat','Ra')%Density ratio
-    
-    cd(sprintf('R0%gmm',Ro*10000))
-    
-    cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 
-    tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
-    
-    % #--- 
-    N = 30; % Number of harmonics contributing to the oscillation
-    % #---0
-    
-    %Unit of time
-    T = Ro/U0; save('T.mat','T')%base time is seconds
+U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+Ang = 180;  %contact angle to be imposed
 
-    %Dimensionless numbers that depend on U0
-    Re = Ro*U0/nu; save('Re.mat','Re')
-    Fr = U0^2/(g*Ro); save('Fr.mat','Fr')
-    We = rho*Ro*U0^2/sigma; save('We.mat','We')
-    WeSB = rhoS*Ro*U0^2/sigma;save('WeSB.mat','WeSB')
-    WeS  = rhoS*Ro*U0^2/sigmaS;save('WeS.mat','WeS') %This name may not be the best, the surface tension is that of the 
-    %bath at least in one place
-    Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
-    
-    %Physical parameters
-    tend = 8; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
-    
-    %Inintial conditions for the fluid
-    t = 0;
-    etao = zeros(nr,1); %initial surface elevation
-    phio = zeros(nr,1); %initial surface potential
+cd ..
+load('Ro.mat','Ro')%Sphere's radius in CGS
 
-    %Numerical Simulation parameters
-    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
-    dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
-    steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
-    
-    %Zeroing result storing variables
-    etaOri = zeros(1,steps+1);%height of the surface below the south pole
-    z = zeros(1,steps+1);%height of the centre of mass
-    vz = zeros(1,steps+1);%speed of the centre of mass
-    numl = zeros(1,steps+1);%number of pressed mesh points at each time step
-    tvec = t:(dtb):tend+1; %vector of times assuming no refinement has happened
-    %plus some extra time just in case the simulation needs to run longer
-    % #--- 
-    oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
-    Rv = -ones(1, steps+1);
-    % the time dependent amplitude of all the SH
-    oscillation_velocities = zeros(N, steps+1);
-    nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
-    
-    tolP = 1E-6; save('tolP.mat','tolP')%error tolerance for the pressure field and deformation 
-    
-    %Drop oscillation frequencies
-    % #--- 
-    f = @(n) sqrt(n.*(n+2).*(n-1)./WeS);
-    omegas_frequencies = f(1:N)';
+cd ..
+load('rhoS.mat','rhoS')%Sphere density
+load('sigmaS.mat')%Sphere's surface tension
 
-    % #---oscillation_amplitudes = zeros(N, steps + 1);
-    amplitudes_old = oscillation_amplitudes(:, 1);
-    amplitudes_velocities_old = oscillation_velocities(:, 1);
-    B_l_ps_old = zeros(1, N);
-     
-    % # ---
-    z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
-  
-    % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
-    vz(1) = -1; %Initial velocity of the CoM in dimesionless units
-    dt = tvec(2) - tvec(1);
-    
-    current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
-        "deformation_velocities", amplitudes_velocities_old, ...
-        "pressure_amplitudes", B_l_ps_old, "dt", dt, "nb_harmonics", N,  ...
-        "current_time", 0, ...
-        "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
-        "nb_contact_points", 0);
-    
-    previous_conditions = {current_conditions, current_conditions}; 
-    
-    f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
-    previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
-    previous_conditions{1}.center_of_mass_velocity = ...
-        previous_conditions{2}.center_of_mass_velocity + dt/Fr;
-    previous_conditions{1}.center_of_mass = ...
-        previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
-    
-    g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
-        + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
+cd ..
+load('rho.mat','rho')
+load('sigma.mat','sigma')
+load('nu.mat','nu')
+load('muair.mat')
+load('g.mat','g') %gravitational constant
 
-    for idx = 1:N
-        previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
-        previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
-    end
-    
-    jj = 0;%iteration counter
+cd ..
+load('D.mat')%Domain diameter in units of droplet radii
+load('quant.mat')%number of dr's contained in an undeformed dropelt radius
+load('nr.mat','nr')
+load('dr.mat','dr')
+load('Delta.mat','Delta')
+load('IntMat.mat','IntMat')
+load(sprintf('DTNnew345nr%dD%drefp10.mat', nr, D),'DTNnew345')
+DTN = DTNnew345;
+clear DTNnew345
+xplot = dr*(0:nr-1); 
 
-    errortan = zeros(5,steps+1);%tangency error recorder
+cd(['rho',num2str(1000*rho),'sigma',num2str(round(100*sigma)),'nu',num2str(round(10000*nu)),'muair',num2str(muair)])
 
-    %intial guess for the surface profile at the next time step
-%     eta1 = etao;%these are here just to satisfy a silly thing in the first loop
-%     phi1 = phio;
-    ps1 = [];
+cd(['RhoS',num2str(rhoS*1000),'SigmaS',num2str(round(100*sigmaS))])
+load('Ma.mat','Ma')%Dimensionless mass of sphere
+load('Ra.mat','Ra')%Density ratio
+
+cd(sprintf('R0%gmm',Ro*10000))
+
+cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
+
+tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
+
+% #--- 
+N = 30; % Number of harmonics contributing to the oscillation
+% #---0
+
+%Unit of time
+T = Ro/U0; 
+
+
+%Dimensionless numbers that depend on U0
+Re = Ro*U0/nu; 
+Fr = U0^2/(g*Ro); 
+We = rho*Ro*U0^2/sigma; 
+WeSB = rhoS*Ro*U0^2/sigma;
+WeS  = rhoS*Ro*U0^2/sigmaS;%This name may not be the best, the surface tension is that of the 
+%bath at least in one place
+Cang = (Ang/180)*pi; %contact angle to be imposed
+
+%Physical parameters
+tend = 8; %Earliest possible end of simulation in characteristic units
+
+save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
+    "WeSB", "WeS", "Cang", "tend", "nsteps", "dtb" );
+%Inintial conditions for the fluid
+t = 0;
+etao = zeros(nr,1); %initial surface elevation
+phio = zeros(nr,1); %initial surface potential
+
+%Numerical Simulation parameters
+nsteps = 400; %minimum number of timesteps in one unit of time
+dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
+steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
+
+%Zeroing result storing variables
+etaOri = zeros(1,steps+1);%height of the surface below the south pole
+z = zeros(1,steps+1);%height of the centre of mass
+vz = zeros(1,steps+1);%speed of the centre of mass
+numl = zeros(1,steps+1);%number of pressed mesh points at each time step
+tvec = t:(dtb):tend+1; %vector of times assuming no refinement has happened
+%plus some extra time just in case the simulation needs to run longer
+% #--- 
+oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
+Rv = -ones(1, steps+1);
+% the time dependent amplitude of all the SH
+oscillation_velocities = zeros(N, steps+1);
+nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
+
+tolP = 1E-6; %error tolerance for the pressure field and deformation 
     
-   
-    
-    %If there were some initial pressure acting on the surface and sphere I
-    %would have to change this bit here to reflect the presure distribution
-    
-    %zeroing variable that records each part of the sequence of surface states
-    etaMatPer = zeros(length(etao),nsteps); % ?? Why nsteps
-    etas      = zeros(length(etao), steps);
-    phiMatPer = zeros(length(phio),nsteps);
-    psMatPer = cell(1,nsteps); % ??? why cell
-    %Storing initial surface state
-    etas(:, 1) = etao;
-    etaMatPer(:,1) = etao;
-    phiMatPer(:,1) = phio;
-    psMatPer{1} = zeros(quant+1,1);
-    
-    %zeroing the ceiling functions
-    zs = zeros(nr,1);
-    
-    jj1 = 1; %partial results savings  counter
-    
-    PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", WeS, ...
-        "nb_harmonics", N, ...
-        "omegas_frequencies", omegas_frequencies, ...
-        "spatial_tol", dr, ...
-        "DEBUG_FLAG", true, ...
-        "Ra", Ra);
-        
+%Drop oscillation frequencies
+% #--- 
+f = @(n) sqrt(n.*(n+2).*(n-1)./WeS);
+omegas_frequencies = f(1:N)';
+
+% #---oscillation_amplitudes = zeros(N, steps + 1);
+amplitudes_old = oscillation_amplitudes(:, 1);
+amplitudes_velocities_old = oscillation_velocities(:, 1);
+B_l_ps_old = zeros(1, N);
+ 
+% # ---
+z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi,A2(1),A3(1)); %height of the centre of mass (CoM) in dimensionless units,
+
+% respect to the CoM, z(1) is chosen so that the drop is just about to touch down
+vz(1) = -1; %Initial velocity of the CoM in dimesionless units
+dt = tvec(2) - tvec(1);
+
+current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
+    "deformation_velocities", amplitudes_velocities_old, ...
+    "pressure_amplitudes", B_l_ps_old, "dt", dt, "nb_harmonics", N,  ...
+    "current_time", 0, ...
+    "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
+    "nb_contact_points", 0);
+
+previous_conditions = {current_conditions, current_conditions}; 
+
+f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
+previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
+previous_conditions{1}.center_of_mass_velocity = ...
+    previous_conditions{2}.center_of_mass_velocity + dt/Fr;
+previous_conditions{1}.center_of_mass = ...
+    previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
+
+g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
+    + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
+
+for idx = 1:N
+    previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
+    previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
 end
+    
+jj = 0;%iteration counter
 
+errortan = zeros(5,steps+1);%tangency error recorder
+ps1 = [];
+
+%If there were some initial pressure acting on the surface and sphere I
+%would have to change this bit here to reflect the presure distribution
+
+%zeroing variable that records each part of the sequence of surface states
+etaMatPer = zeros(length(etao),nsteps); % ?? Why nsteps
+etas      = zeros(length(etao), steps);
+phiMatPer = zeros(length(phio),nsteps);
+psMatPer = cell(1,nsteps); % ??? why cell
+%Storing initial surface state
+etas(:, 1) = etao;
+etaMatPer(:,1) = etao;
+phiMatPer(:,1) = phio;
+psMatPer{1} = zeros(quant+1,1);
+
+%zeroing the ceiling functions
+zs = zeros(nr,1);
+
+jj1 = 1; %partial results savings  counter
+
+PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", WeS, ...
+    "nb_harmonics", N, ...
+    "omegas_frequencies", omegas_frequencies, ...
+    "spatial_tol", dr, ...
+    "DEBUG_FLAG", true, ...
+    "Ra", Ra);
+    
+
+PROBLEM_CONSTANTS = 
 
 %% Main Loop
 while (t<tend) %#-- || jj1>.5) 
@@ -212,23 +207,15 @@ while (t<tend) %#-- || jj1>.5)
 
     %Spherical Harmonic modes
     if norm(psTent,1) == 0
-        %B2Tent = 0;
-        %B3Tent = 0;
+
         B_l_ps_tent = zeros(1, N);
     else
         nb_contact_points = nlmax(jj)-find(flipud(psTent),1)+1; %Number of nodes contact points%
         %needs to be integrated against SH modes
-        
-        %%#---
-        % We have that B_l = (2l+1)/2 * int(Ps * P_m * sin(theta))
-%         B_l_ps_tent = arrayfun(@(m) find_harmonic_coefficient(thetaVec(1:(nb_contact_points+1)), ...
-%                     psTent(1:nb_contact_points), m, nb_contact_points, LEGENDRE_POLYNOMIALS{m}), 1:N);
-        
+
         f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psTent(1:nb_contact_points)', 0], thetas, 'linear',  0); 
         endpoints = [thetaVec(nb_contact_points+1), thetaVec(1)]; %TODO: Check integration ends
         B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
-
-        
     end
     
     
@@ -236,12 +223,8 @@ while (t<tend) %#-- || jj1>.5)
 
     [amplitudes_tent, velocities_tent] = solve_ODE_unkown(nan, B_l_ps_tent, dt, ...
         previous_conditions, PROBLEM_CONSTANTS);
-    %#---
     
-    
-    %#---
     RmaxTent = rs_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, jj)), oscillation_amplitudes(:, jj));
-  
 
     nlmaxTent = floor(RmaxTent/dr)+1;
     thetaVec  = theta_from_cylindrical(dr*(0:(nlmaxTent-1)), oscillation_amplitudes(:, jj)); % zeros(1,nlmaxTent);
@@ -260,305 +243,387 @@ while (t<tend) %#-- || jj1>.5)
     ll = 0; % Limiting while loop to 100 iterations
     while abs(errorP)>=tolP && reduc == 0 
         ll = ll + 1;
-        
-        if numl(jj) < .5 %i.e. if previously in flight (I need to define this as integer)
-            [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),errortan(3,jj+1)] = ...
-                solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
-            if abs(errortan(3,jj+1))<.5
-                numlTent = 0;
-                etaTent = etaprob(:,3);
-                phiTent = phiprob(:,3);
-                psNew = zeros(nlmaxTent,1);
-                zTent = zprob(3);
-                vzTent = vzprob(3);
-            else
-                co = find(numl(jj:-1:1)~=1,1);
-                [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1,4),errortan(4,jj+1)] = ...
-                    solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
-                co = find(numl(jj:-1:1)~=2,1);
-                [~,~,~,~,~,errortan(5,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
-                    numlTent = 1;
-                    etaTent = etaprob(:,4);
-                    phiTent = phiprob(:,4);
-                    psNew = psprob(:,4);
-                    zTent = zprob(4);
-                    vzTent = vzprob(4);
-                else
-                    tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                    jj = jj-1;
-                    reduc = 1;
-                end
-            end
-        elseif numl(jj)>.5 && numl(jj)<1.5 % i.e. the last number of contact points was 1
-            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),errortan(2,jj+1)] = ...
-                solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
-            if abs(errortan(2,jj+1))<.5
-                numlTent = 0;
-                etaTent = etaprob(:,2);
-                phiTent = phiprob(:,2);
-                psNew = zeros(nlmaxTent,1);
-                zTent = zprob(2);
-                vzTent = vzprob(2);
-            else
-                co = find(numl(jj:-1:1)~=1,1);
-                [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1,3),errortan(3,jj+1)] = ...                     
-                    solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
-                co = find(numl(jj:-1:1)~=2,1);
-                [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:2,4),errortan(4,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
-                    numlTent = 1;
-                    etaTent = etaprob(:,3);
-                    phiTent = phiprob(:,3);
-                    psNew = psprob(:,3);
-                    zTent = zprob(3);
-                    vzTent = vzprob(3);
-                else
-                    co = find(numl(jj:-1:1)~=3,1);
-                    [~,~,~,~,~,errortan(5,jj+1)] = ...
-                        solvenDDCusp(numl(jj-co+1),3,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
-                    if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
-                        numlTent = 2;
-                        etaTent = etaprob(:,4);
-                        phiTent = phiprob(:,4);
-                        psNew = psprob(:,4);
-                        zTent = zprob(4);
-                        vzTent = vzprob(4);
-                    else
-                        tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                        jj = jj-1; 
-                        reduc = 1;
-                    end
-                end
-            end
-        elseif numl(jj) > 1.5 && numl(jj) < 2.5 %i.e. the last contact had two points
-            [~,~,~,~,errortan(1,jj+1)] = ...
-                solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
-            if abs(errortan(1,jj+1))<.5
-                tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                jj = jj-1; 
-                reduc = 1;
-            else
-                co = find(numl(jj:-1:1)~=2,1);
-                [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:2,3),errortan(3,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
-                co = find(numl(jj:-1:1)~=1,1);
-                [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1,2),errortan(2,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
-                    numlTent = 1;
-                    etaTent = etaprob(:,2);
-                    phiTent = phiprob(:,2);
-                    psNew = psprob(:,2);
-                    zTent = zprob(2);
-                    vzTent = vzprob(2);
-                else
-                    co = find(numl(jj:-1:1)~=3,1);
-                    [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:3,4),errortan(4,jj+1)] = ...    
-                        solvenDDCusp(numl(jj-co+1),3,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
-                    if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
-                        numlTent = 2;
-                        etaTent = etaprob(:,3);
-                        phiTent = phiprob(:,3);
-                        psNew = psprob(:,3);
-                        zTent = zprob(3);
-                        vzTent = vzprob(3);
-                    else
-                        co = find(numl(jj:-1:1)~=4,1);
-                        [~,~,~,~,~,errortan(5,jj+1)] = ...    
-                            solvenDDCusp(numl(jj-co+1),4,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                            We,Ma,zs,IntMat(4,:),angleDropMP,Cang,WeSB,RvTent);
-                        if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
-                            numlTent = 3;
-                            etaTent = etaprob(:,4);
-                            phiTent = phiprob(:,4);
-                            psNew = psprob(:,4);
-                            zTent = zprob(4);
-                            vzTent = vzprob(4);
-                        else
-                            tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                            jj = jj-1; 
-                            reduc = 1;
-                        end
-                    end
-                end
-            end
-        elseif numl(jj)>2.5 && numl(jj)<nlmaxTent-1.5 %if the last number of contact points was far from the boundaries
-            co = find(numl(jj:-1:1)~=numl(jj),1);
-            [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
-            co = find(numl(jj:-1:1)~=numl(jj)-1,1);
-            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
-            if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
-                co = find(numl(jj:-1:1)~=numl(jj)-2,1);
-                [~,~,~,~,~,errortan(1,jj+1)] = ...
-                    solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
-                    numlTent = numl(jj)-1;
-                    etaTent = etaprob(:,2);
-                    phiTent = phiprob(:,2);
-                    psNew = psprob(:,2);
-                    zTent = zprob(2);
-                    vzTent = vzprob(2);
-                else
-                    tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                    jj = jj-1; 
-                    reduc = 1;
-                end
-            else
-                co = find(numl(jj:-1:1)~=numl(jj)+1,1);
-                [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(jj)+1,4),errortan(4,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),numl(jj)+1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)+1,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(3,jj+1))<abs(errortan(4,jj+1))
-                    numlTent = numl(jj);
-                    etaTent = etaprob(:,3);
-                    phiTent = phiprob(:,3);
-                    psNew = psprob(:,3);
-                    zTent = zprob(3);
-                    vzTent = vzprob(3);
-                else
-                    co = find(numl(jj:-1:1)~=numl(jj)+2,1);%I think I don't need this and I can just replace the first argument of solven by numl(jj)
-                    [~,~,~,~,~,errortan(5,jj+1)] = ...
-                        solvenDDCusp(numl(jj-co+1),numl(jj)+2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(numl(jj)+2,:),angleDropMP,Cang,WeSB,RvTent);
-                    if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
-                        numlTent = numl(jj)+1;
-                        etaTent = etaprob(:,4);
-                        phiTent = phiprob(:,4);
-                        psNew = psprob(:,4);
-                        zTent = zprob(4);
-                        vzTent = vzprob(4);
-                    else
-                        tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                        jj = jj-1; 
-                        reduc = 1;
-                    end
-                end
-            end
-        elseif numl(jj) > nlmax(jj)-1.5 && numl(jj) < nlmaxTent-.5 %i.e. if last number of contacted points is nlmax-1
-            co = find(numl(jj:-1:1)~=numl(jj),1);
-            [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
-            co = find(numl(jj:-1:1)~=numl(jj)-1,1);
-            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
-            if abs(errortan(2,jj+1))<abs(errortan(3,jj+1))
-                co = find(numl(jj:-1:1)~=numl(jj)-2,1);
-                [~,~,~,~,~,errortan(1,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
-                    numlTent = numl(jj)-1;
-                    etaTent = etaprob(:,2);
-                    phiTent = phiprob(:,2);
-                    psNew = psprob(:,2);
-                    zTent = zprob(2);
-                    vzTent = vzprob(2);
-                else
-                    tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                    jj = jj-1; 
-                    reduc = 1;
-                end
-            else
-                co = find(numl(jj:-1:1)~=numl(jj)+1,1);
-                [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(jj)+1,4),errortan(4,jj+1)] = ...    
-                    solvenDDCusp(numl(jj-co+1),numl(jj)+1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)+1,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
-                    numlTent = numl(jj);
-                    etaTent = etaprob(:,3);
-                    phiTent = phiprob(:,3);
-                    psNew = psprob(:,3);
-                    zTent = zprob(3);
-                    vzTent = vzprob(3);
-                else
-                    numlTent = numl(jj)+1;
-                    etaTent = etaprob(:,4);
-                    phiTent = phiprob(:,4);
-                    psNew = psprob(:,4);
-                    zTent = zprob(4);
-                    vzTent = vzprob(4);
-                end
-            end
-        elseif numl(jj) == nlmaxTent %i.e. if last number of contact points was nlmax
-            co = find(numl(jj:-1:1)~=numl(jj),1);
-            [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
-            co = find(numl(jj:-1:1)~=numl(jj)-1,1);
-            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
-            if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
-                co = find(numl(jj:-1:1)~=numl(jj)-2,1);
-                [~,~,~,~,~,errortan(1,jj+1)] = ...
-                    solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
-                    numlTent = numl(jj)-1;
-                    etaTent = etaprob(:,2);
-                    phiTent = phiprob(:,2);
-                    psNew = psprob(:,2);
-                    zTent = zprob(2);
-                    vzTent = vzprob(2);
-                else
-                    tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                    jj = jj-1; 
-                    reduc = 1;
-                end
-            else
-                numlTent = numl(jj);
-                etaTent = etaprob(:,3);
-                phiTent = phiprob(:,3);
-                psNew = psprob(:,3);
-                zTent = zprob(3);
-                vzTent = vzprob(3);
-            end
+
+        [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...
+                getNextStep(numl(jj),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+                    We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
+        if abs(errortan(3, jj+1)) < 1e-5
+            numlTent = numl(jj);
+            etaTent = etaprob(:,3);
+            phiTent = phiprob(:,3);
+            psNew = psprob(:,3);
+            zTent = zprob(3);
+            vzTent = vzprob(3);
         else
-            co = find(numl(jj:-1:1)~=numl(jj)-1,1);
-            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
-                solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
-            if abs(errortan(2,jj+1)) < 4
-                co = find(numl(jj:-1:1)~=numl(jj)-2,1);
-                [~,~,~,~,~,errortan(1,jj+1)] = ...
-                    solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
-                if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
-                    numlTent = numl(jj)-1;
-                    etaTent = etaprob(:,2);
-                    phiTent = phiprob(:,2);
-                    psNew = psprob(:,2);
-                    zTent = zprob(2);
-                    vzTent = vzprob(2);
+            [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:(numl(jj)+1),4),errortan(4,jj+1)] = ...
+                getNextStep(numl(jj),numl(jj)+1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+                    We,Ma,zs,IntMat(numl(jj)+1,:),angleDropMP,Cang,WeSB,RvTent);
+            [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:(numl(jj)-1),2),errortan(2,jj+1)] = ...
+                getNextStep(numl(jj),numl(jj) - 1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+                    We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
+
+            if (abs(errortan(3, jj+1)) > abs(errortan(4, jj+1)) || ...
+                    abs(errortan(3, jj+1)) > abs(errortan(2, jj+1)))
+                if abs(errortan(4, jj+1)) <= abs(errortan(2, jj+1))
+                    %Now lets check with one more point to be sure
+                    [~,~,~,~,~,errortan(5,jj+1)] = ...
+                getNextStep(numl(jj),numl(jj) +2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+                    We,Ma,zs,IntMat(numl(jj)+2,:),angleDropMP,Cang,WeSB,RvTent);
+                    
+
+                    if abs(errortan(4)) < abs(errortan(5))
+                        %Accept new data
+                        numlTent = numl(jj) + 1;
+                        etaTent = etaprob(:,4);
+                        phiTent = phiprob(:,4);
+                        psNew = psprob(:, 4);
+                        zTent = zprob(4);
+                        vzTent = vzprob(4);
+
+                    else
+                        %time step too big
+                        tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+                        jj = jj-1; 
+                        reduc = 1;
+                    end
                 else
+                    %now lets check if errortan is good enough with one point
+                    %less
+                    [~,~,~,~,~,errortan(1,jj+1)] = ...
+                getNextStep(numl(jj),numl(jj) - 2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+                    We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
+
+                    if abs(errortan(2, jj+1)) < abs(errortan(1, jj+1))
+                        %Accept new data
+                        numlTent = numl(jj) + 1;
+                        etaTent = etaprob(:,2);
+                        phiTent = phiprob(:,2);
+                        psNew = psprob(:, 2);
+                        zTent = zprob(2);
+                        vzTent = vzprob(2);
+                    else
+                        tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+                        jj = jj-1; 
+                        reduc = 1;
+                    end
+                end %End of (errortan(4) < errortan(2))
+
+            else %the same number of contact points is best    
+                if errortan(3, jj+1) == Inf % ALl errors are infinity
                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
                     jj = jj-1; 
                     reduc = 1;
+                else
+                    %Accept new data
+                    numlTent = numl(jj);
+                    etaTent = etaprob(:,3);
+                    phiTent = phiprob(:,3);
+                    psNew = psprob(:,3);
+                    zTent = zprob(3);
+                    vzTent = vzprob(3);
                 end
-            else
-                tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
-                jj = jj-1; 
-                reduc = 1;
-            end
+            end %
         end
+
+%         % #--
+%         if numl(jj) < .5 %i.e. if previously in flight (I need to define this as integer)
+%             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),errortan(3,jj+1)] = ...
+%                 solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
+%             if abs(errortan(3,jj+1))<.5
+%                 numlTent = 0;
+%                 etaTent = etaprob(:,3);
+%                 phiTent = phiprob(:,3);
+%                 psNew = zeros(nlmaxTent,1);
+%                 zTent = zprob(3);
+%                 vzTent = vzprob(3);
+%             else
+%                 co = find(numl(jj:-1:1)~=1,1);
+%                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1,4),errortan(4,jj+1)] = ...
+%                     solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+%                 co = find(numl(jj:-1:1)~=2,1);
+%                 [~,~,~,~,~,errortan(5,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
+%                     numlTent = 1;
+%                     etaTent = etaprob(:,4);
+%                     phiTent = phiprob(:,4);
+%                     psNew = psprob(:,4);
+%                     zTent = zprob(4);
+%                     vzTent = vzprob(4);
+%                 else
+%                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                     jj = jj-1;
+%                     reduc = 1;
+%                 end
+%             end
+%         elseif numl(jj)>.5 && numl(jj)<1.5 % i.e. the last number of contact points was 1
+%             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),errortan(2,jj+1)] = ...
+%                 solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
+%             if abs(errortan(2,jj+1))<.5
+%                 numlTent = 0;
+%                 etaTent = etaprob(:,2);
+%                 phiTent = phiprob(:,2);
+%                 psNew = zeros(nlmaxTent,1);
+%                 zTent = zprob(2);
+%                 vzTent = vzprob(2);
+%             else
+%                 co = find(numl(jj:-1:1)~=1,1);
+%                 [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1,3),errortan(3,jj+1)] = ...                     
+%                     solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+%                 co = find(numl(jj:-1:1)~=2,1);
+%                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:2,4),errortan(4,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
+%                     numlTent = 1;
+%                     etaTent = etaprob(:,3);
+%                     phiTent = phiprob(:,3);
+%                     psNew = psprob(:,3);
+%                     zTent = zprob(3);
+%                     vzTent = vzprob(3);
+%                 else
+%                     co = find(numl(jj:-1:1)~=3,1);
+%                     [~,~,~,~,~,errortan(5,jj+1)] = ...
+%                         solvenDDCusp(numl(jj-co+1),3,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                         We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
+%                     if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
+%                         numlTent = 2;
+%                         etaTent = etaprob(:,4);
+%                         phiTent = phiprob(:,4);
+%                         psNew = psprob(:,4);
+%                         zTent = zprob(4);
+%                         vzTent = vzprob(4);
+%                     else
+%                         tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                         jj = jj-1; 
+%                         reduc = 1;
+%                     end
+%                 end
+%             end
+%         elseif numl(jj) > 1.5 && numl(jj) < 2.5 %i.e. the last contact had two points
+%             [~,~,~,~,errortan(1,jj+1)] = ...
+%                 solveDD0(dt,z(jj),vz(jj),etao,phio,nr,Re,Delta,DTN,Fr,We,zs,RvTent);
+%             if abs(errortan(1,jj+1))<.5
+%                 tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                 jj = jj-1; 
+%                 reduc = 1;
+%             else
+%                 co = find(numl(jj:-1:1)~=2,1);
+%                 [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:2,3),errortan(3,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 co = find(numl(jj:-1:1)~=1,1);
+%                 [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1,2),errortan(2,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
+%                     numlTent = 1;
+%                     etaTent = etaprob(:,2);
+%                     phiTent = phiprob(:,2);
+%                     psNew = psprob(:,2);
+%                     zTent = zprob(2);
+%                     vzTent = vzprob(2);
+%                 else
+%                     co = find(numl(jj:-1:1)~=3,1);
+%                     [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:3,4),errortan(4,jj+1)] = ...    
+%                         solvenDDCusp(numl(jj-co+1),3,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                         We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
+%                     if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
+%                         numlTent = 2;
+%                         etaTent = etaprob(:,3);
+%                         phiTent = phiprob(:,3);
+%                         psNew = psprob(:,3);
+%                         zTent = zprob(3);
+%                         vzTent = vzprob(3);
+%                     else
+%                         co = find(numl(jj:-1:1)~=4,1);
+%                         [~,~,~,~,~,errortan(5,jj+1)] = ...    
+%                             solvenDDCusp(numl(jj-co+1),4,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                             We,Ma,zs,IntMat(4,:),angleDropMP,Cang,WeSB,RvTent);
+%                         if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
+%                             numlTent = 3;
+%                             etaTent = etaprob(:,4);
+%                             phiTent = phiprob(:,4);
+%                             psNew = psprob(:,4);
+%                             zTent = zprob(4);
+%                             vzTent = vzprob(4);
+%                         else
+%                             tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                             jj = jj-1; 
+%                             reduc = 1;
+%                         end
+%                     end
+%                 end
+%             end
+%         elseif numl(jj)>2.5 && numl(jj)<nlmaxTent-1.5 %if the last number of contact points was far from the boundaries
+%             co = find(numl(jj:-1:1)~=numl(jj),1);
+%             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
+%             co = find(numl(jj:-1:1)~=numl(jj)-1,1);
+%             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
+%             if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
+%                 co = find(numl(jj:-1:1)~=numl(jj)-2,1);
+%                 [~,~,~,~,~,errortan(1,jj+1)] = ...
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
+%                     numlTent = numl(jj)-1;
+%                     etaTent = etaprob(:,2);
+%                     phiTent = phiprob(:,2);
+%                     psNew = psprob(:,2);
+%                     zTent = zprob(2);
+%                     vzTent = vzprob(2);
+%                 else
+%                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                     jj = jj-1; 
+%                     reduc = 1;
+%                 end
+%             else
+%                 co = find(numl(jj:-1:1)~=numl(jj)+1,1);
+%                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(jj)+1,4),errortan(4,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)+1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)+1,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(3,jj+1))<abs(errortan(4,jj+1))
+%                     numlTent = numl(jj);
+%                     etaTent = etaprob(:,3);
+%                     phiTent = phiprob(:,3);
+%                     psNew = psprob(:,3);
+%                     zTent = zprob(3);
+%                     vzTent = vzprob(3);
+%                 else
+%                     co = find(numl(jj:-1:1)~=numl(jj)+2,1);%I think I don't need this and I can just replace the first argument of solven by numl(jj)
+%                     [~,~,~,~,~,errortan(5,jj+1)] = ...
+%                         solvenDDCusp(numl(jj-co+1),numl(jj)+2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                         We,Ma,zs,IntMat(numl(jj)+2,:),angleDropMP,Cang,WeSB,RvTent);
+%                     if abs(errortan(4,jj+1)) < abs(errortan(5,jj+1))
+%                         numlTent = numl(jj)+1;
+%                         etaTent = etaprob(:,4);
+%                         phiTent = phiprob(:,4);
+%                         psNew = psprob(:,4);
+%                         zTent = zprob(4);
+%                         vzTent = vzprob(4);
+%                     else
+%                         tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                         jj = jj-1; 
+%                         reduc = 1;
+%                     end
+%                 end
+%             end
+%         elseif numl(jj) > nlmax(jj)-1.5 && numl(jj) < nlmaxTent-.5 %i.e. if last number of contacted points is nlmax-1
+%             co = find(numl(jj:-1:1)~=numl(jj),1);
+%             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
+%             co = find(numl(jj:-1:1)~=numl(jj)-1,1);
+%             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
+%             if abs(errortan(2,jj+1))<abs(errortan(3,jj+1))
+%                 co = find(numl(jj:-1:1)~=numl(jj)-2,1);
+%                 [~,~,~,~,~,errortan(1,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
+%                     numlTent = numl(jj)-1;
+%                     etaTent = etaprob(:,2);
+%                     phiTent = phiprob(:,2);
+%                     psNew = psprob(:,2);
+%                     zTent = zprob(2);
+%                     vzTent = vzprob(2);
+%                 else
+%                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                     jj = jj-1; 
+%                     reduc = 1;
+%                 end
+%             else
+%                 co = find(numl(jj:-1:1)~=numl(jj)+1,1);
+%                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(jj)+1,4),errortan(4,jj+1)] = ...    
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)+1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)+1,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(3,jj+1)) < abs(errortan(4,jj+1))
+%                     numlTent = numl(jj);
+%                     etaTent = etaprob(:,3);
+%                     phiTent = phiprob(:,3);
+%                     psNew = psprob(:,3);
+%                     zTent = zprob(3);
+%                     vzTent = vzprob(3);
+%                 else
+%                     numlTent = numl(jj)+1;
+%                     etaTent = etaprob(:,4);
+%                     phiTent = phiprob(:,4);
+%                     psNew = psprob(:,4);
+%                     zTent = zprob(4);
+%                     vzTent = vzprob(4);
+%                 end
+%             end
+%         elseif numl(jj) == nlmaxTent %i.e. if last number of contact points was nlmax
+%             co = find(numl(jj:-1:1)~=numl(jj),1);
+%             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(jj),3),errortan(3,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj),dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj),:),angleDropMP,Cang,WeSB,RvTent);
+%             co = find(numl(jj:-1:1)~=numl(jj)-1,1);
+%             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
+%             if abs(errortan(2,jj+1)) < abs(errortan(3,jj+1))
+%                 co = find(numl(jj:-1:1)~=numl(jj)-2,1);
+%                 [~,~,~,~,~,errortan(1,jj+1)] = ...
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
+%                     numlTent = numl(jj)-1;
+%                     etaTent = etaprob(:,2);
+%                     phiTent = phiprob(:,2);
+%                     psNew = psprob(:,2);
+%                     zTent = zprob(2);
+%                     vzTent = vzprob(2);
+%                 else
+%                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                     jj = jj-1; 
+%                     reduc = 1;
+%                 end
+%             else
+%                 numlTent = numl(jj);
+%                 etaTent = etaprob(:,3);
+%                 phiTent = phiprob(:,3);
+%                 psNew = psprob(:,3);
+%                 zTent = zprob(3);
+%                 vzTent = vzprob(3);
+%             end
+%         else
+%             co = find(numl(jj:-1:1)~=numl(jj)-1,1);
+%             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(jj)-1,2),errortan(2,jj+1)] = ...    
+%                 solvenDDCusp(numl(jj-co+1),numl(jj)-1,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                 We,Ma,zs,IntMat(numl(jj)-1,:),angleDropMP,Cang,WeSB,RvTent);
+%             if abs(errortan(2,jj+1)) < 4
+%                 co = find(numl(jj:-1:1)~=numl(jj)-2,1);
+%                 [~,~,~,~,~,errortan(1,jj+1)] = ...
+%                     solvenDDCusp(numl(jj-co+1),numl(jj)-2,dt,z(jj),vz(jj),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
+%                     We,Ma,zs,IntMat(numl(jj)-2,:),angleDropMP,Cang,WeSB,RvTent);
+%                 if abs(errortan(2,jj+1)) < abs(errortan(1,jj+1))
+%                     numlTent = numl(jj)-1;
+%                     etaTent = etaprob(:,2);
+%                     phiTent = phiprob(:,2);
+%                     psNew = psprob(:,2);
+%                     zTent = zprob(2);
+%                     vzTent = vzprob(2);
+%                 else
+%                     tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                     jj = jj-1; 
+%                     reduc = 1;
+%                 end
+%             else
+%                 tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+%                 jj = jj-1; 
+%                 reduc = 1;
+%             end
+%         end
         
         if ll == 100
             tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];

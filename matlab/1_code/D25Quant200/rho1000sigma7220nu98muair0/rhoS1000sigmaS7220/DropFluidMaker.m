@@ -1,5 +1,5 @@
 
-rhoS = 1.0; save('rhoS.mat','rhoS')%ball density in gr/cm^3
+rhoS = 1; save('rhoS.mat','rhoS')%ball density in gr/cm^3
 sigmaS = 72.2; save('sigmaS.mat','sigmaS');
 
 cd ..

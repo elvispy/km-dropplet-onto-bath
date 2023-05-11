@@ -1,9 +1,7 @@
-clear
-close all
-clc
 
-D = 200; save('D.mat','D') %Diameter of the domain measured in units of Ro
-quant = 25;save('quant.mat','quant')%minimal number of intervals covered by a radius
+
+D = 25; save('D.mat','D') %Diameter of the domain measured in units of Ro
+quant = 200;save('quant.mat','quant')%minimal number of intervals covered by a radius
 
 %geometry of Domain
 nr = ceil(D*quant/2); save('nr.mat','nr')% number of intervals where integration in needed, which is also the number of points 

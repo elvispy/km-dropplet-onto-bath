@@ -26,7 +26,7 @@ if runNumber == 0
     dtheta = 2*pi/numer;%use pi/even number
     DTNnew345=zeros(nr,nr);
 
-    k = 1 
+    k = 1 ;
     %Integrating away from the singularity
     for i=2:(rn(k)+nr+1)
         i1 = round(i);
