@@ -15,7 +15,7 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = 51; %linspace(28, 50, 5)';
+U = 5; %linspace(28, 50, 5)';
 modes = 40;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
@@ -126,7 +126,7 @@ function final_folder = create_folder_stucture(entry)
     fluid_parameters = sprintf("rho%gsigma%gnu%.2gmuair%g", entry.rho*1000, entry.sigma*100, entry.nu*10000, entry.muair);
     sphere_parameters = sprintf("rhoS%gsigmaS%g", entry.RhoS*1000, entry.SigmaS*100);
     radius_folder = sprintf("R%04.4gmm", entry.R*10000);
-    velocity_folder = sprintf("ImpDefCornerAng%gU%2.3g", entry.Ang, entry.U);
+    velocity_folder = sprintf("ImpDefCornerAng%gU%.3g", entry.Ang, entry.U);
 
     if isfolder(physical_space)
        cd(physical_space);
