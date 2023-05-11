@@ -1,6 +1,3 @@
-clear
-close all
-clc
 
 %Physical properties of the bath's fluid
 rho = 1; save('rho.mat','rho')%Density of fluid bath in cgs

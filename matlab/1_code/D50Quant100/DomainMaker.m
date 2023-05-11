@@ -1,6 +1,4 @@
-clear
-close all
-clc
+
 
 D = 100; save('D.mat','D') %Diameter of the domain measured in units of Ro
 quant = 50;save('quant.mat','quant')%minimal number of intervals covered by a radius
