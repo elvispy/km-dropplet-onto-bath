@@ -23,6 +23,7 @@ indep = [bmod;vzo-dt/Fr+dt*3*(nl-.5)*dr*sin(angleDrop(nl)-AngC)/(2*WeSB);...
     zo+vzo*dt-dt^2/(2*Fr)+dt^2*3*(nl-.5)*dr*sin(angleDrop(nl)-AngC)/(4*WeSB)];
 
 ds = Mat\indep;
+if rand() < 0.01; fprintf("%.1e\n", abs(det(Mat))); end
 etaprob(nl+1:nr,1) = ds(1:nr-nl);
 phiprob = ds(nr-nl+1:2*nr-nl);
 psprob = ds(2*nr-nl+1:2*nr);
@@ -32,7 +33,7 @@ etaprob(1:nl,1) = zprob+Rv+zs(1:nl);
 
 check = (etaprob(nl+1:end)>(zprob+Rv+zs(nl+1:end)));
 if sum(check)>.5
-    errortan = 4;
+    errortan = Inf;
 else
     taneffect = (etaprob(nl+1)-etaprob(nl))/dr;
     ataneffect = atan(taneffect);

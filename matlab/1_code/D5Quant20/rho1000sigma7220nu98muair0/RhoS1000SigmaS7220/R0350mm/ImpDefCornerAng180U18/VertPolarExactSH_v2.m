@@ -3,14 +3,12 @@ close all
 tstart = tic;
 tic
 
-
-
 if exist('oscillation_amplitudes.mat', 'file') == 2
    % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
 
 
-U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+U0 = 18; %impact velocity in cm/s (unit of velocity for the problem)
 Ang = 180;  %contact angle to be imposed
 
 cd ..
@@ -78,7 +76,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 400; %minimum number of timesteps in one unit of time
+nsteps = 100; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
@@ -89,7 +87,7 @@ vz = zeros(1,steps+1);%speed of the centre of mass
 numl = zeros(1,steps+1);%number of pressed mesh points at each time step
 tvec = zeros(1, steps+1); %vector of times assuming no refinement has happened
 %plus some extra time just in case the simulation needs to run longer
-dt = dtb; time_index = 0; save_index = 0; resetter = 0;
+dt = dtb; time_index = 0; save_index = 0; resetter = 100;
 indexes_to_save = zeros(steps + 1, 1); indexes_to_save(1) = 1;
 current_to_save = 2;
 % #--- 
@@ -263,15 +261,15 @@ while tentative_index <= steps && t < tend && exit == false
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:(numl(tentative_index)-1),2),errortan(2,tentative_index+1)] = ...
                    getNextStep(numl(tentative_index),numl(tentative_index) - 1,dt,z(tentative_index),vz(tentative_index),etao,phio, ...
                         zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
-            if (abs(errortan(3, tentative_index+1)) > abs(errortan(4, tentative_index+1)) || ...
-                    abs(errortan(3, tentative_index+1)) > abs(errortan(2, tentative_index+1)))
+            if (abs(errortan(3, tentative_index+1)) >= abs(errortan(4, tentative_index+1)) || ...
+                    abs(errortan(3, tentative_index+1)) >= abs(errortan(2, tentative_index+1)))
                 if abs(errortan(4, tentative_index+1)) <= abs(errortan(2, tentative_index+1))
                     %Now lets check with one more point to be sure
                     [~,~,~,~,~,errortan(5,tentative_index+1)] = ...
                         getNextStep(numl(tentative_index),numl(tentative_index) + 2,dt,z(tentative_index),vz(tentative_index),etao,phio, ...
                             zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
 
-                    if abs(errortan(4)) < abs(errortan(5))
+                    if abs(errortan(4,tentative_index+1)) < abs(errortan(5,tentative_index+1))
                         %Accept new data
                         numlTent = numl(tentative_index) + 1;
                         etaTent = etaprob(:,4);
@@ -360,7 +358,6 @@ while tentative_index <= steps && t < tend && exit == false
             
             err = norm([psTent;zeros(length(length(psTent)+1:nb_points),1);amplitudes_tent']-...
                        [psNew ;zeros(length(length(psNew )+1:nb_points),1);amplitudes_new'],1);
-                   
             
             if norm([psNew;amplitudes_new'],1) > 0
                 errorP = err/norm([psNew;amplitudes_new'],1);    
@@ -369,7 +366,7 @@ while tentative_index <= steps && t < tend && exit == false
             end
             if errorP < tolP % Finally accept solution
                 time_index = time_index + 1; t = t + dt;
-                if mod(time_index, 2) == 0 && resetter > 0
+                if mod(time_index, 2) == 0 && resetter > 0 && save_index > 0
                     time_index = time_index / 2;
                     save_index = save_index - 1;
                     dt = 2 * dt;
@@ -421,10 +418,11 @@ while tentative_index <= steps && t < tend && exit == false
 
                 if time_index == 2^save_index
                     time_index = 0;
-                    resetter = 1;
+                    resetter = 100;
                     indexes_to_save(current_to_save) = tentative_index;
                     current_to_save = current_to_save + 1;
                 end
+
                 etao = eta_accepted;
                 phio = phi_accepted;
                 pso = ps_accepted;
@@ -485,43 +483,44 @@ while tentative_index <= steps && t < tend && exit == false
         else
             dt = dt/2; time_index = 2 * time_index;
             save_index = save_index + 1;
-            if 1/(dt * nsteps) >= 2^12
+            if save_index > 20
                 warning("Step size has been made too small (%.5e). Stopped the execution of the program", dt);
                 t = inf;
             end
         end
     end
-    
 end
 
-% runNumber = runNumber+1;
-tstop = t;
-% save(['tstop',num2str(runNumber),'.mat'],'tstop')
-% jjstop = tentative_index;
-% save(['jjstop',num2str(runNumber),'.mat'],'jjstop')
-% save(['etao',num2str(runNumber),'.mat'],'etao')
-% save(['phio',num2str(runNumber),'.mat'],'phio')
-% save(['pso',num2str(runNumber),'.mat'],'pso')
-
-% zrestart = z(tentative_index+1);
-% vzrestart = vz(tentative_index+1);
-% trestart = tvec(tentative_index+1);
-% numlrestart = numl(tentative_index+1);
-% save(['zrestart',num2str(runNumber),'.mat'],'zrestart')
-% save(['vzrestart',num2str(runNumber),'.mat'],'vzrestart')
-% save(['trestart',num2str(runNumber),'.mat'],'trestart')
-% save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
-indexes_to_save = indexes_to_save(1:(current_to_save-1));
-z = z(indexes_to_save); save('z.mat','z')
-etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
-etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
-phiMatPer = phiMatPer(:, indexes_to_save); save('phiMatPer.mat','phiMatPer')
-psMatPer = psMatPer(:, indexes_to_save); save('psMatPer.mat','psMatPer')
-
-vz = vz(indexes_to_save); save('vz.mat','vz');
-save('tvec.mat','tvec'); % TODO Revise this
-nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
-numl = numl(indexes_to_save); save('numl.mat','numl');
-errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
-oscillation_amplitudes = oscillation_amplitudes(indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
+if t < inf
+    % runNumber = runNumber+1;
+    tstop = t;
+    % save(['tstop',num2str(runNumber),'.mat'],'tstop')
+    % jjstop = tentative_index;
+    % save(['jjstop',num2str(runNumber),'.mat'],'jjstop')
+    % save(['etao',num2str(runNumber),'.mat'],'etao')
+    % save(['phio',num2str(runNumber),'.mat'],'phio')
+    % save(['pso',num2str(runNumber),'.mat'],'pso')
+    
+    % zrestart = z(tentative_index+1);
+    % vzrestart = vz(tentative_index+1);
+    % trestart = tvec(tentative_index+1);
+    % numlrestart = numl(tentative_index+1);
+    % save(['zrestart',num2str(runNumber),'.mat'],'zrestart')
+    % save(['vzrestart',num2str(runNumber),'.mat'],'vzrestart')
+    % save(['trestart',num2str(runNumber),'.mat'],'trestart')
+    % save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
+    indexes_to_save = indexes_to_save(1:(current_to_save-1));
+    z = z(indexes_to_save); save('z.mat','z')
+    etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
+    etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
+    phiMatPer = phiMatPer(:, indexes_to_save); save('phiMatPer.mat','phiMatPer')
+    psMatPer = psMatPer(:, indexes_to_save); save('psMatPer.mat','psMatPer')
+    
+    vz = vz(indexes_to_save); save('vz.mat','vz');
+    save('tvec.mat','tvec'); % TODO Revise this
+    nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
+    numl = numl(indexes_to_save); save('numl.mat','numl');
+    errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
+    oscillation_amplitudes = oscillation_amplitudes(indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
+end
