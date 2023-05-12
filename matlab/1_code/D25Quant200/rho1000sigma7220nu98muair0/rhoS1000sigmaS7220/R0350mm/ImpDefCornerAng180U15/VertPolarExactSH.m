@@ -15,7 +15,7 @@ if exist('z.mat', 'file') == 2
 end
 
 if runNumber == 0
-    U0 = 50; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
+    U0 = 15; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
    
     cd ..
