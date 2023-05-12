@@ -896,7 +896,7 @@ while (t<tend) %#-- || jj1>.5)
                 zsTop = zs_from_spherical(thetaplot, amplitudes_new);
                 xsTop = r_from_spherical(thetaplot, amplitudes_new); 
                 plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+zTent,'k','Linewidth',2);
-                width = min(nr, 200);
+                width = round(nr * 6/D);
                 plot([-fliplr(xplot(2:width)),xplot(1:width)],[flipud(eta1(2:width));eta1(1:width)],'LineWidth',2);
                 hold off
                 axis equal
