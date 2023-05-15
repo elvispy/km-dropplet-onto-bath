@@ -81,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 100; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 1000; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
@@ -951,7 +951,7 @@ while (t<tend) %#-- || jj1>.5)
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
         else
-            if 1/(dt * nsteps) >= 2^12
+            if 1/(dt * nsteps) >= 2^20
                 warning("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
                 t = inf;
             end

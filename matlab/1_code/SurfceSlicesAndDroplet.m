@@ -101,7 +101,7 @@ zmax = max(max(etaMatPer));
 
 
 vidObj = VideoWriter('WavesAndDrop.mp4','MPEG-4');
-set(vidObj,'FrameRate',50)
+set(vidObj,'FrameRate',20)
 open(vidObj);
 
 Gamma = 0; %%
@@ -110,39 +110,16 @@ thetaZero = 0; %%
 zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb(1:end-1);
 
-for ii = 1:size(etaMatPer,2)
-%     RvCurr = Rv(ii); 
-%     Rh = sqrt(1/RvCurr);
-%     nlmax = floor(Rh/dr)+1;
-%     zs(1:nlmax) = RvCurr-RvCurr*sqrt(1-RvCurr*(0:dr:(nlmax-1)*dr).^2);
-%     zsplot = [(zplot(ii)-RvCurr)+[flipud(zs(2:nlmax));zs(1:nlmax)];flipud((z(ii)+RvCurr)...
-%         -[flipud(zs(2:nlmax));zs(1:nlmax)]);(z(ii)-RvCurr)+zs(nlmax)];
-%     xs = [xplot(nr-nlmax+2:nr+nlmax),fliplr(xplot(nr-nlmax+2:nr+nlmax)),xplot(nr-nlmax+2)];
-%     plot(xs,(zbplot(ii)+zsplot),'k','LineWidth',2)
+for ii = floor(linspace(1, size(etaMatPer,2), 300))
 
-%%
-%RmaxTent = rs_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, ii)), oscillation_amplitudes(:, ii));    
-%nlmax = floor(RmaxTent/dr)+1;
 
-%xs = dr*(0:nlmax-1);
-%zsplot = zs(1:nlmax)+Rv(ii)+z(ii);
-%plot([-fliplr(xs(2:end)),xs],[flipud(zsplot(2:end));zsplot],'k','Linewidth',2);
-%thetaVec = theta_from_cylindrical(dr*(0:(nlmax-1)), oscillation_amplitudes(:, ii)); % zeros(1,nlmaxTent);
-
-thetaplot = linspace(0, pi, 100);%-%-0:thetaVec(end)/400:thetaVec(end);
-%-%-xsTop = xsoftheta(thetaplot,A2New,A3New);
-%-%-zsTop = zsoftheta(thetaplot,A2New,A3New);
-zsTop = zs_from_spherical(thetaplot, oscillation_amplitudes(:, ii));
-xsTop = r_from_spherical(thetaplot, oscillation_amplitudes(:, ii)); 
-plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+z(ii),'k','Linewidth',2);
-hold on
-%width = min(nr, 200);
-%plot([-fliplr(xplot(2:width)),xplot(1:width)],[flipud(eta1(2:width));eta1(1:width)],'LineWidth',2);
-%hold off
-%axis equal
-%title(['   t = ',num2str(t),'   ','nl = ',num2str(numl(jj+1))],'FontSize',16);
-%grid on
-
+    thetaplot = linspace(0, pi, 100);%-%-0:thetaVec(end)/400:thetaVec(end);
+    %-%-xsTop = xsoftheta(thetaplot,A2New,A3New);
+    %-%-zsTop = zsoftheta(thetaplot,A2New,A3New);
+    zsTop = zs_from_spherical(thetaplot, oscillation_amplitudes(:, ii));
+    xsTop = r_from_spherical(thetaplot, oscillation_amplitudes(:, ii)); 
+    plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+z(ii),'k','Linewidth',2);
+    hold on
 
 %%
     plot([fliplr(-1*r),r(2:end)],(zbplot(ii)+[0;flipud(etaMatPer(:,ii));etaMatPer(2:end,ii);0]),...

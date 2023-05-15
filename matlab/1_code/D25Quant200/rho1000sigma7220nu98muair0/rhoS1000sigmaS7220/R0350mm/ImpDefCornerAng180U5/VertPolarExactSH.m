@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 40; % Number of harmonics contributing to the oscillation
+    N = 20; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -73,7 +73,7 @@ if runNumber == 0
     Cang = (Ang/180)*pi; save('Cang.mat','Cang')%contact angle to be imposed
     
     %Physical parameters
-    tend = 7; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
+    tend = 9; save('tend.mat','tend')%Earliest possible end of simulation in characteristic units
     
     %Inintial conditions for the fluid
     t = 0;
@@ -81,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 400; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 100; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
@@ -834,13 +834,6 @@ while (t<tend) %#-- || jj1>.5)
                 amplitudes_velocities_old = velocities_new;
                 B_l_ps_old = B_l_ps_new;
                 
-                previous_conditions{1} = previous_conditions{2};
-                previous_conditions{2} = struct("deformation_amplitudes", amplitudes_new, ...
-                    "deformation_velocities", velocities_new, ...
-                    "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_new, ...
-                    "current_time", previous_conditions{1}.current_time + dt, ...
-                    "center_of_mass", z(jj+1), "center_of_mass_velocity", vz(jj+1), ...
-                    "nb_contact_points", numlTent);
 
                 nlmax(jj+1) = nlmaxTent;
                 etaOri(jj+1) = eta1(1);
@@ -868,6 +861,20 @@ while (t<tend) %#-- || jj1>.5)
                     save('errortan.mat','errortan')
                     % s ave('oscillation_amplitudes.mat', 'oscillation_amplitudes');
                 end
+
+                if  zTent > 1.5 && numlTent == 0
+                    tend = t;
+                    tvec = tvec(1:(jj+1));
+                    numl = numl(1:(jj+1));
+                    z = z(1:(jj+1));
+                    vz = vz(1:(jj+1));
+                    oscillation_amplitudes = oscillation_amplitudes(:, 1:(jj + 1)); 
+                    etaOri = etaOri(1:(jj+1));
+                    etaMatPer = etaMatPer(:,1:(jj1+1));
+                    phiMatPer = phiMatPer(:,1:(jj1+1));
+                    Rv = Rv(1:(jj+1));
+                end
+
                 etao = eta1;
                 phio = phi1;
                 pso = ps1;
@@ -882,7 +889,7 @@ while (t<tend) %#-- || jj1>.5)
                 zsTop = zs_from_spherical(thetaplot, amplitudes_new);
                 xsTop = r_from_spherical(thetaplot, amplitudes_new); 
                 plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+zTent,'k','Linewidth',2);
-                width = min(nr, 200);
+                width = round(nr * 6/D);
                 plot([-fliplr(xplot(2:width)),xplot(1:width)],[flipud(eta1(2:width));eta1(1:width)],'LineWidth',2);
                 hold off
                 axis equal
@@ -944,8 +951,8 @@ while (t<tend) %#-- || jj1>.5)
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
         else
-            if 1/(dt * nsteps) >= 2^12
-                warning("Step size has been made too small (%.5f). Stopped the execution of the program", dt);
+            if 1/(dt * nsteps) >= 2^20
+                warning("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
                 t = inf;
             end
         end

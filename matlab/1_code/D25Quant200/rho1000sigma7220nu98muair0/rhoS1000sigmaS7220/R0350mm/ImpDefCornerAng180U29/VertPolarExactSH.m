@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 40; % Number of harmonics contributing to the oscillation
+    N = 20; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -834,13 +834,6 @@ while (t<tend) %#-- || jj1>.5)
                 amplitudes_velocities_old = velocities_new;
                 B_l_ps_old = B_l_ps_new;
                 
-                previous_conditions{1} = previous_conditions{2};
-                previous_conditions{2} = struct("deformation_amplitudes", amplitudes_new, ...
-                    "deformation_velocities", velocities_new, ...
-                    "dt", dt, "nb_harmonics", N, "pressure_amplitudes", B_l_ps_new, ...
-                    "current_time", previous_conditions{1}.current_time + dt, ...
-                    "center_of_mass", z(jj+1), "center_of_mass_velocity", vz(jj+1), ...
-                    "nb_contact_points", numlTent);
 
                 nlmax(jj+1) = nlmaxTent;
                 etaOri(jj+1) = eta1(1);
@@ -958,7 +951,7 @@ while (t<tend) %#-- || jj1>.5)
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
         else
-            if 1/(dt * nsteps) >= 2^12
+            if 1/(dt * nsteps) >= 2^20
                 warning("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
                 t = inf;
             end

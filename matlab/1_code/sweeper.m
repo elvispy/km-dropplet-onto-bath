@@ -6,7 +6,7 @@
 % STEP 1: Define which simulations are to be run. 
 
 D = 25;
-Quant = 200;
+Quant = 100;
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
 nu = 9.78E-3; % Multiply by x10000
@@ -15,8 +15,8 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(50, 1, 15)';
-modes = 40;
+U = linspace(46, 6, 5)';
+modes = 50;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx] = ...
