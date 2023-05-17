@@ -15,7 +15,7 @@ if exist('z.mat', 'file') == 2
 end
 
 if runNumber == 0
-    U0 = 38; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
+    U0 = 26.1; save('U0.mat','U0')%impact velocity in cm/s (unit of velocity for the problem)
     Ang = 180; save('Ang.mat','Ang') %contact angle to be imposed
    
     cd ..
@@ -57,7 +57,7 @@ if runNumber == 0
     tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
     
     % #--- 
-    N = 40; % Number of harmonics contributing to the oscillation
+    N = 50; % Number of harmonics contributing to the oscillation
     % #---0
     
     %Unit of time
@@ -81,7 +81,7 @@ if runNumber == 0
     phio = zeros(nr,1); %initial surface potential
 
     %Numerical Simulation parameters
-    nsteps = 200; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
+    nsteps = 250; save('nsteps.mat','nsteps')%minimum number of timesteps in one unit of time
     dtb = 1/nsteps; save('dtb.mat','dtb')%basic timestep (gets halved as needed over impacts)
     steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
     
