@@ -5,8 +5,10 @@
 
 % STEP 1: Define which simulations are to be run. 
 
-D = 5;
-Quant = 20;
+
+D = 50;
+Quant = 100;
+
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
 nu = 9.78E-3; % Multiply by x10000
