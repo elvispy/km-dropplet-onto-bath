@@ -2,7 +2,7 @@
 % of restitution, contact time and max deflection.
 
 %D = 5;
-Quant = [100, 200];
+Quant = [150, 200];
 %rho = 1; % must multiply by x1000
 %sigma = 72.20; % must multiply by x100
 %nu = 9.78E-3; % Multiply by x10000
