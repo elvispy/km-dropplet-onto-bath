@@ -41,7 +41,8 @@ for ii = 1:length(files_folder)
         Uend = (vz(index1+index2-1)+vz(index1+index2-2))/2;
         tcont = tend-tImpact;
         CRref = -Uend/Uo;
-        max_def = min(south);
+        
+        max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
 
         save('simulation_postprocessing.mat', "Uo", "tend", ...
             "Uend", "max_def", "CRref", "tcont");
