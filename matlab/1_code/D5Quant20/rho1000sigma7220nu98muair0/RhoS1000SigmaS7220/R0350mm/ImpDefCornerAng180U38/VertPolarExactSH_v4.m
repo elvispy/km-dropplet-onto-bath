@@ -56,7 +56,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 30; % Number of harmonics contributing to the oscillation
+N = 50; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time

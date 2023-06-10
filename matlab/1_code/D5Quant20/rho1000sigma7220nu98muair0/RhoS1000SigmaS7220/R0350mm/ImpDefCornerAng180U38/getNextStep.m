@@ -1,5 +1,5 @@
 function [etaprob,phiprob,zprob,vzprob,psprob,errortan] = getNextStep(nlprev,nl,dt,zo,vzo,etao,phio,...
-    zs,Rv, PROBLEM_CONSTANTS, nlmax)
+    zs,Rv, PROBLEM_CONSTANTS, nlmax, angleDropMP)
 
 if nl < 0 || nl > nlmax
     etaprob = 0;
@@ -12,7 +12,7 @@ else
     We = PROBLEM_CONSTANTS.We; Delta = PROBLEM_CONSTANTS.Delta;
     Re = PROBLEM_CONSTANTS.Re; DTN = PROBLEM_CONSTANTS.DTN;
     nr = PROBLEM_CONSTANTS.nr; IntMat = PROBLEM_CONSTANTS.IntMat(max(nl, 1), :);
-    angleDropMP = PROBLEM_CONSTANTS.angleDropMP; Cang = PROBLEM_CONSTANTS.Cang;
+    Cang = PROBLEM_CONSTANTS.Cang;
     WeSB = PROBLEM_CONSTANTS.WeSB; Ma = PROBLEM_CONSTANTS.Ma;
     dr = PROBLEM_CONSTANTS.dr; Fr = PROBLEM_CONSTANTS.Fr;
 

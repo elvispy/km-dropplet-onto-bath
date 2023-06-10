@@ -3,8 +3,13 @@
 close all;
 p = uigetdir();
 cd(p);
-load('U0.mat')
-load('Ang.mat'); Cang = Ang * pi / 180;
+try
+    load('U0.mat');
+    load('Ang.mat'); Cang = Ang * pi / 180;
+    load('Fr.mat');
+catch
+    load('ProblemConditions.mat');
+end
 load('vz.mat'); Vo = abs(vz(1));
 files = dir(fullfile(pwd, "etaMatPer*.mat"));
 N = length(files);
@@ -17,7 +22,7 @@ etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
-load('Fr.mat')
+
 load('oscillation_amplitudes.mat');
 Rv = zeros(1, size(oscillation_amplitudes, 2));
 for ii = 1:size(oscillation_amplitudes, 2)
@@ -108,7 +113,7 @@ Gamma = 0; %%
 wzero = 1; %%
 thetaZero = 0; %%
 zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
-zbplot=zb(1:end-1);
+zbplot=zb; %(1:end-1);
 
 for ii = floor(linspace(1, size(etaMatPer,2), 300))
 

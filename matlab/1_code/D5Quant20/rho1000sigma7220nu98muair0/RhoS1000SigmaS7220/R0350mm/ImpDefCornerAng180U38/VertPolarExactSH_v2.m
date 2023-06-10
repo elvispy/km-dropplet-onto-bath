@@ -1,9 +1,7 @@
-nclose all
+close all
 
 tstart = tic;
 tic
-
-
 
 if exist('oscillation_amplitudes.mat', 'file') == 2
    % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
@@ -52,7 +50,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 30; % Number of harmonics contributing to the oscillation
+N = 10; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
@@ -78,7 +76,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 400; %minimum number of timesteps in one unit of time
+nsteps = 100; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
@@ -119,29 +117,29 @@ z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi
 % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
 vz(1) = -1; %Initial velocity of the CoM in dimesionless units
 
-% current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
-%     "deformation_velocities", amplitudes_velocities_old, ...
-%     "pressure_amplitudes", B_l_ps_old, "dt", dt, "nb_harmonics", N,  ...
-%     "current_time", 0, ...
-%     "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
-%     "nb_contact_points", 0);
-% 
-% previous_conditions = {current_conditions, current_conditions}; 
-% 
-% f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
-% previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
-% previous_conditions{1}.center_of_mass_velocity = ...
-%     previous_conditions{2}.center_of_mass_velocity + dt/Fr;
-% previous_conditions{1}.center_of_mass = ...
-%     previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
-% 
-% g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
-%     + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
-% 
-% for idx = 1:N
-%     previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
-%     previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
-% end
+current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
+    "deformation_velocities", amplitudes_velocities_old, ...
+    "pressure_amplitudes", B_l_ps_old, "dt", dt, "nb_harmonics", N,  ...
+    "current_time", 0, ...
+    "center_of_mass", z(1), "center_of_mass_velocity", vz(1), ...
+    "nb_contact_points", 0);
+
+previous_conditions = {current_conditions, current_conditions}; 
+
+f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
+previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
+previous_conditions{1}.center_of_mass_velocity = ...
+    previous_conditions{2}.center_of_mass_velocity + dt/Fr;
+previous_conditions{1}.center_of_mass = ...
+    previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
+
+g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
+    + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
+
+for idx = 1:N
+    previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
+    previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
+end
     
 tentative_index = 0; %iteration counter
 
@@ -168,7 +166,6 @@ zs = zeros(nr,1);
 jj1 = 1; %partial results savings  counter
 
 PROBLEM_CONSTANTS = struct("We", We, "Ma", Ma, ...
-    "angleDropMP", angleDropMP, ...
     "Cang", Cang, "WeSB", WeSB, "Delta", Delta, ...
     "IntMat", IntMat, "nr", nr, "dr", dr, "DTN", DTN, "Fr", Fr, ...
     "froude_nb", Fr, "weber_nb", WeS, ...
@@ -246,7 +243,7 @@ while tentative_index <= steps && t < tend && exit == false
 
         [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(tentative_index),3),errortan(3,tentative_index+1)] = ...
             getNextStep(numl(tentative_index),numl(tentative_index),dt,z(tentative_index),vz(tentative_index),etao,phio, ...
-            zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent);        
+            zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent, angleDropMP);        
 %         getNextStep(numl(tentative_index),numl(tentative_index),dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
 %                     We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,WeSB,RvTent);
         if abs(errortan(3, tentative_index+1)) < 1e-5
@@ -259,17 +256,17 @@ while tentative_index <= steps && t < tend && exit == false
         else
             [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:(numl(tentative_index)+1),4),errortan(4,tentative_index+1)] = ...
                  getNextStep(numl(tentative_index),numl(tentative_index) + 1,dt,z(tentative_index),vz(tentative_index),etao,phio, ...
-                    zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
+                    zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent, angleDropMP); 
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:(numl(tentative_index)-1),2),errortan(2,tentative_index+1)] = ...
                    getNextStep(numl(tentative_index),numl(tentative_index) - 1,dt,z(tentative_index),vz(tentative_index),etao,phio, ...
-                        zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
+                        zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent, angleDropMP); 
             if (abs(errortan(3, tentative_index+1)) > abs(errortan(4, tentative_index+1)) || ...
                     abs(errortan(3, tentative_index+1)) > abs(errortan(2, tentative_index+1)))
                 if abs(errortan(4, tentative_index+1)) <= abs(errortan(2, tentative_index+1))
                     %Now lets check with one more point to be sure
                     [~,~,~,~,~,errortan(5,tentative_index+1)] = ...
                         getNextStep(numl(tentative_index),numl(tentative_index) + 2,dt,z(tentative_index),vz(tentative_index),etao,phio, ...
-                            zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
+                            zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent, angleDropMP); 
 
                     if abs(errortan(4)) < abs(errortan(5))
                         %Accept new data
@@ -291,7 +288,7 @@ while tentative_index <= steps && t < tend && exit == false
                     %less
                     [~,~,~,~,~,errortan(1,tentative_index+1)] = ...
                         getNextStep(numl(tentative_index),numl(tentative_index) - 2,dt,z(tentative_index), ...
-                            vz(tentative_index),etao,phio, zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent); 
+                            vz(tentative_index),etao,phio, zs,RvTent, PROBLEM_CONSTANTS, nlmaxTent, angleDropMP); 
                     if abs(errortan(2, tentative_index+1)) < abs(errortan(1, tentative_index+1))
                         %Accept new data
                         numlTent = numl(tentative_index) + 1;
@@ -329,6 +326,7 @@ while tentative_index <= steps && t < tend && exit == false
             % % tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
             tentative_index = tentative_index-1;
             reduc = 1;
+            disp("did it");
         end
         
 
@@ -352,7 +350,8 @@ while tentative_index <= steps && t < tend && exit == false
                 endpoints = [thetaVec(nb_contact_points+1), thetaVec(1)];
                 B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);   
             end
-             
+            %tentative_new_conditions = previous_conditions;
+            %tentative_new_conditions{2}.pressure_amplitudes = B_l_ps_new;
             [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
                 previous_conditions, PROBLEM_CONSTANTS);
                         
@@ -376,6 +375,13 @@ while tentative_index <= steps && t < tend && exit == false
                     resetter = resetter - 1;
                 end
 
+                current_conditions = struct("deformation_amplitudes", amplitudes_new, ...
+                    "deformation_velocities", velocities_new, ...
+                    "pressure_amplitudes", B_l_ps_new, "dt", dt, "nb_harmonics", N,  ...
+                    "current_time", t, ...
+                    "center_of_mass", zTent, "center_of_mass_velocity", vzTent, ...
+                    "nb_contact_points", numlTent);
+                previous_conditions = {previous_conditions{2}, current_conditions};
                 numl(tentative_index+1) = numlTent;
                 eta_accepted = etaTent;
                 phi_accepted = phiTent;
@@ -485,7 +491,7 @@ while tentative_index <= steps && t < tend && exit == false
         else
             dt = dt/2; time_index = 2 * time_index;
             save_index = save_index + 1;
-            if 1/(dt * nsteps) >= 2^12
+            if dt <= 1e-12
                 warning("Step size has been made too small (%.5e). Stopped the execution of the program", dt);
                 t = inf;
             end
@@ -519,7 +525,7 @@ phiMatPer = phiMatPer(:, indexes_to_save); save('phiMatPer.mat','phiMatPer')
 psMatPer = psMatPer(:, indexes_to_save); save('psMatPer.mat','psMatPer')
 
 vz = vz(indexes_to_save); save('vz.mat','vz');
-save('tvec.mat','tvec'); % TODO Revise this
+save('tvec.mat','tvec'); 
 nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
 numl = numl(indexes_to_save); save('numl.mat','numl');
 errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
