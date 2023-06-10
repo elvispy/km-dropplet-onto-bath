@@ -6,8 +6,8 @@
 % STEP 1: Define which simulations are to be run. 
 
 
-D = 5;
-Quant = 20;
+D = 25;
+Quant = 100;
 
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
@@ -17,8 +17,8 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = 25.96; %linspace(26, 6, 5)';
-modes = 25;
+U = linspace(58, 8, 5)';
+modes = 20;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx] = ...
@@ -90,8 +90,13 @@ for ii = 1:height(simulations_cgs)
         for file = aux_files
             copyfile(fullfile(safe_folder, file), pwd)    
         end
-    
-        VertPolarExactSH;
+        
+        try
+            VertPolarExactSH;
+        catch ME
+            fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
+                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
+        end
     end
     
 
