@@ -701,8 +701,8 @@ while (t<tend) %#-- || jj1>.5)
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
         else
-            if dt < 1e-12
-                warning("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
+            if dt < 1e-15
+                error("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
                 t = inf;
             end
         end
@@ -752,36 +752,36 @@ end
 % runNumber = runNumber+1;
 tstop = t;
 
+if t < inf
+    indexes_to_save = indexes_to_save(1:(current_to_save-1));
+    z = z(indexes_to_save); save('z.mat','z')
+    etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
+    etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
+    etaMatPer = etaMatPer(:,  1:(current_to_save-1)); save('etaMatPer.mat', 'etaMatPer');
+    phiMatPer = phiMatPer(:,  1:(current_to_save-1)); save('phiMatPer.mat','phiMatPer');
+    psMatPer  = psMatPer{1:(current_to_save-1)};  save('psMatPer.mat','psMatPer');
 
-indexes_to_save = indexes_to_save(1:(current_to_save-1));
-z = z(indexes_to_save); save('z.mat','z')
-etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
-etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
-etaMatPer = etaMatPer(:,  1:(current_to_save-1)); save('etaMatPer.mat', 'etaMatPer');
-phiMatPer = phiMatPer(:,  1:(current_to_save-1)); save('phiMatPer.mat','phiMatPer');
-psMatPer  = psMatPer{1:(current_to_save-1)};  save('psMatPer.mat','psMatPer');
+    vz = vz(indexes_to_save); save('vz.mat','vz');
+    tvecOri = tvecOri(1:(current_to_save-1)); tvec = tvecOri; save('tvec.mat','tvec'); 
+    nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
+    numl = numl(indexes_to_save); save('numl.mat','numl');
+    % errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
+    oscillation_amplitudes = oscillation_amplitudes(:, indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
 
-vz = vz(indexes_to_save); save('vz.mat','vz');
-tvecOri = tvecOri(1:(current_to_save-1)); tvec = tvecOri; save('tvec.mat','tvec'); 
-nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
-numl = numl(indexes_to_save); save('numl.mat','numl');
-% errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
-oscillation_amplitudes = oscillation_amplitudes(:, indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
-
-% 
-% save('etaOri.mat','etaOri')
-% save('z.mat','z')
-% 
-% save('vz.mat','vz')
-% save('tvec.mat','tvec');
-% save('nlmax.mat','nlmax');
-% save('numl.mat','numl');
-% save('errortan.mat','errortan');
-% save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-% save('Rv.mat', 'Rv');
-% 
-
+    % 
+    % save('etaOri.mat','etaOri')
+    % save('z.mat','z')
+    % 
+    % save('vz.mat','vz')
+    % save('tvec.mat','tvec');
+    % save('nlmax.mat','nlmax');
+    % save('numl.mat','numl');
+    % save('errortan.mat','errortan');
+    % save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    % save('Rv.mat', 'Rv');
+    % 
+end
 % 
 % function [amplitudes_tent, amplitudes_velocities_tent] = solve_EDO(N, dt, Ra,...
 %     omegas_frequencies, B_l_ps_old, B_l_ps_tent, ODE_inverse_matrices, ODE_matrices, amplitudes_old, amplitudes_velocities_old)
