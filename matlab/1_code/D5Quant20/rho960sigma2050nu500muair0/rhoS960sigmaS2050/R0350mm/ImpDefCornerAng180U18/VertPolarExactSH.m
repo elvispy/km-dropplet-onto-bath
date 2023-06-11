@@ -14,7 +14,7 @@ if exist('z.mat', 'file') == 2
 end
 
 
-U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+U0 = 18; %impact velocity in cm/s (unit of velocity for the problem)
 Ang = 180; %contact angle to be imposed
 
 cd ..
@@ -56,7 +56,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 30; % Number of harmonics contributing to the oscillation
+N = 25; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time

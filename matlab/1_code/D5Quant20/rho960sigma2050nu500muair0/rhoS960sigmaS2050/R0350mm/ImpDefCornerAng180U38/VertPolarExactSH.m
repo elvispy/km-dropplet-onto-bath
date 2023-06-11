@@ -56,7 +56,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 30; % Number of harmonics contributing to the oscillation
+N = 20; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
@@ -80,7 +80,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 250; %minimum number of timesteps in one unit of time
+nsteps = 100; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
@@ -220,6 +220,9 @@ while (t<tend) %#-- || jj1>.5)
         nb_contact_points = nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
         %needs to be integrated against SH modes
         
+        %f = @(thetas) interp1(thetaVec(1:(nb_contact_points+1)), [psTent(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+        %endpoints = [thetaVec(nb_contact_points+1), thetaVec(1)]; %TODO: Check integration ends
+        
         % Defining where the pressure distribution will be
         % projected
         if nb_contact_points == length(thetaVec)
@@ -229,7 +232,8 @@ while (t<tend) %#-- || jj1>.5)
         end
         f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
         endpoints = [angles(end), angles(1)];
-        B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
+        
+        B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
   
     end    
 
@@ -243,7 +247,7 @@ while (t<tend) %#-- || jj1>.5)
     thetaVec  = theta_from_cylindrical(dr*(0:(nlmaxTent-1)), oscillation_amplitudes(:, tentative_index)); % zeros(1,nlmaxTent);
 
     RvTent = zs_from_spherical(pi, amplitudes_tent);
-    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent; %TODO: Check that matrix dimensions agree.
+    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent; 
     zs((nlmaxTent+1):nr) = Inf;
     
     tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, amplitudes_tent)';
@@ -573,7 +577,6 @@ while (t<tend) %#-- || jj1>.5)
                 nb_contact_points = nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
                 %against each harmonic 
                 
-
                 % Defining where the pressure distribution will be
                 % projected
                 if nb_contact_points == length(thetaVec)
@@ -583,7 +586,7 @@ while (t<tend) %#-- || jj1>.5)
                 end
                 f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
                 endpoints = [angles(end), angles(1)];
-                B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);  
+                B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);   
             end
            
             [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
