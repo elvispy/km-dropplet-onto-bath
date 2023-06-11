@@ -91,13 +91,13 @@ for ii = 1:height(simulations_cgs)
             copyfile(fullfile(safe_folder, file), pwd)    
         end
         
-        %try
+        try
             VertPolarExactSH;
-        %catch ME
-        %    disp(ME);
-        %    fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
-        %        simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
-        %end
+        catch ME
+            disp(ME);
+            fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
+                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
+        end
     end
     
 
