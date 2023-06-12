@@ -28,6 +28,7 @@ Manifest.toml
 # For matlab
 *.mat
 !DTN*.mat
+!sweeping_post*.mat
 **/*.asv
 
 # Julia files
