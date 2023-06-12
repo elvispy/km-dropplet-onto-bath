@@ -17,7 +17,7 @@ RhoS = 0.96; % must multiply by x1000
 SigmaS = 20.50; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = [2, 5, 10, 15, 20, 25, 30];
+U = [2, 5, 10, 15, 20, 25, 30]'; % Has to be column vector
 modes = 25;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
