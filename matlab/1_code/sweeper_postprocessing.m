@@ -9,8 +9,15 @@ for ii = 1:length(files_folder)
     
     % Check if etaOri exists (the center of the bath)
     if isempty(dir("oscillation*.mat")) == false
-        load('U0.mat');
-        load('vz.mat'); Vo = abs(vz(1));
+        
+        try
+            load('U0.mat');
+        
+        catch
+            load("ProblemConditions.mat");
+        end
+        load('vz.mat'); 
+        Vo = abs(vz(1));
         if exist('etas.m', 'file')
             load('etas.m');
         else
