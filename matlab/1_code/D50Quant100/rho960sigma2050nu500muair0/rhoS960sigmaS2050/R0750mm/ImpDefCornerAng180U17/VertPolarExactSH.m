@@ -14,7 +14,7 @@ if exist('z.mat', 'file') == 2
 end
 
 
-U0 = 2; %impact velocity in cm/s (unit of velocity for the problem)
+U0 = 17; %impact velocity in cm/s (unit of velocity for the problem)
 Ang = 180; %contact angle to be imposed
 
 cd ..
@@ -61,7 +61,6 @@ N = 25; % Number of harmonics contributing to the oscillation
 
 %Unit of time
 T = Ro/U0; %base time is seconds
-T = 2 * pi * sqrt(rhoS * Ro^3/(sigmaS * 6));
 
 %Dimensionless numbers that depend on U0
 Re = Ro*U0/nu; 

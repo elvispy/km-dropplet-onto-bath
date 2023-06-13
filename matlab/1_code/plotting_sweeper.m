@@ -1,9 +1,10 @@
 % This script will plot a number of variables relating such as coefficient
 % of restitution, contact time and max deflection.
 
-%D = 5;
+
 clear data;
-% data.Quant = [100, 200];
+%dta.D = 5;
+%data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
 %data.nu = 9.78E-3; % Multiply by x10000
