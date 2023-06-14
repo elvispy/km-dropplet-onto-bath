@@ -60,12 +60,13 @@ N = 30; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
-T = Ro/U0; %base time is seconds
+% T = Ro/U0; %base time is seconds
+T = sqrt(rho * Ro^3/sigma);
 
 %Dimensionless numbers that depend on U0
-Re = Ro*U0/nu; 
-Fr = U0^2/(g*Ro); 
-We = rho*Ro*U0^2/sigma; 
+Re = Ro^2/(nu * T); % Ro*U0/nu; 
+Fr = sigma/(g * rho * Ro^2);% U0^2/(g*Ro); 
+We = 1; % rho*Ro*U0^2/sigma; 
 WeSB = rhoS*Ro*U0^2/sigma;
 WeS  = rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
 %bath at least in one place
@@ -133,7 +134,7 @@ current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
 
 previous_conditions = {current_conditions, current_conditions}; 
 
-f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
+% f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
 previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
 previous_conditions{1}.center_of_mass_velocity = ...
     previous_conditions{2}.center_of_mass_velocity + dt/Fr;
