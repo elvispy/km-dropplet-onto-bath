@@ -60,14 +60,16 @@ N = 30; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
-T = Ro/U0; %base time is seconds
+% T = Ro/U0; %base time is seconds
+T = sqrt(rhoS * Ro^3/sigmaS);
 
 %Dimensionless numbers that depend on U0
-Re = Ro*U0/nu; 
-Fr = U0^2/(g*Ro); 
-We = rho*Ro*U0^2/sigma; 
-WeSB = rhoS*Ro*U0^2/sigma;
-WeS  = rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
+Dr = rhoS/rho; Sr = sigmaS/sigma;
+Re = Ro^2/(nu * T); % Ro*U0/nu; 
+Fr = sigma/(g * rho * Ro^2);% U0^2/(g*Ro); 
+We = Sr * rhoS * Ro.^3 / (sigmaS * T^2); % rho*Ro*U0^2/sigma; 
+WeSB = We; %rhoS*Ro*U0^2/sigma;
+WeS  = We;%rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
 %bath at least in one place
 Cang = (Ang/180)*pi; %contact angle to be imposed
 
@@ -80,7 +82,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 250; %minimum number of timesteps in one unit of time
+nsteps = 100; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
@@ -108,7 +110,7 @@ save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 
 %Drop oscillation frequencies
 % #--- 
-f = @(n) sqrt(n.*(n+2).*(n-1)./WeS);
+f = @(n) sqrt(n.*(n+2).*(n-1)./1); % Changed frequency
 omegas_frequencies = f(1:N)';
 
 % #---oscillation_amplitudes = zeros(N, steps + 1);
@@ -133,7 +135,7 @@ current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
 
 previous_conditions = {current_conditions, current_conditions}; 
 
-f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
+% f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
 previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
 previous_conditions{1}.center_of_mass_velocity = ...
     previous_conditions{2}.center_of_mass_velocity + dt/Fr;
@@ -174,8 +176,9 @@ zs = zeros(nr,1);
 
 jj1 = 1; %partial results savings  counter
 
-PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", WeS, ...
+PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", We, ...
     "nb_harmonics", N, ...
+    "density_ratio", Dr, ...
     "omegas_frequencies", omegas_frequencies, ...
     "spatial_tol", dr, ...
     "DEBUG_FLAG", true, ...
