@@ -8,7 +8,6 @@ tic
 tmax = 100;
 
 
-
 if exist('z.mat', 'file') == 2
    % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
