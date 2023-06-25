@@ -7,8 +7,14 @@ files_folder = dir("**/etaOri.mat");
 for ii = 1:length(files_folder)
     cd(files_folder(ii).folder);
     
+    while ~isfile("dr.mat")
+        cd ..
+    end
+    load("dr.mat");
+    cd(files_folder(ii).folder);
+    
     % Check if etaOri exists (the center of the bath)
-    if isempty(dir("oscillation*.mat")) == false
+    if isempty(dir("oscillation*.mat")) == false % || true
         
         try
             load('U0.mat');
@@ -50,9 +56,11 @@ for ii = 1:length(files_folder)
         CRref = -Uend/Uo;
         
         max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
-
+        
+        L = diff(etas)/dr;
+        max_gradient = max(abs(L(:)));
         save('simulation_postprocessing.mat', "Uo", "tend", ...
-            "Uend", "max_def", "CRref", "tcont");
+            "Uend", "max_def", "CRref", "tcont", "max_gradient");
 
     end
 end
