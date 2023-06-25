@@ -30,43 +30,46 @@ plotting_data = table(We, Bo, Oh, max_deflection, contact_time, coef_restitution
 
 for ii = 1:length(files)
     
-
-    if length(files) == 1; folder_name = files.folder; else folder_name = files(ii).folder; end
-    cd(folder_name);
     try
-        load("U0.mat");
-        load("T.mat");
-    catch
-        load("ProblemConditions.mat");
-    end
-    cd ..
-    load('Ro.mat','Ro')%Sphere's radius in CGS
-    cd ..
-    %load('rhoS.mat','rhoS')%Sphere density
-    %load('sigmaS.mat')%Sphere's surface tension
-    cd ..
-    load('rho.mat','rho')
-    load('sigma.mat','sigma')
-    load('nu.mat','nu')
-    load('muair.mat')
-    load('g.mat','g') %gravitational constant
-    cd(folder_name);
-    We = rho * U0.^2 * Ro / sigma;
-    Bo = rho * g * Ro.^2 / sigma;
-    Oh = nu / sqrt(sigma * Ro * rho);
-    t_sigma = sqrt(rho * Ro^3/sigma);
-    
-    simul.Ro = Ro; simul.rho = rho; simul.sigma = sigma; simul.U0 = U0;
-    simul.nu = nu; simul.We = We; simul.Bo = Bo; simul.Oh = Oh;
-    simul.folder = folder_name;
+        if length(files) == 1; folder_name = files.folder; else folder_name = files(ii).folder; end
+        cd(folder_name);
+        try
+            load("U0.mat");
+            load("T.mat");
+        catch
+            load("ProblemConditions.mat");
+        end
+        cd ..
+        load('Ro.mat','Ro')%Sphere's radius in CGS
+        cd ..
+        %load('rhoS.mat','rhoS')%Sphere density
+        %load('sigmaS.mat')%Sphere's surface tension
+        cd ..
+        load('rho.mat','rho')
+        load('sigma.mat','sigma')
+        load('nu.mat','nu')
+        load('muair.mat')
+        load('g.mat','g') %gravitational constant
+        cd(folder_name);
+        We = rho * U0.^2 * Ro / sigma;
+        Bo = rho * g * Ro.^2 / sigma;
+        Oh = nu / sqrt(sigma * Ro * rho);
+        t_sigma = sqrt(rho * Ro^3/sigma);
 
-    if is_valid(simul, data)
-        load("simulation_postprocessing.mat");        
-        max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
-        coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
-        contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
+        simul.Ro = Ro; simul.rho = rho; simul.sigma = sigma; simul.U0 = U0;
+        simul.nu = nu; simul.We = We; simul.Bo = Bo; simul.Oh = Oh;
+        simul.folder = folder_name;    
 
-        plotting_data = [plotting_data; {We, Bo, Oh, max_deflection, contact_time, coef_restitution}];
+        if is_valid(simul, data)
+            load("simulation_postprocessing.mat");        
+            max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
+            coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
+            contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
+
+            plotting_data = [plotting_data; {We, Bo, Oh, max_deflection, contact_time, coef_restitution}];
+        end
+    catch ME
+        warning(ME.message);
     end
 
 end
