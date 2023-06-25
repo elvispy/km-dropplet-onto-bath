@@ -14,7 +14,7 @@ for ii = 1:length(files_folder)
     cd(files_folder(ii).folder);
     
     % Check if etaOri exists (the center of the bath)
-    if isempty(dir("oscillation*.mat")) == false  || true
+    if isempty(dir("oscillation*.mat")) == false % || true
         
         try
             load('U0.mat');
