@@ -14,7 +14,7 @@ for ii = 1:length(files_folder)
     cd(files_folder(ii).folder);
     
     % Check if etaOri exists (the center of the bath)
-    if isempty(dir("oscillation*.mat")) == false % || true
+    if isempty(dir("oscillation*.mat")) == false  || true
         
         try
             load('U0.mat');
@@ -59,6 +59,7 @@ for ii = 1:length(files_folder)
         
         L = diff(etas)/dr;
         max_gradient = max(abs(L(:)));
+        if max_gradient > 1; warning("Gradient too big for %s", pwd); end
         save('simulation_postprocessing.mat', "Uo", "tend", ...
             "Uend", "max_def", "CRref", "tcont", "max_gradient");
 
