@@ -148,8 +148,8 @@ for ii = floor(linspace(1, size(etaMatPer,2), 300))
         t1 = 0;
         to = to+1;
     end
-	ti = round(tvec(ii)*100);
-    title(['$   tV_0/R_o =\ $',num2str(floor(ti/100)),'.',num2str(floor(mod(ti,100)/10)),num2str(mod(ti,10))],'FontSize',18,...
+
+    title(sprintf("$ t/t_\\sigma =\\ $ %3.2f", tvec(ii)),'FontSize',18,...
             'interpreter','latex','FontName','Times')    
     drawnow
     currFrame = getframe(gcf);
