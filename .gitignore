@@ -27,7 +27,7 @@ Manifest.toml
 # For matlab
 *.mat
 !DTN*.mat
-!sweeping_post*.mat
+!simul*_post*.mat
 **/*.asv
 *.m~
 
