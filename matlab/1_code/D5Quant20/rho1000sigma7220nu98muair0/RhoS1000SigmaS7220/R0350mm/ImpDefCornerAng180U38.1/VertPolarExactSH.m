@@ -55,7 +55,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 15; % Number of harmonics contributing to the oscillation
+N = 50; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
@@ -81,7 +81,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 150; %minimum number of timesteps in one unit of time
+nsteps = 200; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
