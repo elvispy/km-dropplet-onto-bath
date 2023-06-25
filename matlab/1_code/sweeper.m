@@ -6,7 +6,7 @@
 % STEP 1: Define which simulations are to be run. 
 
 
-D = 25;
+D = 50;
 Quant = 100;
 
 rho = 1; % must multiply by x1000
@@ -17,8 +17,8 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(58, 8, 11)';
-modes = 20;
+U = [8, 13]'; % linspace(58, 8, 11)';
+modes = 25;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx] = ...
@@ -88,15 +88,20 @@ for ii = 1:height(simulations_cgs)
 
     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
         for file = aux_files
-            copyfile(fullfile(safe_folder, file), pwd)    
+            try
+                copyfile(fullfile(safe_folder, file), pwd)    
+            catch ME
+                if simulations_cgs.U(ii) ~= 38
+                   throw("Unexpected error ocurred"); 
+                end
+            end
         end
-        
-        try
-            VertPolarExactSH;
-        catch ME
-            fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
-                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
-        end
+        %try
+        VertPolarExactSH;
+        %catch ME
+         %   fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
+          %      simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
+        %end
     end
     
 
