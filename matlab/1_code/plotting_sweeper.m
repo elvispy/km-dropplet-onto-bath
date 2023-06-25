@@ -3,8 +3,8 @@
 
 
 clear data;
-%dta.D = 5;
-%data.Quant = 100;
+dta.D = 50;
+data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
 %data.nu = 9.78E-3; % Multiply by x10000
