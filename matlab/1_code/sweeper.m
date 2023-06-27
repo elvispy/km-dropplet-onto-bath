@@ -6,8 +6,8 @@
 % STEP 1: Define which simulations are to be run. 
 
 
-D = 50;
-Quant = 100;
+D = 5;
+Quant = 20;
 
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
@@ -82,7 +82,7 @@ root = pwd;
 safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", ...
     "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
-for ii = 1:height(simulations_cgs)
+parfor ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(simulations_cgs.folder(ii));
 
@@ -97,7 +97,7 @@ for ii = 1:height(simulations_cgs)
             end
         end
         %try
-        VertPolarExactSH;
+        callVertPolarExactSH();
         %catch ME
          %   fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
           %      simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
@@ -222,6 +222,10 @@ function final_folder = create_folder_stucture(entry)
     final_folder = pwd;
 
     cd(base);
+end
+
+function callVertPolarExactSH()
+    VertPolarExactSH;
 end
 
 function folder = return_folder(entry)

@@ -55,19 +55,20 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 30; % Number of harmonics contributing to the oscillation
+N = 25; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
 % T = Ro/U0; %base time is seconds
-T = sqrt(rhoS * Ro^3/sigmaS);
+X = Ro; % Characteristic length
+T = sqrt(rhoS * Ro^3/sigmaS); % Characteristic time
 
 %Dimensionless numbers that depend on U0
 Dr = rhoS/rho; Sr = sigmaS/sigma;
 Re = Ro^2/(nu * T); % Ro*U0/nu; 
 Fr = sigma/(g * rho * Ro^2);% U0^2/(g*Ro); 
 We = Sr * rhoS * Ro.^3 / (sigmaS * T^2); % rho*Ro*U0^2/sigma; 
-WeSB = We; %rhoS*Ro*U0^2/sigma;
+%Dr = We; %rhoS*Ro*U0^2/sigma;
 WeS  = We;%rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
 %bath at least in one place
 Cang = (Ang/180)*pi; %contact angle to be imposed
@@ -81,7 +82,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 100; %minimum number of timesteps in one unit of time
+nsteps = 150; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
@@ -105,7 +106,7 @@ nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the d
 tolP = 1E-6; %error tolerance for the pressure field and deformation 
 
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
-"WeSB", "WeS", "Cang", "tend", "nsteps", "dtb" );
+"WeS", "Cang", "tend", "nsteps", "dtb" );
 
 %Drop oscillation frequencies
 % #--- 
@@ -122,7 +123,7 @@ z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi
 
 % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
 % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
-vz(1) = -1; %Initial velocity of the CoM in dimesionless units
+vz(1) = -abs(U0/ (X/T)); %Initial velocity of the CoM in dimesionless units
 
 
 current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
@@ -273,11 +274,11 @@ while (t<tend) %#-- || jj1>.5)
                 co = find(numl(tentative_index:-1:1)~=1,1);
                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1,4),errortan(4,tentative_index+1)] = ...
                     solvenDDCusp(numl(tentative_index-co+1),1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,Dr,RvTent);
                 co = find(numl(tentative_index:-1:1)~=2,1);
                 [~,~,~,~,~,errortan(5,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(4,tentative_index+1)) < abs(errortan(5,tentative_index+1))
                     numlTent = 1;
                     etaTent = etaprob(:,4);
@@ -305,11 +306,11 @@ while (t<tend) %#-- || jj1>.5)
                 co = find(numl(tentative_index:-1:1)~=1,1);
                 [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1,3),errortan(3,tentative_index+1)] = ...                     
                     solvenDDCusp(numl(tentative_index-co+1),1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,Dr,RvTent);
                 co = find(numl(tentative_index:-1:1)~=2,1);
                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:2,4),errortan(4,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(3,tentative_index+1)) < abs(errortan(4,tentative_index+1))
                     numlTent = 1;
                     etaTent = etaprob(:,3);
@@ -321,7 +322,7 @@ while (t<tend) %#-- || jj1>.5)
                     co = find(numl(tentative_index:-1:1)~=3,1);
                     [~,~,~,~,~,errortan(5,tentative_index+1)] = ...
                         solvenDDCusp(numl(tentative_index-co+1),3,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
+                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,Dr,RvTent);
                     if abs(errortan(4,tentative_index+1)) < abs(errortan(5,tentative_index+1))
                         numlTent = 2;
                         etaTent = etaprob(:,4);
@@ -347,11 +348,11 @@ while (t<tend) %#-- || jj1>.5)
                 co = find(numl(tentative_index:-1:1)~=2,1);
                 [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:2,3),errortan(3,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(2,:),angleDropMP,Cang,Dr,RvTent);
                 co = find(numl(tentative_index:-1:1)~=1,1);
                 [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1,2),errortan(2,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(1,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(2,tentative_index+1)) < abs(errortan(3,tentative_index+1))
                     numlTent = 1;
                     etaTent = etaprob(:,2);
@@ -363,7 +364,7 @@ while (t<tend) %#-- || jj1>.5)
                     co = find(numl(tentative_index:-1:1)~=3,1);
                     [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:3,4),errortan(4,tentative_index+1)] = ...    
                         solvenDDCusp(numl(tentative_index-co+1),3,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,WeSB,RvTent);
+                        We,Ma,zs,IntMat(3,:),angleDropMP,Cang,Dr,RvTent);
                     if abs(errortan(3,tentative_index+1)) < abs(errortan(4,tentative_index+1))
                         numlTent = 2;
                         etaTent = etaprob(:,3);
@@ -375,7 +376,7 @@ while (t<tend) %#-- || jj1>.5)
                         co = find(numl(tentative_index:-1:1)~=4,1);
                         [~,~,~,~,~,errortan(5,tentative_index+1)] = ...    
                             solvenDDCusp(numl(tentative_index-co+1),4,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                            We,Ma,zs,IntMat(4,:),angleDropMP,Cang,WeSB,RvTent);
+                            We,Ma,zs,IntMat(4,:),angleDropMP,Cang,Dr,RvTent);
                         if abs(errortan(4,tentative_index+1)) < abs(errortan(5,tentative_index+1))
                             numlTent = 3;
                             etaTent = etaprob(:,4);
@@ -395,16 +396,16 @@ while (t<tend) %#-- || jj1>.5)
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index),1);
             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(tentative_index),3),errortan(3,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index),dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,Dr,RvTent);
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-1,1);
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(tentative_index)-1,2),errortan(2,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,Dr,RvTent);
             if abs(errortan(2,tentative_index+1)) < abs(errortan(3,tentative_index+1))
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-2,1);
                 [~,~,~,~,~,errortan(1,tentative_index+1)] = ...
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(2,tentative_index+1)) < abs(errortan(1,tentative_index+1))
                     numlTent = numl(tentative_index)-1;
                     etaTent = etaprob(:,2);
@@ -421,7 +422,7 @@ while (t<tend) %#-- || jj1>.5)
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)+1,1);
                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(tentative_index)+1,4),errortan(4,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)+1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)+1,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)+1,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(3,tentative_index+1))<abs(errortan(4,tentative_index+1))
                     numlTent = numl(tentative_index);
                     etaTent = etaprob(:,3);
@@ -433,7 +434,7 @@ while (t<tend) %#-- || jj1>.5)
                     co = find(numl(tentative_index:-1:1)~=numl(tentative_index)+2,1);%I think I don't need this and I can just replace the first argument of solven by numl(jj)
                     [~,~,~,~,~,errortan(5,tentative_index+1)] = ...
                         solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)+2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                        We,Ma,zs,IntMat(numl(tentative_index)+2,:),angleDropMP,Cang,WeSB,RvTent);
+                        We,Ma,zs,IntMat(numl(tentative_index)+2,:),angleDropMP,Cang,Dr,RvTent);
                     if abs(errortan(4,tentative_index+1)) < abs(errortan(5,tentative_index+1))
                         numlTent = numl(tentative_index)+1;
                         etaTent = etaprob(:,4);
@@ -452,16 +453,16 @@ while (t<tend) %#-- || jj1>.5)
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index),1);
             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(tentative_index),3),errortan(3,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index),dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,Dr,RvTent);
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-1,1);
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(tentative_index)-1,2),errortan(2,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,Dr,RvTent);
             if abs(errortan(2,tentative_index+1))<abs(errortan(3,tentative_index+1))
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-2,1);
                 [~,~,~,~,~,errortan(1,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(2,tentative_index+1)) < abs(errortan(1,tentative_index+1))
                     numlTent = numl(tentative_index)-1;
                     etaTent = etaprob(:,2);
@@ -478,7 +479,7 @@ while (t<tend) %#-- || jj1>.5)
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)+1,1);
                 [etaprob(:,4),phiprob(:,4),zprob(4),vzprob(4),psprob(1:numl(tentative_index)+1,4),errortan(4,tentative_index+1)] = ...    
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)+1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)+1,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)+1,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(3,tentative_index+1)) < abs(errortan(4,tentative_index+1))
                     numlTent = numl(tentative_index);
                     etaTent = etaprob(:,3);
@@ -499,16 +500,16 @@ while (t<tend) %#-- || jj1>.5)
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index),1);
             [etaprob(:,3),phiprob(:,3),zprob(3),vzprob(3),psprob(1:numl(tentative_index),3),errortan(3,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index),dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index),:),angleDropMP,Cang,Dr,RvTent);
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-1,1);
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(tentative_index)-1,2),errortan(2,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,Dr,RvTent);
             if abs(errortan(2,tentative_index+1)) < abs(errortan(3,tentative_index+1))
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-2,1);
                 [~,~,~,~,~,errortan(1,tentative_index+1)] = ...
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(2,tentative_index+1)) < abs(errortan(1,tentative_index+1))
                     numlTent = numl(tentative_index)-1;
                     etaTent = etaprob(:,2);
@@ -533,12 +534,12 @@ while (t<tend) %#-- || jj1>.5)
             co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-1,1);
             [etaprob(:,2),phiprob(:,2),zprob(2),vzprob(2),psprob(1:numl(tentative_index)-1,2),errortan(2,tentative_index+1)] = ...    
                 solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-1,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,WeSB,RvTent);
+                We,Ma,zs,IntMat(numl(tentative_index)-1,:),angleDropMP,Cang,Dr,RvTent);
             if abs(errortan(2,tentative_index+1)) < 4
                 co = find(numl(tentative_index:-1:1)~=numl(tentative_index)-2,1);
                 [~,~,~,~,~,errortan(1,tentative_index+1)] = ...
                     solvenDDCusp(numl(tentative_index-co+1),numl(tentative_index)-2,dt,z(tentative_index),vz(tentative_index),etao,phio,nr,dr,Re,Delta,DTN,Fr,...
-                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,WeSB,RvTent);
+                    We,Ma,zs,IntMat(numl(tentative_index)-2,:),angleDropMP,Cang,Dr,RvTent);
                 if abs(errortan(2,tentative_index+1)) < abs(errortan(1,tentative_index+1))
                     numlTent = numl(tentative_index)-1;
                     etaTent = etaprob(:,2);

@@ -82,7 +82,7 @@ root = pwd;
 safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", ...
     "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
-for ii = 1:height(simulations_cgs)
+parfor ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(simulations_cgs.folder(ii));
 
@@ -92,7 +92,7 @@ for ii = 1:height(simulations_cgs)
         end
         
         try
-            VertPolarExactSH;
+            callVertPolarExactSH();
         catch ME
             disp(ME);
             fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
@@ -219,6 +219,10 @@ function final_folder = create_folder_stucture(entry)
     final_folder = pwd;
 
     cd(base);
+end
+
+function callVertPolarExactSH()
+    VertPolarExactSH;
 end
 
 function folder = return_folder(entry)
