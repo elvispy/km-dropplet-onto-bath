@@ -13,7 +13,7 @@ if exist('z.mat', 'file') == 2
 end
 
 
-U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+U0 = 58; %impact velocity in cm/s (unit of velocity for the problem)
 Ang = 180; %contact angle to be imposed
 
 cd ..
@@ -106,7 +106,7 @@ nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the d
 tolP = 1E-6; %error tolerance for the pressure field and deformation 
 
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
- "WeS", "Cang", "tend", "nsteps", "dtb" );
+"WeSB", "WeS", "Cang", "tend", "nsteps", "dtb" );
 
 %Drop oscillation frequencies
 % #--- 
