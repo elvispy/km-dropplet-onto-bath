@@ -44,9 +44,9 @@ for ii = 1:length(files_folder)
         
         north = z + 1 + sum(oscillation_amplitudes, 1);
         contact_idx = find(north<=2,1);
-        while north(contact_idx + 1) >=2
-            contact_idx = contact_idx + 1;
-        end
+        %while north(contact_idx + 1) >=2
+        %    contact_idx = contact_idx + 1;
+        %end
         flight_idx = find(north((contact_idx+1):end)>=2,1);
         N = size(oscillation_amplitudes, 1);
         south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^((1:N)')), 1));
