@@ -6,8 +6,8 @@
 % STEP 1: Define which simulations are to be run. 
 
 
-D = 5;
-Quant = 20;
+D = 50;
+Quant = 100;
 
 rho = 1; % must multiply by x1000
 sigma = 72.20; % must multiply by x100
@@ -17,7 +17,7 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = [33, 38, 43, 48, 53, 58]'; % linspace(58, 8, 11)';
+U = [8, 13, 18, 23, 28]'; % linspace(58, 8, 11)';
 modes = 25;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
@@ -82,7 +82,7 @@ root = pwd;
 safe_folder = fullfile(root, "D50Quant100", "rho1000sigma7220nu98muair0", ...
     "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
-parfor ii = 1:height(simulations_cgs)
+for ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(simulations_cgs.folder(ii));
 
@@ -97,7 +97,7 @@ parfor ii = 1:height(simulations_cgs)
             end
         end
         %try
-        callVertPolarExactSH();
+        VertPolarExactSH;
         %catch ME
          %   fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
           %      simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
@@ -222,10 +222,6 @@ function final_folder = create_folder_stucture(entry)
     final_folder = pwd;
 
     cd(base);
-end
-
-function callVertPolarExactSH()
-    VertPolarExactSH;
 end
 
 function folder = return_folder(entry)
