@@ -43,15 +43,15 @@ for ii = 1:length(files_folder)
      
         
         north = z + 1 + sum(oscillation_amplitudes, 1);
-        index1 = find(north<=2,1);
-        index2 = find(north((index1+1):end)>=2,1);
+        contact_idx = find(north<=2,1);
+        flight_idx = find(north((contact_idx+1):end)>=2,1);
         N = size(oscillation_amplitudes, 1);
         south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^((1:N)')), 1));
         
-        tImpact = (tvec(index1)+tvec(index1+1))/2; 
-        Uo = (vz(index1)+vz(index1+1))/2;
-        tend = (tvec(index1+index2-1)+tvec(index1+index2-2))/2;
-        Uend = (vz(index1+index2-1)+vz(index1+index2-2))/2;
+        tImpact = (tvec(contact_idx)+tvec(contact_idx+1))/2; 
+        Uo = (vz(contact_idx)+vz(contact_idx+1))/2;
+        tend = (tvec(contact_idx+flight_idx)+tvec(contact_idx+flight_idx-1))/2;
+        Uend = (vz(contact_idx+flight_idx)+vz(contact_idx+flight_idx-1))/2;
         tcont = tend-tImpact;
         CRref = -Uend/Uo;
         
