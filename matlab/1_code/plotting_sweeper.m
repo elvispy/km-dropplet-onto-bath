@@ -3,8 +3,8 @@
 
 
 clear data;
-dta.D = 50;
-data.Quant = 100;
+data.D = 25;
+%data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
 %data.nu = 9.78E-3; % Multiply by x10000
@@ -144,7 +144,14 @@ function bool = is_valid(simul, data)
                 check = (check || ~isempty(regexp(simul.folder, ...
                 sprintf("Quant%g", folder), 'ONCE')));
             end
+        elseif fieldname == "D"
+            % checking the name of the folder
             
+            check = false;
+            for folder = data.(fieldname)
+                check = (check || ~isempty(regexp(simul.folder, ...
+                sprintf("D%gQuant", folder), 'ONCE')));
+            end
         elseif length(data.(fieldname)) < 2
             % checking that data is roughly equal to value
             check = relerr(data.(fieldname), simul.(fieldname)) < tolerance;

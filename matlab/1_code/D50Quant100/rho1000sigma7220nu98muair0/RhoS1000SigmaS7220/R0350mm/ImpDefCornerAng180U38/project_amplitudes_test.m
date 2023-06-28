@@ -38,6 +38,7 @@ function testLegendrePolynomials(testCase)
     %[handles, ~, ~] = create_function_handle(testCase.TestData.polynomials, {}, {});
     
     actual_value = project_amplitudes(ff, testCase.TestData.N, endpoints, NaN, true);
+    fprintf("Test 1: Time %.3e seconds\n", timeit(@() project_amplitudes(ff, testCase.TestData.N, endpoints, NaN, true)));
     expected_value = [1; zeros(testCase.TestData.N - 1, 1)];
     
     %input = rand(); % Random but deterministic value
