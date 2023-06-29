@@ -106,7 +106,7 @@ nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the d
 tolP = 1E-6; %error tolerance for the pressure field and deformation 
 
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
- "WeS", "Cang", "tend", "nsteps", "dtb" );
+"WeS", "Cang", "tend", "nsteps", "dtb" );
 
 %Drop oscillation frequencies
 % #--- 
@@ -181,8 +181,8 @@ PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", We, ...
     "density_ratio", Dr, ...
     "omegas_frequencies", omegas_frequencies, ...
     "spatial_tol", dr, ...
-    "DEBUG_FLAG", true, ...
-    "Ra", Ra);
+    "DEBUG_FLAG", true, "linear_on_theta", true, ...
+    "Ra", Ra, "interpolation_number", 10);
                             %"pressure_unit", pressure_unit, ...
                             %"CM", 9, ...
                             %"PG", 2, ...
@@ -223,17 +223,33 @@ while (t<tend) %#-- || jj1>.5)
         nb_contact_points = nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
         %needs to be integrated against SH modes
         
-        % Defining where the pressure distribution will be
-        % projected
-        if nb_contact_points == length(thetaVec)
-            angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
+        if PROBLEM_CONSTANTS.linear_on_theta == true
+            if nb_contact_points > 1
+                contactAnle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
+            else
+                contactAngle = (thetaVec(2) + thetaVec(1))/2;
+            end
+            angles = linspace(contactAngle, ...% + (thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))/2
+                        pi, (nb_contact_points +1) * PROBLEM_CONSTANTS.interpolation_number);
+            values = r_from_spherical(angles, oscillation_amplitudes(:, tentative_index));
+            f = @(r) interp1(dr*(0:(nb_contact_points)), ...
+                [psNew(1:nb_contact_points)', 0], r, 'linear',  0);
+            values = f(values);
+            B_l_ps_new = custom_project_amplitudes(angles, values, N, NaN, NaN);
+            
         else
-            angles = thetaVec(1:(nb_contact_points+1));
+            % Linear on theta not assumed
+            % Defining where the pressure distribution will be
+            % projected
+            if nb_contact_points == length(thetaVec)
+                angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
+            else
+                angles = thetaVec(1:(nb_contact_points+1));
+            end
+            f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+            endpoints = [angles(end), angles(1)];
+            B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
         end
-        f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
-        endpoints = [angles(end), angles(1)];
-        B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
-  
     end    
 
     [amplitudes_tent, velocities_tent] = solve_ODE_unkown(nan, B_l_ps_tent, dt, ...
@@ -575,18 +591,32 @@ while (t<tend) %#-- || jj1>.5)
             else
                 nb_contact_points = nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
                 %against each harmonic 
-                
+                if PROBLEM_CONSTANTS.linear_on_theta == true
+                    if nb_contact_points > 1
+                        contactAnle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
+                    else
+                        contactAngle = (thetaVec(2) + thetaVec(1))/2;
+                    end
+                    angles = linspace(contactAngle, ...% + (thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))/2
+                                pi, (nb_contact_points +1) * PROBLEM_CONSTANTS.interpolation_number);
+                    values = r_from_spherical(angles, oscillation_amplitudes(:, tentative_index));
+                    f = @(r) interp1(dr*(0:(nb_contact_points)), ...
+                        [psNew(1:nb_contact_points)', 0], r, 'linear',  0);
+                    values = f(values);
+                    B_l_ps_new = custom_project_amplitudes(angles, values, N, NaN, NaN);
 
-                % Defining where the pressure distribution will be
-                % projected
-                if nb_contact_points == length(thetaVec)
-                    angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
                 else
-                    angles = thetaVec(1:(nb_contact_points+1));
+                    % Defining where the pressure distribution will be
+                    % projected
+                    if nb_contact_points == length(thetaVec)
+                        angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
+                    else
+                        angles = thetaVec(1:(nb_contact_points+1));
+                    end
+                    f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+                    endpoints = [angles(end), angles(1)];
+                    B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
                 end
-                f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
-                endpoints = [angles(end), angles(1)];
-                B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);  
             end
            
             [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
