@@ -55,12 +55,13 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 25; % Number of harmonics contributing to the oscillation
+N = 15; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Unit of time
 % T = Ro/U0; %base time is seconds
-T = sqrt(rhoS * Ro^3/sigmaS);
+X = Ro; % Characteristic length
+T = sqrt(rhoS * Ro^3/sigmaS); % Characteristic time
 
 %Dimensionless numbers that depend on U0
 Dr = rhoS/rho; Sr = sigmaS/sigma;
@@ -105,7 +106,7 @@ nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the d
 tolP = 1E-6; %error tolerance for the pressure field and deformation 
 
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
-"WeSB", "WeS", "Cang", "tend", "nsteps", "dtb" );
+ "WeS", "Cang", "tend", "nsteps", "dtb" );
 
 %Drop oscillation frequencies
 % #--- 
@@ -122,7 +123,7 @@ z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi
 
 % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
 % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
-vz(1) = -1; %Initial velocity of the CoM in dimesionless units
+vz(1) = -abs(U0/ (X/T)); %Initial velocity of the CoM in dimesionless units
 
 
 current_conditions = struct("deformation_amplitudes", amplitudes_old, ...

@@ -18,7 +18,7 @@ SigmaS = 20.50; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
 U = [2, 5, 10, 15, 20, 25, 30]'; % Has to be column vector
-modes = 25;
+modes = 15;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx] = ...
