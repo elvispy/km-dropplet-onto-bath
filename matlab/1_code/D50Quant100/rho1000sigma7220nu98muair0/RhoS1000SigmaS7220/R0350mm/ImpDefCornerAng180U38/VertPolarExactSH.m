@@ -82,7 +82,7 @@ etao = zeros(nr,1); %initial surface elevation
 phio = zeros(nr,1); %initial surface potential
 
 %Numerical Simulation parameters
-nsteps = 150; %minimum number of timesteps in one unit of time
+nsteps = 100; %minimum number of timesteps in one unit of time
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
 steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
