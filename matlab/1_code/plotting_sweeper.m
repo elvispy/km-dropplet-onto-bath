@@ -4,7 +4,7 @@
 
 clear data;
 data.D = 25;
-%data.Quant = 100;
+data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
 %data.nu = 9.78E-3; % Multiply by x10000
@@ -61,6 +61,10 @@ for ii = 1:length(files)
         simul.folder = folder_name;    
 
         if is_valid(simul, data)
+            load('oscillation_amplitudes.mat');
+            if norm(oscillation_amplitudes) < 0.01
+                continue
+            end
             load("simulation_postprocessing.mat");        
             max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
             coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
