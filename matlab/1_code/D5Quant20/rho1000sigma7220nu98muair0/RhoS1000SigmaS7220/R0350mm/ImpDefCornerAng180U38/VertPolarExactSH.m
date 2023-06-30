@@ -225,7 +225,7 @@ while (t<tend) %#-- || jj1>.5)
         
         if PROBLEM_CONSTANTS.linear_on_theta == true
             if nb_contact_points > 1
-                contactAnle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
+                contactAngle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
             else
                 contactAngle = (thetaVec(2) + thetaVec(1))/2;
             end
@@ -233,9 +233,9 @@ while (t<tend) %#-- || jj1>.5)
                         pi, (nb_contact_points +1) * PROBLEM_CONSTANTS.interpolation_number);
             values = r_from_spherical(angles, oscillation_amplitudes(:, tentative_index));
             f = @(r) interp1(dr*(0:(nb_contact_points)), ...
-                [psNew(1:nb_contact_points)', 0], r, 'linear',  0);
+                [psTent(1:nb_contact_points)', 0], r, 'linear',  0);
             values = f(values);
-            B_l_ps_new = custom_project_amplitudes(angles, values, N, NaN, NaN);
+            B_l_ps_tent = custom_project_amplitudes(angles, values, N, NaN, NaN);
             
         else
             % Linear on theta not assumed
@@ -246,9 +246,9 @@ while (t<tend) %#-- || jj1>.5)
             else
                 angles = thetaVec(1:(nb_contact_points+1));
             end
-            f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
+            f = @(thetas) interp1(angles, [psTent(1:nb_contact_points)', 0], thetas, 'linear',  0); 
             endpoints = [angles(end), angles(1)];
-            B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
+            B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
         end
     end    
 
@@ -593,7 +593,7 @@ while (t<tend) %#-- || jj1>.5)
                 %against each harmonic 
                 if PROBLEM_CONSTANTS.linear_on_theta == true
                     if nb_contact_points > 1
-                        contactAnle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
+                        contactAngle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
                     else
                         contactAngle = (thetaVec(2) + thetaVec(1))/2;
                     end
@@ -753,49 +753,9 @@ while (t<tend) %#-- || jj1>.5)
                 error("Step size has been made too small (%.3e). Stopped the execution of the program", dt);
                 
             end
-        end
-    end
-    
-
-%     tComp = toc(tstart);
-%     if jj1==0 && tComp > tmax %#---
-%         runNumber = runNumber+1;
-%         save('runNumber.mat','runNumber')
-%         tstop = t;
-%         save(['tstop',num2str(runNumber),'.mat'],'tstop')
-%         jjstop = tentative_index;
-%         save(['jjstop',num2str(runNumber),'.mat'],'jjstop')
-%         save(['etao',num2str(runNumber),'.mat'],'etao')
-%         save(['phio',num2str(runNumber),'.mat'],'phio')
-%         save(['pso',num2str(runNumber),'.mat'],'pso')
-% 
-%         zrestart = z(tentative_index+1);
-%         vzrestart = vz(tentative_index+1);
-%         trestart = tvec(tentative_index+1);
-%         numlrestart = numl(tentative_index+1);
-%         save(['zrestart',num2str(runNumber),'.mat'],'zrestart')
-%         save(['vzrestart',num2str(runNumber),'.mat'],'vzrestart')
-%         save(['trestart',num2str(runNumber),'.mat'],'trestart')
-%         save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
-% 
-%         save('etaOri.mat','etaOri')
-%         %-%-save('A2.mat','A2')
-%         %-%-save('V2.mat','V2')
-%         %-%-save('A3.mat','A3')
-%         %-%-save('V3.mat','V3')
-%         save('z.mat','z')
-%         save('vz.mat','vz')
-%         save('tvec.mat','tvec')
-%         save('numl.mat','numl')
-%         save('nlmax.mat','nlmax')
-%         save('errortan.mat','errortan')
-%         if runNumber == 1
-%             save('tiempoComp.mat','tiempoComp')
-%         end
-%         
-%         %exit
-%     end
-end
+        end %it time step was not reduced
+    end % inner while   
+end % Outer while
 
 % runNumber = runNumber+1;
 tstop = t;
