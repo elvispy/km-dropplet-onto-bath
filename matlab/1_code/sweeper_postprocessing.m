@@ -36,12 +36,13 @@ for ii = 1:length(files_folder)
             end
             etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
         end
+        load("numl.mat");
         load('z.mat')
         load('etaOri.mat')
         load('tvec.mat')
         load('oscillation_amplitudes.mat');
      
-        
+        % North Based parameters
         north = z + 1 + sum(oscillation_amplitudes, 1);
         contact_idx = find(north<=2,1);
         %while north(contact_idx + 1) >=2
@@ -60,11 +61,28 @@ for ii = 1:length(files_folder)
         
         max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
         
+        % Center-of-mass based parameters
+        nnew = diff(numl);
+        liftoff = [nnew, NaN] == numl;
+        contact = [NaN, nnew] == -numl;
+        idx_impact_theory = find(contact, 1);
+        idx_end_theory    = find(liftoff, 1);
+        Uo_theory = vz(idx_impact_theory);
+        Uend_theory = vz(idx_end_theory);
+        t_cont_theory = tvec(idx_end_theory) - tvec(idx_impact_theory);
+        contact_times = tvec(idx_impact_theory);
+        liftoff_times = tvec(idx_end_theory);
+        if len(liftoff_times) > 1; fprintf("Second bounce found for %s", pwd); end
+        CR_theory = -Uend_theory/Uo_theory;
+        
+        
         L = diff(etas)/dr;
         max_gradient = max(abs(L(:)));
         if max_gradient > 1; warning("Gradient too big for %s", pwd); end
         save('simulation_postprocessing.mat', "Uo", "tend", ...
-            "Uend", "max_def", "CRref", "tcont", "max_gradient");
+            "Uend", "max_def", "CRref", "tcont", "max_gradient", "Uo_theory", ...
+            'Uend_theory', 't_cont_theory', 'contact_times', 'liftoff_times', ...
+            'CR_theory');
 
     end
 end
