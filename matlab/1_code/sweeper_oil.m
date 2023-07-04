@@ -6,7 +6,7 @@
 % STEP 1: Define which simulations are to be run. 
 
 
-D = 50;
+D = 25;
 Quant = 100;
 
 rho = 0.96; % must multiply by x1000
@@ -17,7 +17,7 @@ RhoS = 0.96; % must multiply by x1000
 SigmaS = 20.50; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = [2, 5, 10, 15, 20, 25, 30]'; % Has to be column vector
+U = [5, 10, 15, 20, 25, 30]'; % Has to be column vector
 modes = 15;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
