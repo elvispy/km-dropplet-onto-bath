@@ -3,7 +3,7 @@
 
 
 clear data;
-data.D = 50;
+data.D = 25;
 data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
@@ -13,12 +13,12 @@ data.Quant = 100;
 %data.sigma = 72.20; % must multiply by x100
 %data.Ro = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 %Oil
-%data.Bo = 0.056;
-%data.Oh = 0.058;
+data.Bo = 0.056;
+data.Oh = 0.058;
 
 % Water
-data.Bo = 0.017;
-data.Oh = 0.006;
+%data.Bo = 0.017;
+%data.Oh = 0.006;
 %Ang = 180;
 %U = 18; %linspace(28, 50, 5)';
 
@@ -128,7 +128,7 @@ if ~isempty(plotting_data)
         b = openfig(figname);
         b = b.Children;
         
-        scatter(b(1), plotting_data.We,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',4);
+        scatter(b(1), plotpting_data.We,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(2), plotting_data.We,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(3), plotting_data.We,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
     end
