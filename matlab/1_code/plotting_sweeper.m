@@ -88,7 +88,7 @@ if ~isempty(plotting_data)
     
         % Coef of Restitution
         figure(1);
-        coef_res = scatter(plotting_data.We,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        coef_res = scatter(plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
         set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
@@ -99,7 +99,7 @@ if ~isempty(plotting_data)
 
         % Maximum deflection
         figure(2);
-        max_def = scatter(plotting_data.We,plotting_data.max_deflection,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        max_def = scatter(plotting_data.Westar,plotting_data.max_deflection,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
         set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
@@ -110,7 +110,7 @@ if ~isempty(plotting_data)
 
         % ontact time
         figure(3);
-        contact_time = scatter(plotting_data.We,plotting_data.contact_time,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        contact_time = scatter(plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
         set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
@@ -128,9 +128,9 @@ if ~isempty(plotting_data)
         b = openfig(figname);
         b = b.Children;
         
-        scatter(b(1), plotting_data.We,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',4);
-        scatter(b(2), plotting_data.We,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
-        scatter(b(3), plotting_data.We,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        scatter(b(1), plotting_data.Westar,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',4);
+        scatter(b(2), plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
+        scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
     end
 else
     warning("Couldn't find any simulations with the specified parameters");
