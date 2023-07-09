@@ -1,5 +1,6 @@
 close all;
-p = pwd;
+p = uigetdir();
+cd(p);
 
 try
     load('U0.mat');
@@ -19,7 +20,7 @@ load('numl.mat','numl');
 %     load(files(i).name);
 %     etaAux = [etaAux, etaMatPer];
 % end
-loas('etas.mat');
+load('etas.mat');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
