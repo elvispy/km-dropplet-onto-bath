@@ -132,7 +132,14 @@ if ~isempty(plotting_data)
         scatter(b(1), plotting_data.Westar,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(2), plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
-
+        
+        f_maxdef = figure(2);
+        copyobject(b(1), f_maxdef);
+        f_contact = figure(3);
+        copyobject(b(2), f_contact);
+        f_CR = figure(4);
+        copyobject(b(3), f_CR);
+        
     end
 else
     warning("Couldn't find any simulations with the specified parameters");
