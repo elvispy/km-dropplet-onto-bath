@@ -3,7 +3,7 @@
 
 
 clear data;
-data.D = 25;
+data.D = 50;
 data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
@@ -24,13 +24,13 @@ data.Oh = 0.006;
 
 files = dir("**/simulation_postprocessing.mat");
 currfol = pwd;
-We = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
+Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
 coef_restitution = [];
-plotting_data = table(We, Bo, Oh, max_deflection, contact_time, coef_restitution);
+plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution);
 
 for ii = 1:length(files)
     
-    try
+    try 
         if length(files) == 1; folder_name = files.folder; else folder_name = files(ii).folder; end
         cd(folder_name);
         try
@@ -51,13 +51,13 @@ for ii = 1:length(files)
         load('muair.mat')
         load('g.mat','g') %gravitational constant
         cd(folder_name);
-        We = rho * U0.^2 * Ro / sigma;
+        Westar = rho * U0.^2 * Ro / sigma;
         Bo = rho * g * Ro.^2 / sigma;
         Oh = nu / sqrt(sigma * Ro * rho);
         t_sigma = sqrt(rho * Ro^3/sigma);
 
         simul.Ro = Ro; simul.rho = rho; simul.sigma = sigma; simul.U0 = U0;
-        simul.nu = nu; simul.We = We; simul.Bo = Bo; simul.Oh = Oh;
+        simul.nu = nu; simul.We = Westar; simul.Bo = Bo; simul.Oh = Oh;
         simul.folder = folder_name;    
 
         if is_valid(simul, data)
@@ -70,7 +70,7 @@ for ii = 1:length(files)
             coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
             contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
 
-            plotting_data = [plotting_data; {We, Bo, Oh, max_deflection, contact_time, coef_restitution}];
+            plotting_data = [plotting_data; {Westar, Bo, Oh, max_deflection, contact_time, coef_restitution}];
         end
     catch ME
         warning(ME.message);
