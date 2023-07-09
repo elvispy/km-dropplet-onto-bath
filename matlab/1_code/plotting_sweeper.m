@@ -136,18 +136,20 @@ if ~isempty(plotting_data)
         f_maxdef = figure(2);
         copyobj(b(1), f_maxdef); a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_maxdef, 'maximum_deflection', 'eps');
+        saveas(f_maxdef, '../0_data/manual/maximum_deflection', 'eps');
+        savefig(f_maxdef, "../0_data/manual/maximum_defelction.fig");
         
         f_contact = figure(3);
         copyobj(b(2), f_contact);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_contact, 'contact_time', 'eps');
+        saveas(f_contact, '../0_data/manual/contact_time', 'eps');
+        savefig(f_contact, '../0_data/manual/contact_time.fig');
         
         f_CR = figure(4);
         copyobj(b(3), f_CR);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_CR, 'coef_res', 'eps');
-        
+        saveas(f_CR, '../0_data/manual/coef_res', 'eps');
+        savefig(f_CR, '../0_data/manual/coef_res.fig');
         
     end
 else
