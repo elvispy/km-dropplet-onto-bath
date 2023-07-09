@@ -134,11 +134,20 @@ if ~isempty(plotting_data)
         scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         
         f_maxdef = figure(2);
-        copyobject(b(1), f_maxdef);
+        copyobj(b(1), f_maxdef); a = gca;
+        a.Position = [0.2, 0.1, 0.6, 0.9];
+        saveas(f_maxdef, 'maximum_deflection', 'eps');
+        
         f_contact = figure(3);
-        copyobject(b(2), f_contact);
+        copyobj(b(2), f_contact);a = gca;
+        a.Position = [0.2, 0.1, 0.6, 0.9];
+        saveas(f_contact, 'contact_time', 'eps');
+        
         f_CR = figure(4);
-        copyobject(b(3), f_CR);
+        copyobj(b(3), f_CR);a = gca;
+        a.Position = [0.2, 0.1, 0.6, 0.9];
+        saveas(f_CR, 'coef_res', 'eps');
+        
         
     end
 else
