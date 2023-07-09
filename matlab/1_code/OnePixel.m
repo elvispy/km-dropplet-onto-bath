@@ -165,12 +165,12 @@ grid on
 saveas(gcf,['CenterLineRadius',num2str(10*Ro),'mm.fig'],'fig')
 print(fi,'-depsc','-r300',['CenterLineRadius',num2str(10*Ro),'mm.eps'])
 
-index1 = find(z<0,1);
-index2 = find(z(index1:end)>0,1);
-
-tImpact = (tvec(index1)+tvec(index1-1))/2; save('tImpact.mat','tImpact')
-Uo = (vz(index1)+vz(index1-1))/2;save('Uo.mat','Uo')
-tend = (tvec(index1+index2-1)+tvec(index1+index2-2))/2;save('tend.mat','tend')
-Uend = (vz(index1+index2-1)+vz(index1+index2-2))/2;save('Uend.mat','Uend')
-tcont = tend-tImpact;save('tcont.mat','tcont')
-CRref = -Uend/Uo; save('CRref.mat','CRref')
+% index1 = find(z<0,1);
+% index2 = find(z(index1:end)>0,1);
+% 
+% tImpact = (tvec(index1)+tvec(index1-1))/2; save('tImpact.mat','tImpact')
+% Uo = (vz(index1)+vz(index1-1))/2;save('Uo.mat','Uo')
+% tend = (tvec(index1+index2-1)+tvec(index1+index2-2))/2;save('tend.mat','tend')
+% Uend = (vz(index1+index2-1)+vz(index1+index2-2))/2;save('Uend.mat','Uend')
+% tcont = tend-tImpact;save('tcont.mat','tcont')
+% CRref = -Uend/Uo; save('CRref.mat','CRref')
