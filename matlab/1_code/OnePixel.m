@@ -1,22 +1,29 @@
 close all;
 p = pwd;
 
-load('U0.mat')
-load('Ang.mat'); Cang = Ang * pi / 180;
+try
+    load('U0.mat');
+    load('Ang.mat'); Cang = Ang * pi / 180;
+    load('Fr.mat');
+catch
+    load('ProblemConditions.mat');
+end
+%load('U0.mat')
+%load('Ang.mat'); Cang = Ang * pi / 180;
 load('vz.mat'); Vo = abs(vz(1));
 load('numl.mat','numl');
-files = dir(fullfile(pwd, "etaMatPer*.mat"));
-N = length(files);
-etaAux = [];
-for i = 1:N
-    load(files(i).name);
-    etaAux = [etaAux, etaMatPer];
-end
-etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
+% files = dir(fullfile(pwd, "etaMatPer*.mat"));
+% N = length(files);
+% etaAux = [];
+% for i = 1:N
+%     load(files(i).name);
+%     etaAux = [etaAux, etaMatPer];
+% end
+loas('etas.mat');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
-load('Fr.mat')
+%load('Fr.mat')
 load('oscillation_amplitudes.mat');
 load('Rv.mat')
 load('dtb.mat');
