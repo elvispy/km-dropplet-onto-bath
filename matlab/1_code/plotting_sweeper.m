@@ -3,7 +3,7 @@
 
 
 clear data;
-data.D = 25;
+data.D = 50;
 data.Quant = 100;
 %rho = 1; % must multiply by x1000
 
@@ -13,12 +13,12 @@ data.Quant = 100;
 %data.sigma = 72.20; % must multiply by x100
 %data.Ro = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 %Oil
-data.Bo = 0.056;
-data.Oh = 0.058;
+%data.Bo = 0.056;
+%data.Oh = 0.058;
 
 % Water
-%data.Bo = 0.017;
-%data.Oh = 0.006;
+data.Bo = 0.017;
+data.Oh = 0.006;
 %Ang = 180;
 %U = 18; %linspace(28, 50, 5)';
 
