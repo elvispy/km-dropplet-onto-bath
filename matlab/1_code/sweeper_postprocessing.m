@@ -59,7 +59,11 @@ for ii = 1:length(files_folder)
         tcont = tend-tImpact;
         CRref = -Uend/Uo;
         
-        max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
+        max_def = min(south); %if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
+        if norm(oscillation_amplitudes) < 1e-5
+           save("delete_me.m", "oscillation_amplitudes");
+           disp("lol");
+        end
         
         % Center-of-mass based parameters
         nnew = diff(numl);
@@ -69,12 +73,16 @@ for ii = 1:length(files_folder)
         idx_end_theory    = find(liftoff, 1);
         Uo_theory = vz(idx_impact_theory);
         Uend_theory = vz(idx_end_theory);
+        
         t_cont_theory = tvec(idx_end_theory) - tvec(idx_impact_theory);
         contact_times = tvec(idx_impact_theory);
         liftoff_times = tvec(idx_end_theory);
-        if len(liftoff_times) > 1; fprintf("Second bounce found for %s", pwd); end
-        CR_theory = -Uend_theory/Uo_theory;
-        
+        if length(liftoff_times) > 1; fprintf("Second bounce found for %s", pwd); end
+        try    
+            CR_theory = -Uend_theory/Uo_theory;
+        catch
+            CR_theory = NaN;
+        end
         
         L = diff(etas)/dr;
         max_gradient = max(abs(L(:)));
