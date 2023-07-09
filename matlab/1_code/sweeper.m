@@ -96,12 +96,12 @@ parfor ii = 1:height(simulations_cgs)
                 end
             end
         end
-        %try
+        try
         callVertPolarExactSH();
-        %catch ME
-         %   fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
-          %      simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
-        %end
+        catch ME
+           fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
+                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
+        end
     end
     
 
