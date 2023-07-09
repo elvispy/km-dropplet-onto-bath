@@ -97,6 +97,7 @@ tvec = t:(dtb):tend+1; tvecOri = tvec;%vector of times assuming no refinement ha
 dt = tvec(2) - tvec(1); indexes_to_save = zeros(steps + 1, 1);
 current_to_save = 2; indexes_to_save(1) = 1;
 oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
+pressure_amplitudes    = zeros(N, steps + 1); % Pressure amplitudes
 Rv = -ones(1, steps+1);
 % the time dependent amplitude of all the SH
 oscillation_velocities = zeros(N, steps+1);
@@ -641,6 +642,7 @@ while (t<tend) %#-- || jj1>.5)
                 vz(tentative_index+1) = vzTent;
                 %#---
                 oscillation_amplitudes(:, tentative_index + 1) = amplitudes_new;
+                pressure_amplitudes(:, tentative_index + 1)    = B_l_ps_new;
                 Rv(tentative_index+1) = zs_from_spherical(pi, amplitudes_new);
                 amplitudes_old = amplitudes_new;
                 amplitudes_velocities_old = velocities_new;
@@ -775,6 +777,7 @@ if t < inf
     numl = numl(indexes_to_save); save('numl.mat','numl');
     % errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
     oscillation_amplitudes = oscillation_amplitudes(:, indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    pressure_amplitudes    = pressure_amplitudes(:, indexes_to_save);    save('pressure_amplitudes.mat', 'pressure_amplitudes');
     Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
 
     % 
