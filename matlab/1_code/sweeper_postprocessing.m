@@ -59,7 +59,7 @@ for ii = 1:length(files_folder)
         tcont = tend-tImpact;
         CRref = -Uend/Uo;
         
-        max_def = min(south); %if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
+        max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
         if norm(oscillation_amplitudes) < 1e-5
            save("delete_me.m", "oscillation_amplitudes");
            disp("lol");
