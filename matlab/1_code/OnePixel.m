@@ -27,7 +27,7 @@ load('tvec.mat')
 %load('Fr.mat')
 load('oscillation_amplitudes.mat');
 load('Rv.mat')
-load('dtb.mat');
+%load('dtb.mat');
 % Rv = zeros(1, size(oscillation_amplitudes, 2));
 % for ii = 1:size(oscillation_amplitudes, 2)
 %     Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
@@ -141,7 +141,7 @@ ntimes = size(psMatPer,2);
 
 tvecplot = tvec(1:size(psMatPer,2));
 
-dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
+%dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
 
 %#--
 % f=zeros(1,size(psMatPer,2));
@@ -159,7 +159,7 @@ dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
 % plot(tvecplot,dr*numl(1:length(tvecplot)),'LineWidth',2)
 %#--
 
-Integral = f*dtvecplot';
+%Integral = f*dtvecplot';
 % daspect([.83 .73/5 1])
 grid on
 % %
