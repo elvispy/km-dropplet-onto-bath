@@ -1,5 +1,6 @@
 close all;
-p = pwd;
+p = uigetdir();
+cd(p);
 
 try
     load('U0.mat');
@@ -19,14 +20,14 @@ load('numl.mat','numl');
 %     load(files(i).name);
 %     etaAux = [etaAux, etaMatPer];
 % end
-loas('etas.mat');
+load('etas.mat');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')
 %load('Fr.mat')
 load('oscillation_amplitudes.mat');
 load('Rv.mat')
-load('dtb.mat');
+%load('dtb.mat');
 % Rv = zeros(1, size(oscillation_amplitudes, 2));
 % for ii = 1:size(oscillation_amplitudes, 2)
 %     Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
@@ -140,7 +141,7 @@ ntimes = size(psMatPer,2);
 
 tvecplot = tvec(1:size(psMatPer,2));
 
-dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
+%dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
 
 %#--
 % f=zeros(1,size(psMatPer,2));
