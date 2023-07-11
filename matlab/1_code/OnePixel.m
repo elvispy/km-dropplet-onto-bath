@@ -158,7 +158,7 @@ dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
 % plot(tvecplot,dr*numl(1:length(tvecplot)),'LineWidth',2)
 %#--
 
-Integral = f*dtvecplot';
+%Integral = f*dtvecplot';
 % daspect([.83 .73/5 1])
 grid on
 % %
