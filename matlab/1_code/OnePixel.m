@@ -83,8 +83,8 @@ North = plot(tvec_p,z(index_to_plot)+north(index_to_plot),'color',verdinho,'Line
 
 Center = plot(tvec_p,z(index_to_plot),'k','LineWidth',4);
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',20)
-ylabel('   $z/R \ \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0)
+xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',26)
+ylabel('   $z/R \ \ \ \ $    ','interpreter','LaTeX','FontSize',26,'Rotation',0)
 grid on
 %ylim([0, 1]);
 xlim([0, tvec_p(end)]);
@@ -96,8 +96,8 @@ f2 = figure(2);
 PressedRad = plot(tvec_p,dr*numl(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
 
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',20)
-ylabel('$r_c/R \ \ \ \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0)
+xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',26)
+ylabel('$r_c/R \ \ \ \ \ \ $    ','interpreter','LaTeX','FontSize',26,'Rotation',0)
 ylim([0, 1]);
 xlim([0, tvec_p(end)]);
 grid on
