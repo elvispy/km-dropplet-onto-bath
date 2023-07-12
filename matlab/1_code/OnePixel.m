@@ -1,5 +1,6 @@
 close all;
-p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
+p = uigetdir();
+%p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
 cd(p);
 
 try
@@ -61,7 +62,7 @@ hold on
 % North Pole, South pole and bath
 deep_blue = [66 145 245]/255;
 verdinho = [0, 1, 0];
-index_to_plot = 1:floor(length(z)/2);
+index_to_plot = 1:floor(length(z)*0.8);
 tvec_p = tvec(index_to_plot);
 south = zeros(1, size(oscillation_amplitudes, 2));
 north = zeros(1, size(oscillation_amplitudes, 2));
