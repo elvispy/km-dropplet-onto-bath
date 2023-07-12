@@ -1,6 +1,7 @@
 close all;
-p = uigetdir();
-%p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
+c = pwd;
+%p = uigetdir();
+p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
 cd(p);
 
 try
@@ -55,7 +56,7 @@ for i = 1:N
 end
 psMatPer = psAux; pss = psAux; save('ps.mat', 'pss');
 
-fi = figure;
+f1 = figure(1);
 
 hold on
 
@@ -70,6 +71,11 @@ for ii = 1:size(oscillation_amplitudes, 2)
     south(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
     north(ii) = zs_from_spherical(0, oscillation_amplitudes(:, ii));
 end
+
+cd(c);
+cd ..
+cd 0_data\manual
+
 FreeSurf = plot(tvec_p,etaOri(index_to_plot),'color',deep_blue,'LineWidth',4);
 
 South = plot(tvec_p,z(index_to_plot)+south(index_to_plot),'color',verdinho,'LineWidth',2);
@@ -82,11 +88,11 @@ ylabel('   $z/R \ \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0)
 grid on
 %ylim([0, 1]);
 xlim([0, tvec_p(end)]);
-saveas(gcf,['CenterLineRadius',num2str(10*Ro),'mm.fig'],'fig')
-print(fi,'-depsc','-r300',['CenterLineRadius',num2str(10*Ro),'mm.eps'])
+saveas(f1,sprintf('CenterLineRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
+print(f1,'-depsc','-r300',sprintf('CenterLineRadiusU0%g%.2fmm.eps',U0, 10*Ro))
 
 % Pressed radius
-figure(2);
+f2 = figure(2);
 PressedRad = plot(tvec_p,dr*numl(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
 
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
@@ -95,8 +101,8 @@ ylabel('$r_c/R \ \ \ \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation'
 ylim([0, 1]);
 xlim([0, tvec_p(end)]);
 grid on
-saveas(gcf,['PressedRadius',num2str(10*Ro),'mm.fig'],'fig')
-print(fi,'-depsc','-r300',['PressedRadius',num2str(10*Ro),'mm.eps'])
+saveas(f2,sprintf('PressedRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
+print(f2,'-depsc','-r300',sprintf('PressedRadius%g%.2fmm.eps',U0, 10*Ro))
 
 
 % Force = 
