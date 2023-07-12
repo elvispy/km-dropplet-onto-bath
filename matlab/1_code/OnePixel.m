@@ -1,7 +1,7 @@
 close all;
 c = pwd;
-%p = uigetdir();
-p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
+p = uigetdir();
+%p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
 cd(p);
 
 try
@@ -74,7 +74,7 @@ end
 
 cd(c);
 cd ..
-cd 0_data\manual
+cd 0_data/manual
 
 FreeSurf = plot(tvec_p,etaOri(index_to_plot),'color',deep_blue,'LineWidth',4);
 
