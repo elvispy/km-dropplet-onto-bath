@@ -1,7 +1,7 @@
 close all;
 c = pwd;
-p = uigetdir();
-%p = 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\D5Quant20\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U38'; %uigetdir();
+%p = uigetdir();
+p = fullfile(pwd, 'D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U38');
 cd(p);
 
 try
@@ -21,8 +21,11 @@ load('numl.mat','numl');
 %     load(files(i).name);
 %     etaAux = [etaAux, etaMatPer];
 % end
+
+%zeta_generator2 = @zeta_generator;
+%zeta_generator = zeta_generator2;
 load('etas.mat');
-load('z.mat')
+load('z.mat');
 load('etaOri.mat')
 load('tvec.mat')
 %load('Fr.mat')
@@ -72,6 +75,12 @@ for ii = 1:size(oscillation_amplitudes, 2)
     north(ii) = zs_from_spherical(0, oscillation_amplitudes(:, ii));
 end
 
+max_width = zeros(1, size(oscillation_amplitudes, 2));
+for ii = 1:size(oscillation_amplitudes, 2)
+    max_width(ii) = maximum_contact_radius(oscillation_amplitudes(:, ii));
+end
+
+
 cd(c);
 cd ..
 cd 0_data/manual
@@ -104,33 +113,17 @@ grid on
 saveas(f2,sprintf('PressedRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
 print(f2,'-depsc','-r300',sprintf('PressedRadius%g%.2fmm.eps',U0, 10*Ro))
 
+f3 = figure(3);
 
-% Force = 
-%title(['$R_0\, =\ $',num2str(round(10000*Ro)/1000),'$mm$, $\rho_s\, =\ $',num2str(rhoS),'$gr/cm^3$, $V_0\, =\ $',num2str(U0),'$cm/s$'],'interpreter','LaTeX','FontSize',20)
-%dropWeight = Ma/Fr;
-
-%ntimes = size(psMatPer,2);
-
-%tvecplot = tvec_p(1:size(psMatPer,2));
-
-%dtvecplot = [tvecplot(2:end)-tvecplot(1:end-1),dtb];
-
-%#--
-% f=zeros(1,size(psMatPer,2));
-% 
-% % fig=figure;
-% for ii = 1:size(psMatPer,2)
-%     if numl(ii) == 0
-%         f(ii) = 0;
-%     else
-%         f(ii) = IntMat(numl(ii),1:numl(ii))*psMatPer{ii}(1:numl(ii));
-%     end
-% end
-% plot(tvecplot,f/dropWeight,'LineWidth',2)
-% hold on
-% plot(tvecplot,dr*numl(1:length(tvecplot)),'LineWidth',2)
-%#--
-
+max_contact_radius = plot(tvec_p, max_width(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
+set(gca, 'FontSize', 16);
+xlabel('  $  t/t_s $  ', 'interpreter', 'LaTeX', 'FontSize', 26);
+ylabel(' .  $ w/R $ \ \ \  ', 'interpreter', 'LaTeX', 'FontSize', 26, 'Rotation', 0);
+ylim([0.8, 1.2]);
+xlim([0, tvec_p(end)]);
+grid on
+saveas(f3, sprintf("MaximumWidthU0%g%.2fmm.fig", U0, 10*Ro), 'fig');
+print(f3, '-depsc', '-r300', sprintf('MaximumWidthU0%g%.2ffmm.eps', U0, 10*Ro));
 %Integral = f*dtvecplot';
 % daspect([.83 .73/5 1])
 
