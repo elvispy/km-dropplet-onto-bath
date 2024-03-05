@@ -13,7 +13,7 @@ if exist('z.mat', 'file') == 2
 end
 
 
-U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+U0 = 17; %impact velocity in cm/s (unit of velocity for the problem)
 Ang = 180; %contact angle to be imposed
 
 cd ..
@@ -55,7 +55,7 @@ cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
 tiempoComp = zeros(1,10); %just to check how long it takes to solve the first ten saving intervals
 
 % #--- 
-N = 25; % Number of harmonics contributing to the oscillation
+N = 20; % Number of harmonics contributing to the oscillation
 % #---0
 
 %Characteristic Units
@@ -65,14 +65,13 @@ T = sqrt(rhoS * Ro^3/sigmaS); % Characteristic time
 T_unit = T;
 V_unit = L_unit/T_unit;
 
-%Dimensionless numbers that depend on U0
-Dr = rhoS/rho; Sr = sigmaS/sigma;
-Re = Ro*U0/nu; %Ro^2/(nu * T); %  
-Fr = sigma/(g * rho * Ro^2);% U0^2/(g*Ro); 
-We = Sr * rho * Ro.^3 / (sigma * T^2); % rho*Ro*U0^2/sigma; 
-%Dr = We; %rhoS*Ro*U0^2/sigma;
-WeS  = rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
-%bath at least in one place
+%Dimensionless numbers for equations
+Dr = rhoS/rho; %Sr = sigmaS/sigma;
+Re = L_unit^2/(nu*T_unit);
+Fr = L_unit/(g * T_unit^2);
+We = rho * L_unit.^3 / (sigma * T_unit^2); 
+WeS  = rhoS*Ro^3/(sigmaS * T_unit^2); %This is for the bath/dropplet interaction.
+
 Cang = (Ang/180)*pi; %contact angle to be imposed
 
 %Physical parameter
@@ -113,7 +112,8 @@ save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 
 %Drop oscillation frequencies
 % #--- 
-f = @(n) sqrt(n.*(n+2).*(n-1)./1); % Changed frequency
+
+f = @(n) sqrt(n.*(n+2).*(n-1)./WeS); % Changed frequency
 omegas_frequencies = f(1:N)';
 
 % #---oscillation_amplitudes = zeros(N, steps + 1);
@@ -126,7 +126,7 @@ z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi
 
 % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
 % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
-vz(1) = -abs(U0/ (L_unit/T)); %Initial velocity of the CoM in dimesionless units
+vz(1) = -abs(U0/ (L_unit/T_unit)); %Initial velocity of the CoM in dimesionless units
 
 
 current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
@@ -163,7 +163,6 @@ ps_accepted = [];
 %zeroing variable that records each part of the sequence of surface states
 etaMatPer = zeros(length(etao),nsteps); 
 etas      = zeros(length(etao), steps); 
-
 phiMatPer = zeros(length(phio),nsteps);
 psMatPer = cell(1,nsteps); % ??? why cell
 %Storing initial surface state

@@ -13,7 +13,7 @@ else
     Re = PROBLEM_CONSTANTS.Re; DTN = PROBLEM_CONSTANTS.DTN;
     nr = PROBLEM_CONSTANTS.nr; IntMat = PROBLEM_CONSTANTS.IntMat(max(nl, 1), :);
     angleDropMP = PROBLEM_CONSTANTS.angleDropMP; Cang = PROBLEM_CONSTANTS.Cang;
-    WeSB = PROBLEM_CONSTANTS.WeSB; Ma = PROBLEM_CONSTANTS.Ma;
+    Dr = PROBLEM_CONSTANTS.Dr; Ma = PROBLEM_CONSTANTS.Ma;
     dr = PROBLEM_CONSTANTS.dr; Fr = PROBLEM_CONSTANTS.Fr;
 
     if nl == 0
@@ -38,6 +38,6 @@ else
         psprob = [];
     else % There are contact points
         [etaprob,phiprob,zprob,vzprob,psprob,errortan] = solvenDDCusp(nlprev,nl,dt,zo,vzo,etao,phio,...
-            nr,dr,Re,Delta,DTN,Fr,We,Ma,zs,IntMat,angleDropMP,Cang,WeSB,Rv);
+            nr,dr,Re,Delta,DTN,Fr,We,Ma,zs,IntMat,angleDropMP,Cang,Dr,Rv);
     end
 end
