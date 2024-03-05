@@ -58,18 +58,20 @@ tiempoComp = zeros(1,10); %just to check how long it takes to solve the first te
 N = 25; % Number of harmonics contributing to the oscillation
 % #---0
 
-%Unit of time
-% T = Ro/U0; %base time is seconds
-X = Ro; % Characteristic length
+%Characteristic Units
+L_unit = Ro; 
+M_unit = rhoS * L_unit^3;
 T = sqrt(rhoS * Ro^3/sigmaS); % Characteristic time
+T_unit = T;
+V_unit = L_unit/T_unit;
 
 %Dimensionless numbers that depend on U0
 Dr = rhoS/rho; Sr = sigmaS/sigma;
-Re = Ro^2/(nu * T); % Ro*U0/nu; 
+Re = Ro*U0/nu; %Ro^2/(nu * T); %  
 Fr = sigma/(g * rho * Ro^2);% U0^2/(g*Ro); 
-We = Sr * rhoS * Ro.^3 / (sigmaS * T^2); % rho*Ro*U0^2/sigma; 
+We = Sr * rho * Ro.^3 / (sigma * T^2); % rho*Ro*U0^2/sigma; 
 %Dr = We; %rhoS*Ro*U0^2/sigma;
-WeS  = We;%rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
+WeS  = rhoS*Ro*U0^2/sigmaS; %This name may not be the best, the surface tension is that of the 
 %bath at least in one place
 Cang = (Ang/180)*pi; %contact angle to be imposed
 
@@ -93,7 +95,7 @@ vz = zeros(1,steps+1);%speed of the centre of mass
 numl = zeros(1,steps+1);%number of pressed mesh points at each time step
 tvec = t:(dtb):tend+1; tvecOri = tvec;%vector of times assuming no refinement has happened
 %plus some extra time just in case the simulation needs to run longer
-% #--- 
+
 dt = tvec(2) - tvec(1); indexes_to_save = zeros(steps + 1, 1);
 current_to_save = 2; indexes_to_save(1) = 1;
 oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
@@ -101,7 +103,7 @@ pressure_amplitudes    = zeros(N, steps + 1); % Pressure amplitudes
 Rv = -ones(1, steps+1);
 % the time dependent amplitude of all the SH
 oscillation_velocities = zeros(N, steps+1);
-% #--- 
+
 nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
 
 tolP = 1E-6; %error tolerance for the pressure field and deformation 
@@ -124,7 +126,7 @@ z(1) = -1* zs_from_spherical(pi, oscillation_amplitudes(:, 1));% -1*zsoftheta(pi
 
 % zsoftheta(pi,A2(1),A3(1)) gives the height of the south pole with
 % respect to the CoM, z(1) is chosen so that the drop is just about to touch down
-vz(1) = -abs(U0/ (X/T)); %Initial velocity of the CoM in dimesionless units
+vz(1) = -abs(U0/ (L_unit/T)); %Initial velocity of the CoM in dimesionless units
 
 
 current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
@@ -136,7 +138,6 @@ current_conditions = struct("deformation_amplitudes", amplitudes_old, ...
 
 previous_conditions = {current_conditions, current_conditions}; 
 
-% f = @(n)  sqrt(n .* (n+2) .* (n-1) / WeS);
 previous_conditions{1}.current_time = previous_conditions{2}.current_time - dt;
 previous_conditions{1}.center_of_mass_velocity = ...
     previous_conditions{2}.center_of_mass_velocity + dt/Fr;
@@ -154,9 +155,7 @@ end
 tentative_index = 0;%iteration counter
 
 errortan = zeros(5,steps+1);%tangency error recorder
-
 ps_accepted = [];
-
 
 %If there were some initial pressure acting on the surface and sphere I
 %would have to change this bit here to reflect the presure distribution
@@ -208,17 +207,19 @@ while (t<tend) %#-- || jj1>.5)
     
     psTent = ps_accepted; %Tentative pressure distribution (we start with the previous pressure)
     
+    
+    
+    
     RmaxOld = r_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, tentative_index)), oscillation_amplitudes(:, tentative_index));
   
     %(i.e. where the tangent plane to the droplet is vertical)
     nlmax(tentative_index) = floor(RmaxOld/dr)+1;%max number of contact points
-    
+
     thetaVec = theta_from_cylindrical(dr*(0:(nlmax(tentative_index)-1)), oscillation_amplitudes(:, tentative_index)); % zeros(1,nlmax(jj));%initialising vector of angles of pressed positions
 
     % Spherical Harmonics modes
     if norm(psTent,1) == 0
-        %B2Tent = 0;
-        %B3Tent = 0;
+        
         B_l_ps_tent = zeros(1, N);
     else
         nb_contact_points = nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
