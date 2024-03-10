@@ -101,13 +101,13 @@ etaOri = zeros(1,steps+1);%height of the surface below the south pole
 z = zeros(1,steps+1);%height of the centre of mass
 vz = zeros(1,steps+1);%speed of the centre of mass
 numl = zeros(1,steps+1);%number of pressed mesh points at each time step
-tvec = zeros(1, steps+1); %vector of times assuming no refinement has happened
+tvec = t:(dtb):tend+1; tvecOri = tvec;%vector of times assuming no refinement has happened
 %plus some extra time just in case the simulation needs to run longer
 
-dt = dtb; time_index = 0; save_index = 0; resetter = 0;
-indexes_to_save = zeros(steps + 1, 1); indexes_to_save(1) = 1;
-current_to_save = 2;
-oscillation_amplitudes = zeros(N, steps + 1); % Harmonic amplitudes
+dt = tvec(2) - tvec(1); indexes_to_save = zeros(steps + 1, 1);
+current_to_save = 2; indexes_to_save(1) = 1;
+oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
+pressure_amplitudes    = zeros(N, steps + 1); % Pressure amplitudes
 Rv = -ones(1, steps+1);
 % the time dependent amplitude of all the SH
 oscillation_velocities = zeros(N, steps+1);
@@ -193,14 +193,17 @@ PROBLEM_CONSTANTS = struct("We", We, "Ma", Ma, ...
     "Ra", Ra,  "Re", Re);
 exit = false;
 %% Main Loop
-while tentative_index <= steps && t < tend && exit == false 
+while  t < tend % && tentative_index <= steps && exit == false 
 %     if toc > 120
 %         break;
 %     end
-    if PROBLEM_CONSTANTS.DEBUG_FLAG == true
-       fprintf("Outside %0.4g, %0.3e\n", t, dt); 
-    end
     tentative_index = tentative_index+1;
+    t = tvec(tentative_index+1);
+    dt = t - tvec(tentative_index);
+    
+    if PROBLEM_CONSTANTS.DEBUG_FLAG == true
+       fprintf("Outside %0.4g, %0.3e\n", t-dt, dt); 
+    end
     
     
     %zeroing the tentative solution variables
@@ -328,7 +331,7 @@ while tentative_index <= steps && t < tend && exit == false
 
                     else
                         %time step too big
-                        % tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
@@ -347,7 +350,7 @@ while tentative_index <= steps && t < tend && exit == false
                         zTent = zprob(2);
                         vzTent = vzprob(2);
                     else
-                        % tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
@@ -355,7 +358,7 @@ while tentative_index <= steps && t < tend && exit == false
 
             else %the same number of contact points is best    
                 if errortan(3, tentative_index+1) == Inf % ALl errors are infinity
-                    % tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+                    tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
                     tentative_index = tentative_index-1; 
                     reduc = 1;
                 else
@@ -372,7 +375,7 @@ while tentative_index <= steps && t < tend && exit == false
 
         
         if ll == 100
-            % % tvec = [tvec(1:jj),tvec(jj)/2+tvec(jj+1)/2,tvec(jj+1:end)];
+            tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
             tentative_index = tentative_index-1;
             reduc = 1;
         end
@@ -430,13 +433,13 @@ while tentative_index <= steps && t < tend && exit == false
                 errorP = err;
             end
             if errorP < tolP % Finally accept solution
-                time_index = time_index + 1; t = t + dt;
-                if mod(time_index, 2) == 0 && resetter > 0
-                    time_index = time_index / 2;
-                    save_index = save_index - 1;
-                    dt = 2 * dt;
-                    resetter = resetter - 1;
-                end
+%                 time_index = time_index + 1; t = t + dt;
+%                 if mod(time_index, 2) == 0 && resetter > 0
+%                     time_index = time_index / 2;
+%                     save_index = save_index - 1;
+%                     dt = 2 * dt;
+%                     resetter = resetter - 1;
+%                 end
 
                 numl(tentative_index+1) = numlTent;
                 eta_accepted = etaTent;
@@ -446,7 +449,7 @@ while tentative_index <= steps && t < tend && exit == false
                 vz(tentative_index+1) = vzTent;
                 %#---
                 oscillation_amplitudes(:, tentative_index + 1) = amplitudes_new;
-                etas(:, tentative_index + 1) = eta_accepted;
+                pressure_amplitudes(:, tentative_index + 1)    = B_l_ps_new;
                 Rv(tentative_index+1) = zs_from_spherical(pi, amplitudes_new);
                 amplitudes_old = amplitudes_new;
                 amplitudes_velocities_old = velocities_new;
@@ -462,14 +465,19 @@ while tentative_index <= steps && t < tend && exit == false
                 
                 nlmax(tentative_index+1) = nlmaxTent;
                 etaOri(tentative_index+1) = eta_accepted(1);
-                tvec(tentative_index + 1) = t;
+                etas(:, tentative_index + 1) = eta_accepted;
+                %tvec(tentative_index + 1) = t;
 
                 % jj0 = floor(tentative_index/nsteps);
                 % jj1 = round(tentative_index-jj0*nsteps);
 
-                etaMatPer(:,tentative_index+1) = eta_accepted;
-                phiMatPer(:,tentative_index+1) = phi_accepted;
-                psMatPer{tentative_index+1} = ps_accepted;
+                if t >= tvecOri(current_to_save)
+                    etaMatPer(:,current_to_save) = eta_accepted;
+                    phiMatPer(:,current_to_save) = phi_accepted;
+                    psMatPer{current_to_save} = ps_accepted;
+                    indexes_to_save(current_to_save) = tentative_index;
+                    current_to_save = current_to_save + 1;
+                end
 %                 if jj1 == nsteps-1 && false
 %                     if runNumber == 0
 %                         tiempoComp(jj0+1)=toc(tstart);
@@ -489,11 +497,8 @@ while tentative_index <= steps && t < tend && exit == false
 %                     save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
 %                 end
 
-                if time_index == 2^save_index
-                    time_index = 0;
-                    resetter = 1;
-                    indexes_to_save(current_to_save) = tentative_index;
-                    current_to_save = current_to_save + 1;
+                if zTent > 1.5 && numlTent == 0
+                    tend = t;
                 end
                 etao = eta_accepted;
                 phio = phi_accepted;
@@ -553,45 +558,47 @@ while tentative_index <= steps && t < tend && exit == false
                 psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
             end
         else
-            dt = dt/2; time_index = 2 * time_index;
-            save_index = save_index + 1;
+            %dt = dt/2; time_index = 2 * time_index;
+            %save_index = save_index + 1;
             if dt*T_unit < 1e-11 % Time step smaller than 10 picoseconds
                 warning("Step size has been made too small (%.5e). Stopped the execution of the program", dt);
                 t = inf;
             end
-        end
-    end
-    
-end
+        end %it time step was not reduced
+    end % inner while   
+end % Outer while
 
 % runNumber = runNumber+1;
 tstop = t;
-% save(['tstop',num2str(runNumber),'.mat'],'tstop')
-% jjstop = tentative_index;
-% save(['jjstop',num2str(runNumber),'.mat'],'jjstop')
-% save(['etao',num2str(runNumber),'.mat'],'etao')
-% save(['phio',num2str(runNumber),'.mat'],'phio')
-% save(['pso',num2str(runNumber),'.mat'],'pso')
 
-% zrestart = z(tentative_index+1);
-% vzrestart = vz(tentative_index+1);
-% trestart = tvec(tentative_index+1);
-% numlrestart = numl(tentative_index+1);
-% save(['zrestart',num2str(runNumber),'.mat'],'zrestart')
-% save(['vzrestart',num2str(runNumber),'.mat'],'vzrestart')
-% save(['trestart',num2str(runNumber),'.mat'],'trestart')
-% save(['numlrestart',num2str(runNumber),'.mat'],'numlrestart')
-indexes_to_save = indexes_to_save(1:(current_to_save-1));
-z = z(indexes_to_save); save('z.mat','z')
-etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
-etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
-phiMatPer = phiMatPer(:, indexes_to_save); save('phiMatPer.mat','phiMatPer')
-psMatPer = psMatPer(:, indexes_to_save); save('psMatPer.mat','psMatPer')
+if t < inf
+    indexes_to_save = indexes_to_save(1:(current_to_save-1));
+    z = z(indexes_to_save); save('z.mat','z')
+    etaOri = etaOri(indexes_to_save); save('etaOri.mat','etaOri')
+    etas = etas(:, indexes_to_save); save('etas.mat', 'etas');
+    etaMatPer = etaMatPer(:,  1:(current_to_save-1)); save('etaMatPer.mat', 'etaMatPer');
+    phiMatPer = phiMatPer(:,  1:(current_to_save-1)); save('phiMatPer.mat','phiMatPer');
+    psMatPer  = psMatPer{1:(current_to_save-1)};  save('psMatPer.mat','psMatPer');
 
-vz = vz(indexes_to_save); save('vz.mat','vz');
-save('tvec.mat','tvec'); % TODO Revise this
-nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
-numl = numl(indexes_to_save); save('numl.mat','numl');
-errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
-oscillation_amplitudes = oscillation_amplitudes(indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
-Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
+    vz = vz(indexes_to_save); save('vz.mat','vz');
+    tvecOri = tvecOri(1:(current_to_save-1)); tvec = tvecOri; save('tvec.mat','tvec'); 
+    nlmax = nlmax(indexes_to_save); save('nlmax.mat','nlmax');
+    numl = numl(indexes_to_save); save('numl.mat','numl');
+    % errrortan = errortan(indexes_to_save); save('errortan.mat','errortan');
+    oscillation_amplitudes = oscillation_amplitudes(:, indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    pressure_amplitudes    = pressure_amplitudes(:, indexes_to_save);    save('pressure_amplitudes.mat', 'pressure_amplitudes');
+    Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
+
+    % 
+    % save('etaOri.mat','etaOri')
+    % save('z.mat','z')
+    % 
+    % save('vz.mat','vz')
+    % save('tvec.mat','tvec');
+    % save('nlmax.mat','nlmax');
+    % save('numl.mat','numl');
+    % save('errortan.mat','errortan');
+    % save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
+    % save('Rv.mat', 'Rv');
+    % 
+end
