@@ -11,14 +11,20 @@ catch
     load('ProblemConditions.mat');
 end
 load('vz.mat'); Vo = abs(vz(1));
+
 files = dir(fullfile(pwd, "etaMatPer*.mat"));
 N = length(files);
-etaAux = [];
-for i = 1:N
-    load(files(i).name);
-    etaAux = [etaAux, etaMatPer];
+if N > 0
+    etaAux = [];
+    for i = 1:N
+        load(files(i).name);
+        etaAux = [etaAux, etaMatPer];
+    end
+    etaMatPer = etaAux;
+else
+    load('etas.mat', 'etas');
+    etaMatPer = etas;
 end
-etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
 load('z.mat')
 load('etaOri.mat')
 load('tvec.mat')

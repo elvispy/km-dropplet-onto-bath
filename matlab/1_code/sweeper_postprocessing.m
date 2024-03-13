@@ -52,6 +52,7 @@ for ii = 1:length(files_folder)
         N = size(oscillation_amplitudes, 1);
         south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^((1:N)')), 1));
         
+        % Adimensional parameters
         tImpact = (tvec(contact_idx)+tvec(contact_idx+1))/2; 
         Uo = (vz(contact_idx)+vz(contact_idx+1))/2;
         tend = (tvec(contact_idx+flight_idx)+tvec(contact_idx+flight_idx-1))/2;
@@ -66,18 +67,22 @@ for ii = 1:length(files_folder)
         end
         
         % Center-of-mass based parameters
-        nnew = diff(numl);
-        liftoff = [nnew, NaN] == numl;
-        contact = [NaN, nnew] == -numl;
-        idx_impact_theory = find(contact, 1);
-        idx_end_theory    = find(liftoff, 1);
-        Uo_theory = vz(idx_impact_theory);
-        Uend_theory = vz(idx_end_theory);
+        contact_indicator = (numl ~= 0);
+        transition_indicator = diff(contact_indicator);
+        contacts = (transition_indicator == 1);
+        liftoffs = (transition_indicator == -1);
+        %nnew = diff(numl);
+        %liftoff = [nnew, NaN] == numl;
+        %contact = [NaN, nnew] == -numl;
+        idx_impact_theory = find(contacts);
+        idx_end_theory    = find(liftoffs);
+        Uo_theory = vz(idx_impact_theory(1));
+        Uend_theory = vz(idx_end_theory(1));
         
-        t_cont_theory = tvec(idx_end_theory) - tvec(idx_impact_theory);
+        t_cont_theory = tvec(idx_end_theory(1)) - tvec(idx_impact_theory(1));
         contact_times = tvec(idx_impact_theory);
         liftoff_times = tvec(idx_end_theory);
-        if length(liftoff_times) > 1; fprintf("Second bounce found for %s", pwd); end
+        if length(liftoff_times) > 1; fprintf("Second bounce found for %s\n", pwd); end
         try    
             CR_theory = -Uend_theory/Uo_theory;
         catch
@@ -86,7 +91,7 @@ for ii = 1:length(files_folder)
         
         L = diff(etas)/dr;
         max_gradient = max(abs(L(:)));
-        if max_gradient > 1; warning("Gradient too big for %s", pwd); end
+        if max_gradient > 1; warning("Gradient too big for %s\n", pwd); end
         save('simulation_postprocessing.mat', "Uo", "tend", ...
             "Uend", "max_def", "CRref", "tcont", "max_gradient", "Uo_theory", ...
             'Uend_theory', 't_cont_theory', 'contact_times', 'liftoff_times', ...
