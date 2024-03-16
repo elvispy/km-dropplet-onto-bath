@@ -27,14 +27,19 @@ for ii = 1:length(files_folder)
         if exist('etas.m', 'file')
             load('etas.m');
         else
+            load('etas.mat', 'etas');
             files = dir(fullfile(pwd, "etaMatPer*.mat"));
             N = length(files);
-            etaAux = [];
-            for i = 1:N
-                load(files(i).name);
-                etaAux = [etaAux, etaMatPer];
+            if N > 0
+                etaAux = [];
+                for i = 1:N
+                    load(files(i).name);
+                    etaAux = [etaAux, etaMatPer];
+                end
+                etaMatPer = etaAux;
+            else
+                etaMatPer = etas;
             end
-            etaMatPer = etaAux; etas = etaAux; save('etas.mat', 'etas');
         end
         load("numl.mat");
         load('z.mat')

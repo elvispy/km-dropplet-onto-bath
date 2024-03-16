@@ -19,6 +19,7 @@ currfold = pwd;
 try
     cd(wd);
     cd ..
+    cd ..
     load('Ro.mat','Ro')%Sphere's radius in CGS
 
     cd ..
@@ -53,6 +54,8 @@ try
     cd(sprintf('R0%gmm',Ro*10000))
 
     cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
+    cd(sprintf('N=%dtol=%0.2e', N, tolP));
+    
 catch
     error("Working directory not ready to perform simulation");
 end
@@ -827,8 +830,8 @@ numl = numl(indexes_to_save); save('numl.mat','numl');
 oscillation_amplitudes = oscillation_amplitudes(:, indexes_to_save); save('oscillation_amplitudes.mat', 'oscillation_amplitudes');
 pressure_amplitudes    = pressure_amplitudes(:, indexes_to_save);    save('pressure_amplitudes.mat', 'pressure_amplitudes');
 Rv = Rv(indexes_to_save); save('Rv.mat', 'Rv');
-simul_time = toc;
-simul_time = simul_time - tstart;
+simul_time = toc(tstart);
+%simul_time = simul_time - tstart;
 
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 "WeS", "Cang", "tend", "nsteps", "dtb", "L_unit", "T_unit", "M_unit", ...
