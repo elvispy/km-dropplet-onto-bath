@@ -87,7 +87,7 @@ addpath(safe_folder, '-begin');
 %    "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
 final_folders = simulations_cgs.folder;
-for ii = 1:height(simulations_cgs)
+parfor ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(final_folders(ii));
 
