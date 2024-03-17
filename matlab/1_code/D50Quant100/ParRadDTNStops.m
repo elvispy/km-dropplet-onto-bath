@@ -6,7 +6,7 @@ tic
 maxtime = 10*60*60;
 poolnum = 4; %Size of the parallel pool
 workerload = 10;%Number of tasks that we expect worker to run before saving
-load('runNumber.mat','runNumber')
+%load('runNumber.mat','runNumber')
 if runNumber == 0
     
     load('nr.mat','nr')

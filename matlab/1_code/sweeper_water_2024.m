@@ -19,7 +19,7 @@ R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
 U = linspace(59, 9, 21)';
 modes = 20;
-tol = 1e-4;
+tol = 5e-5;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx, tolidx] = ...
