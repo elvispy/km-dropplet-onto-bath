@@ -231,7 +231,7 @@ while (t<tend) && exit == false
         
         B_l_ps_tent = zeros(1, N);
     else
-        nb_contact_points = nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
+        nb_contact_points = numl(tentative_index);% nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
         %needs to be integrated against SH modes
         
         if PROBLEM_CONSTANTS.linear_on_theta == true
@@ -637,7 +637,7 @@ while (t<tend) && exit == false
                 %-%-B3New = 0;
                 B_l_ps_new = zeros(1, N);
             else
-                nb_contact_points = nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
+                nb_contact_points = numlTent; %nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
                 %against each harmonic 
                 if PROBLEM_CONSTANTS.linear_on_theta == true
                     if nb_contact_points > 1

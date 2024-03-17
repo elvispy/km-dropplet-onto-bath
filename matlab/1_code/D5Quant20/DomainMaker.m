@@ -1,6 +1,4 @@
-clear
-close all
-clc
+
 
 D = 5; save('D.mat','D') %Diameter of the domain measured in units of Ro
 quant = 20;save('quant.mat','quant')%minimal number of intervals covered by a radius
@@ -16,7 +14,7 @@ xplot = [-fliplr(r(2:nr+1)),r]; save('xplot.mat','xplot')%xaxis, used only for g
 
 %Aux variables
 zs = zeros(1,nlmax); %bottom of the ball/drop plus and infinite height away from the drop in units of drop radii
-zs(1) = 0;
+zs(1) = 0; 
 for j=1:quant
     zs(j+1)=1-sqrt(1-j^2*dr^2);
 end

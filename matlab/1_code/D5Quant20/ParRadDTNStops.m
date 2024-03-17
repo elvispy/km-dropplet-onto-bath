@@ -4,9 +4,9 @@ clc
 
 tic
 maxtime = 10*60*60;
-poolnum = 1; %Size of the parallel pool
+poolnum = 4; %Size of the parallel pool
 workerload = 10;%Number of tasks that we expect worker to run before saving
-load('runNumber.mat','runNumber'); runNumber = 0;
+%load('runNumber.mat','runNumber')
 if runNumber == 0
     
     load('nr.mat','nr')
@@ -26,8 +26,9 @@ if runNumber == 0
     dtheta = 2*pi/numer;%use pi/even number
     DTNnew345=zeros(nr,nr);
 
-    k = 1 ;
-    %Integrating away from the singularity
+    
+    %% Integrating away from the singularity
+    k = 1;
     for i=2:(rn(k)+nr+1)
         i1 = round(i);
         if i1<nr+1
@@ -51,8 +52,9 @@ if runNumber == 0
     DTNnew345(1,3)   = DTNnew345(k,3) + 7/(6*dr);%+ (  1-1/3*4)/(6*dr);
     DTNnew345(1,4)   = DTNnew345(k,4) - 11/(54*dr);%- (-15+    4)/(6*dr);
 
-    k = 2
-    %Integrating the vincinity of the origin
+    
+    %% Integrating the vincinity of the origin
+    k = 2;
     for i = 1:2*refp
         Kern = 2*(1/(i-1/2)-1/(i+1/2));
         for l=dtheta/2:dtheta:pi-dtheta/4
@@ -70,7 +72,7 @@ if runNumber == 0
             end    
         end
     end
-    %Integrating away from the singularity
+    %% Integrating away from the singularity
     for i=2*refp+1:(rn(k)+nr)*refp
         Kern = 2*(1/(i-1/2)-1/(i+1/2));
         for l=dtheta/2:dtheta:pi-dtheta/4
@@ -96,8 +98,9 @@ if runNumber == 0
     DTNnew345(k,:) = dtheta/(2*pi*drp)*DTNnew345(k,:);
     DTNnew345(k,k) = DTNnew345(k,k) + 2/(4*dr+drp);   
 
-    k = 3
-    %Integrating the vincinity of the origin
+
+    %% Integrating the vincinity of the origin
+    k = 3;
     for i = 1:2*refp
         Kern = 2*(1/(i-1/2)-1/(i+1/2));
         for l=dtheta/2:dtheta:pi-dtheta/4
@@ -115,7 +118,7 @@ if runNumber == 0
             end    
         end
     end
-    %Integrating away from the singularity
+    %% Integrating away from the singularity
     for i=2*refp+1:(rn(k)+nr)*refp
         Kern = 2*(1/(i-1/2)-1/(i+1/2));
         for l=dtheta/2:dtheta:pi-dtheta/4
@@ -204,37 +207,34 @@ if runNumber == 0
         
         
         save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
-
+        
+        runtime = toc;
+        if runtime >= maxtime
+            reStartAt = ll + poolnum*workerload;
+            save('reStartAt.mat','reStartAt')
+            runNumber = 1;
+            save('runNumber.mat','runNumber')
+            % Shut down the pool.
+            if ~isempty(gcp('nocreate'))
+                delete(gcp);
+            else
+                disp('No pool exists.')
+            end
+            exit
+        end 
     end
-%         
-%         runtime = toc;
-%         if runtime >= maxtime
-%             reStartAt = ll + poolnum*workerload;
-%             save('reStartAt.mat','reStartAt')
-%             runNumber = 1;
-%             save('runNumber.mat','runNumber')
-%             % Shut down the pool.
-%             if ~isempty(gcp('nocreate'))
-%                 delete(gcp);
-%             else
-%                 disp('No pool exists.')
-%             end
-%             % exit
-%         end 
-%     end
-%     save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
-%     reStartAt = nr+1;
-%     save('reStartAt.mat','reStartAt')
-%     runNumber = 1;
-%     save('runNumber.mat','runNumber')
-%     % Shut down the pool.
-%     if ~isempty(gcp('nocreate'))
-%         delete(gcp);
-%     else
-%         disp('No pool exists.')
-%     end  
-%     %exit
-
+    save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
+    reStartAt = nr+1;
+    save('reStartAt.mat','reStartAt')
+    runNumber = 1;
+    save('runNumber.mat','runNumber')
+    % Shut down the pool.
+    if ~isempty(gcp('nocreate'))
+        delete(gcp);
+    else
+        disp('No pool exists.')
+    end  
+    exit
 elseif runNumber > 0
     load('nr.mat','nr')
     load('D.mat','D')
@@ -251,9 +251,7 @@ elseif runNumber > 0
     dtheta = 2*pi/numer;%use pi/even number
     
     if reStartAt > nr
-
-        %exit
-
+        exit
     else
         load(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
         for ll = reStartAt:poolnum*workerload:nr 
@@ -316,9 +314,7 @@ elseif runNumber > 0
                 else
                     disp('No pool exists.')
                 end
-
-                %exit
-
+                exit
             end
         end
         save(['DTNnew345nr',num2str(nr),'D',num2str(D),'refp',num2str(refp),'.mat'],'DTNnew345')
@@ -332,8 +328,6 @@ elseif runNumber > 0
         else
             disp('No pool exists.')
         end  
-
-        % exit
-
+        exit
     end
 end
