@@ -836,7 +836,9 @@ simul_time = toc(tstart);
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 "WeS", "Cang", "tend", "nsteps", "dtb", "L_unit", "T_unit", "M_unit", ...
 "PROBLEM_CONSTANTS", "simul_time");
-
+fprintf("Finished simulation on %s", pwd);
 cd(currfold)
+
+
 end
 
