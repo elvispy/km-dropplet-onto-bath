@@ -6,7 +6,6 @@ lastwarn('', '');
 tstart = tic;
 %data in cgs
 
-
 if exist('z.mat', 'file') == 2
    % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
@@ -191,6 +190,8 @@ PROBLEM_CONSTANTS = struct("froude_nb", Fr, "weber_nb", We, ...
                             %"KILL_OUTSIDE", true, ...
                             %"wigner3j", {precomputed_wigner(harmonics_qtt)}, ...
 
+                            
+fprintf("Starting simulation on %s\n", pwd);
 
 exit = false;
 %% Main Loop
@@ -836,7 +837,7 @@ simul_time = toc(tstart);
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 "WeS", "Cang", "tend", "nsteps", "dtb", "L_unit", "T_unit", "M_unit", ...
 "PROBLEM_CONSTANTS", "simul_time");
-fprintf("Finished simulation on %s", pwd);
+fprintf("Finished simulation on %s. Time elapsed: %0.2f minutes\n", pwd, simul_time/60);
 cd(currfold)
 
 

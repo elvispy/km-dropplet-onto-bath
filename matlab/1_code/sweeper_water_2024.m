@@ -106,8 +106,10 @@ parfor ii = 1:height(simulations_cgs)
                 simulations_cgs.convergence_tol(ii), pwd, false);
                 
         catch ME
-           fprintf("Couldn't run simulation with the following parameters: \n Velcity: %g \n Modes: %g \n", ...
+            fprintf("Couldn't run simulation with the following parameters: \n Velocity: %g \n Modes: %g \n", ...
                 simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
+            a = datetime('now'); a.Format = 'yyyyMMddmmss';
+            parsave(sprintf("error_logU0=%g-%s.mat", simulations_cgs.U(ii), a), ME);
         end
     end
     
@@ -220,6 +222,10 @@ function final_folder = create_folder_stucture(entry)
     final_folder = pwd;
 
     cd(base);
+end
+
+function parsave(fname, errormsg)
+  save(fname, 'errormsg')
 end
 
 % function run_simulation()
