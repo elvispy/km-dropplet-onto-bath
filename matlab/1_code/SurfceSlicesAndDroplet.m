@@ -1,6 +1,7 @@
 %clc
 %clear
 close all;
+addpath(fullfile(pwd, "simulation_code" ));
 p = uigetdir();
 cd(p);
 try
@@ -38,8 +39,12 @@ end
 %%
 
 cd ..
-load('Ro.mat','Ro')%Sphere's radius in CGS
-
+try
+    load('Ro.mat','Ro')%Sphere's radius in CGS
+catch
+    cd ..
+    load('Ro.mat','Ro')
+end
 cd ..
 load('rhoS.mat','rhoS')%Sphere density
 %load('sigmaS.mat')%Sphere's surface tension
