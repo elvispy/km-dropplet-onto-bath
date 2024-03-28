@@ -117,6 +117,9 @@ parfor ii = 1:height(simulations_cgs)
 end
 
 cd(root);
+delete(gcp); % Deleting current parallel workers
+
+system('python sending_email.py'); % Sending email to notify that's finished
 
 
 function final_folder = create_folder_stucture(entry)
