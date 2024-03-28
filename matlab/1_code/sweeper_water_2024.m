@@ -106,6 +106,7 @@ parfor ii = 1:height(simulations_cgs)
                 simulations_cgs.convergence_tol(ii), pwd, false);
                 
         catch ME
+            cd(final_folders(ii))
             fprintf("Couldn't run simulation with the following parameters: \n Velocity: %g \n Modes: %g \n", ...
                 simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
             a = datetime('now'); a.Format = 'yyyyMMddmmss';
@@ -117,6 +118,7 @@ parfor ii = 1:height(simulations_cgs)
 end
 
 cd(root);
+delete(gcp); % to shutdown current parallel pool
 
 
 function final_folder = create_folder_stucture(entry)
@@ -125,7 +127,7 @@ function final_folder = create_folder_stucture(entry)
     
     % Defining folder structure
     physical_space = sprintf("D%gQuant%g", entry.D, entry.Quant);
-    fluid_parameters = sprintf("rho%gsigma%gnu%.2gmuair%g", entry.rho*1000, entry.sigma*100, entry.nu*10000, entry.muair);
+    fluid_parameters = sprintf("rho%gsigma%gnu%.0fmuair%g", entry.rho*1000, entry.sigma*100, entry.nu*10000, entry.muair);
     sphere_parameters = sprintf("rhoS%gsigmaS%g", entry.RhoS*1000, entry.SigmaS*100);
     radius_folder = sprintf("R%04.4gmm", entry.R*10000);
     velocity_folder = sprintf("ImpDefCornerAng%gU%.4g", entry.Ang, entry.U);
