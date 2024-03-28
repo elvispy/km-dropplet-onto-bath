@@ -81,13 +81,25 @@ for ii = 1:length(files_folder)
         %contact = [NaN, nnew] == -numl;
         idx_impact_theory = find(contacts);
         idx_end_theory    = find(liftoffs);
-        Uo_theory = vz(idx_impact_theory(1));
-        Uend_theory = vz(idx_end_theory(1));
+        if isempty(idx_end_theory)
+            fprintf("No liftoff found for %s\n", pwd);
+            liftoff_times = nan;
+            t_cont_theory = nan;
+            contact_times = nan;
+            Uend_theory = nan;
+            Uo_theory = nan;
+        else
         
-        t_cont_theory = tvec(idx_end_theory(1)) - tvec(idx_impact_theory(1));
-        contact_times = tvec(idx_impact_theory);
-        liftoff_times = tvec(idx_end_theory);
-        if length(liftoff_times) > 1; fprintf("Second bounce found for %s\n", pwd); end
+            Uo_theory = vz(idx_impact_theory(1));
+            Uend_theory = vz(idx_end_theory(1));
+            t_cont_theory = tvec(idx_end_theory(1)) - tvec(idx_impact_theory(1));
+            contact_times = tvec(idx_impact_theory);
+            liftoff_times = tvec(idx_end_theory);
+        end
+        
+        if length(idx_end_theory) > 1
+            fprintf("Second bounce found for %s\n", pwd);     
+        end
         try    
             CR_theory = -Uend_theory/Uo_theory;
         catch
