@@ -26,20 +26,21 @@ data.Oh = 0.006;
 files = dir("**/simulation_postprocessing.mat");
 currfol = pwd;
 Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
-coef_restitution = [];
-plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution);
+coef_restitution = []; N = [];
+plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N);
 
 for ii = 1:length(files)
     
     try 
-        if length(files) == 1; folder_name = files.folder; else folder_name = files(ii).folder; end
+        if length(files) == 1; folder_name = files.folder; else; folder_name = files(ii).folder; end
         cd(folder_name);
         try
+            load("ProblemConditions.mat");
+        catch
             load("U0.mat");
             load("T.mat");
-        catch
-            load("ProblemConditions.mat");
         end
+        if ~isfile("Ro.mat"); cd ..; end
         cd ..
         load('Ro.mat','Ro')%Sphere's radius in CGS
         cd ..
@@ -59,7 +60,7 @@ for ii = 1:length(files)
 
         simul.Ro = Ro; simul.rho = rho; simul.sigma = sigma; simul.U0 = U0;
         simul.nu = nu; simul.We = Westar; simul.Bo = Bo; simul.Oh = Oh;
-        simul.folder = folder_name;    
+        simul.folder = folder_name; simul.N = N;
 
         if is_valid(simul, data)
             load('oscillation_amplitudes.mat');
@@ -71,7 +72,7 @@ for ii = 1:length(files)
             coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
             contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
 
-            plotting_data = [plotting_data; {Westar, Bo, Oh, max_deflection, contact_time, coef_restitution}];
+            plotting_data = [plotting_data; {Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N}];
         end
     catch ME
         warning(ME.message);
@@ -134,23 +135,25 @@ if ~isempty(plotting_data)
         scatter(b(2), plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         
+        id = datetime('now'); id.Format = 'yyyyMMddmmss';
+        
         f_maxdef = figure(2);
         copyobj(b(1), f_maxdef); a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_maxdef, '../0_data/manual/maximum_deflection', 'eps');
-        savefig(f_maxdef, "../0_data/manual/maximum_defelction.fig");
+        saveas(f_maxdef, fprintf("../0_data/manual/maximum_deflection%s", id), 'eps');
+        savefig(f_maxdef, fprintf("../0_data/manual/maximum_deflection%s.fig", id));
         
         f_contact = figure(3);
         copyobj(b(2), f_contact);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_contact, '../0_data/manual/contact_time', 'eps');
-        savefig(f_contact, '../0_data/manual/contact_time.fig');
+        saveas(f_contact, fprintf("../0_data/manual/contact_time%s", id), 'eps');
+        savefig(f_contact, fprintf("../0_data/manual/contact_time%s.fig", id));
         
         f_CR = figure(4);
         copyobj(b(3), f_CR);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_CR, '../0_data/manual/coef_res', 'eps');
-        savefig(f_CR, '../0_data/manual/coef_res.fig');
+        saveas(f_CR, fprintf("../0_data/manual/coef_res%s", id), 'eps');
+        savefig(f_CR, fprintf("../0_data/manual/coef_res%s.fig", id));
         
     end
 else
