@@ -17,8 +17,8 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(59, 9, 21)';
-modes = 20;
+U = linspace(59, 9, 11)';
+modes = 40;
 tol = 5e-5;
 
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
@@ -120,7 +120,10 @@ end
 cd(root);
 delete(gcp); % Deleting current parallel workers
 
-system('python sending_email.py'); % Sending email to notify that's finished
+% Load Python3 in MACOS based on https://www.mathworks.com/matlabcentral/answers/359408-trouble-with-a-command-in-matlab-s-system
+if ~ispc && system('python3 --version') ~= 0; setenv('PATH', [getenv('PATH') ':/usr/local/bin/']); end
+
+system('python3 sending_email.py'); % Sending email to notify that's finished
 
 
 function final_folder = create_folder_stucture(entry)
