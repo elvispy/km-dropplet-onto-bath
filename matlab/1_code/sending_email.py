@@ -6,6 +6,8 @@ import os
 import ssl
 import smtplib
 
+#ssl._create_default_https_context = ssl._create_unverified_context
+
 path = dirname(realpath(__file__))
 while "0_data" not in os.listdir(path):
     path = dirname(path)
