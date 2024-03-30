@@ -40,13 +40,18 @@ for ii = 1:length(files)
             load("U0.mat");
             load("T.mat");
         end
-        if ~isfile("Ro.mat"); cd ..; end
         cd ..
-        load('Ro.mat','Ro')%Sphere's radius in CGS
+        if ~isfile("RoMaker.m"); cd ..; end
+        
+        if ~isfile("Ro.mat") && isfile("RoMaker.m"); RoMaker; end
+            
+        load('Ro.mat','Ro'); 
+        
         cd ..
         %load('rhoS.mat','rhoS')%Sphere density
         %load('sigmaS.mat')%Sphere's surface tension
         cd ..
+        if ~isfile("rho.mat") && isfile("BathMaker.m"); BathMaker; end
         load('rho.mat','rho')
         load('sigma.mat','sigma')
         load('nu.mat','nu')
@@ -76,6 +81,7 @@ for ii = 1:length(files)
         end
     catch ME
         warning(ME.message);
+        disp(pwd)
     end
 
 end
@@ -140,20 +146,20 @@ if ~isempty(plotting_data)
         f_maxdef = figure(2);
         copyobj(b(1), f_maxdef); a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_maxdef, fprintf("../0_data/manual/maximum_deflection%s", id), 'eps');
-        savefig(f_maxdef, fprintf("../0_data/manual/maximum_deflection%s.fig", id));
+        saveas(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s", id), 'eps');
+        savefig(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s.fig", id));
         
         f_contact = figure(3);
         copyobj(b(2), f_contact);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_contact, fprintf("../0_data/manual/contact_time%s", id), 'eps');
-        savefig(f_contact, fprintf("../0_data/manual/contact_time%s.fig", id));
+        saveas(f_contact, sprintf("../0_data/manual/contact_time%s", id), 'eps');
+        savefig(f_contact, sprintf("../0_data/manual/contact_time%s.fig", id));
         
         f_CR = figure(4);
         copyobj(b(3), f_CR);a = gca;
         a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_CR, fprintf("../0_data/manual/coef_res%s", id), 'eps');
-        savefig(f_CR, fprintf("../0_data/manual/coef_res%s.fig", id));
+        saveas(f_CR, sprintf("../0_data/manual/coef_res%s", id), 'eps');
+        savefig(f_CR, sprintf("../0_data/manual/coef_res%s.fig", id));
         
     end
 else
