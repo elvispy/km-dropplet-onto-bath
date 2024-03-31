@@ -28,7 +28,8 @@ currfol = pwd;
 Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
 coef_restitution = []; N = [];
 plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N);
-standalone = true;
+standalone = false;
+saving = false;
 
 for ii = 1:length(files)
     
@@ -73,7 +74,8 @@ for ii = 1:length(files)
             if norm(oscillation_amplitudes) < 0.01
                 continue
             end
-            load("simulation_postprocessing.mat");        
+            load("simulation_postprocessing.mat");     
+            if ~exist('N', 'var'); N = nan; end
             max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
             coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
             contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
@@ -141,26 +143,27 @@ if ~isempty(plotting_data)
         scatter(b(2), plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',4);
         scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         
-        id = datetime('now'); id.Format = 'yyyyMMddmmss';
-        
-        f_maxdef = figure(2);
-        copyobj(b(1), f_maxdef); a = gca;
-        a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s", id), 'eps');
-        savefig(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s.fig", id));
-        
-        f_contact = figure(3);
-        copyobj(b(2), f_contact);a = gca;
-        a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_contact, sprintf("../0_data/manual/contact_time%s", id), 'eps');
-        savefig(f_contact, sprintf("../0_data/manual/contact_time%s.fig", id));
-        
-        f_CR = figure(4);
-        copyobj(b(3), f_CR);a = gca;
-        a.Position = [0.2, 0.1, 0.6, 0.9];
-        saveas(f_CR, sprintf("../0_data/manual/coef_res%s", id), 'eps');
-        savefig(f_CR, sprintf("../0_data/manual/coef_res%s.fig", id));
-        
+        if saving == true
+            id = datetime('now'); id.Format = 'yyyyMMddmmss';
+
+            f_maxdef = figure(2);
+            copyobj(b(1), f_maxdef); a = gca;
+            a.Position = [0.2, 0.1, 0.6, 0.9];
+            saveas(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s", id), 'eps');
+            savefig(f_maxdef, sprintf("../0_data/manual/maximum_deflection%s.fig", id));
+
+            f_contact = figure(3);
+            copyobj(b(2), f_contact);a = gca;
+            a.Position = [0.2, 0.1, 0.6, 0.9];
+            saveas(f_contact, sprintf("../0_data/manual/contact_time%s", id), 'eps');
+            savefig(f_contact, sprintf("../0_data/manual/contact_time%s.fig", id));
+
+            f_CR = figure(4);
+            copyobj(b(3), f_CR);a = gca;
+            a.Position = [0.2, 0.1, 0.6, 0.9];
+            saveas(f_CR, sprintf("../0_data/manual/coef_res%s", id), 'eps');
+            savefig(f_CR, sprintf("../0_data/manual/coef_res%s.fig", id));
+        end
     end
 else
     warning("Couldn't find any simulations with the specified parameters");
