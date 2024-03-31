@@ -92,15 +92,7 @@ parfor ii = 1:height(simulations_cgs)
     cd(final_folders(ii));
 
     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
-%         for file = aux_files
-%             try
-%                 copyfile(fullfile(safe_folder, file), pwd)    
-%             catch ME
-%                 if simulations_cgs.U(ii) ~= 38
-%                    throw("Unexpected error ocurred"); 
-%                 end
-%             end
-%         end
+
         try
             solve_motion(simulations_cgs.U(ii), nan, simulations_cgs.modes(ii), ...
                 simulations_cgs.convergence_tol(ii), pwd, false);
@@ -112,6 +104,9 @@ parfor ii = 1:height(simulations_cgs)
             a = datetime('now'); a.Format = 'yyyyMMddmmss';
             parsave(sprintf("error_logU0=%g-%s.mat", simulations_cgs.U(ii), a), ME);
         end
+    else
+        fprintf("Not running simulation with the following parameters (already done): \n Velocity: %g \n Modes: %g \n", ...
+                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
     end
     
 
