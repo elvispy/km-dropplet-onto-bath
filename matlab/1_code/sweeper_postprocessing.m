@@ -47,13 +47,12 @@ for ii = 1:length(files_folder)
         load('tvec.mat')
         load('oscillation_amplitudes.mat');
      
-        % North Based parameters
-        north = z + 1 + sum(oscillation_amplitudes, 1);
+        % COM-Based parameters
+        north = z + 1; % Changed: Now is COM-based. OLD used: + sum(oscillation_amplitudes, 1); 
+        
         contact_idx = find(north<=2,1);
-        %while north(contact_idx + 1) >=2
-        %    contact_idx = contact_idx + 1;
-        %end
-        flight_idx = find(north((contact_idx+1):end)>=2,1);
+
+        flight_idx = find(north((contact_idx+1):end)>2,1);
         N = size(oscillation_amplitudes, 1);
         south = z - (1 + sum(oscillation_amplitudes .* ((-ones(N, 1)).^((1:N)')), 1));
         
@@ -71,7 +70,7 @@ for ii = 1:length(files_folder)
            disp("lol");
         end
         
-        % Center-of-mass based parameters
+        % Number-of-contact-points based parameters
         contact_indicator = (numl ~= 0);
         transition_indicator = diff(contact_indicator);
         contacts = (transition_indicator == 1);
