@@ -4,27 +4,32 @@ close all;
 addpath(fullfile(pwd, "simulation_code" ));
 p = uigetdir();
 cd(p);
+
+errored = false;
 try
-    load('U0.mat');
-    load('Ang.mat'); Cang = Ang * pi / 180;
-    load('Fr.mat');
-catch
+
     load('ProblemConditions.mat');
+catch
+    load('U0.mat');
+    %load('Ang.mat'); Cang = Ang * pi / 180;
+    load('Fr.mat');
+    disp("Couldn't find Problem COnditions");
 end
 load('vz.mat'); Vo = abs(vz(1));
 
-files = dir(fullfile(pwd, "etaMatPer*.mat"));
-N = length(files);
-if N > 0
+
+try
+    load('etas.mat', 'etas');
+    etaMatPer = etas;
+catch
+    files = dir(fullfile(pwd, "etaMatPer*.mat"));
+    N = length(files);
     etaAux = [];
     for i = 1:N
         load(files(i).name);
         etaAux = [etaAux, etaMatPer];
     end
     etaMatPer = etaAux;
-else
-    load('etas.mat', 'etas');
-    etaMatPer = etas;
 end
 load('z.mat')
 load('etaOri.mat')
@@ -170,7 +175,21 @@ end
 close(vidObj);
 
 
-
+function load_vars(str)
+    global errored
+    
+    if isfile(str) && errored == false
+        a_before = who;
+        load(str);
+        a_after = who;
+        for ii = 1:length(a_after)
+            if any(strcmp(a_before, a_after{ii})) == true; continue; end
+            asssignin('base', a_after{ii}, eval(a_after{ii}));
+        end
+    else
+        errored = true;
+    end
+end
 
 
 

@@ -881,7 +881,8 @@ function results_saver(prefix, indexes, variables, variableNames)
                    var = var(:, indexes);
                end
        end
-       save(sprintf('%s%s.mat', prefix, variableNames{ii}), 'var');
+       stru = struct(variableNames{ii}, var);
+       save(sprintf('%s%s.mat', prefix, variableNames{ii}), '-struct', 'stru');
     end
     
 end
