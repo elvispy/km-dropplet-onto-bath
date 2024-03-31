@@ -28,6 +28,7 @@ currfol = pwd;
 Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
 coef_restitution = []; N = [];
 plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N);
+standalone = true;
 
 for ii = 1:length(files)
     
@@ -76,7 +77,6 @@ for ii = 1:length(files)
             max_deflection = abs(max_def); if isempty(max_deflection) == true; max_deflection = NaN; end
             coef_restitution = CRref; if isempty(coef_restitution) == true; coef_restitution = NaN; end
             contact_time = tcont * T /t_sigma; if isempty(contact_time) == true; contact_time = NaN; end
-
             plotting_data = [plotting_data; {Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N}];
         end
     catch ME
@@ -89,7 +89,7 @@ if ~isempty(plotting_data)
     if max(plotting_data.Bo) ~= min(plotting_data.Bo) || max(plotting_data.Oh) ~= min(plotting_data.Oh)
         warning("Bohn and Oh numbers not uniform across data");
     end
-    standalone = false;
+
     close all
     cd(currfol);
     if standalone
