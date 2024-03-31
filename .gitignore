@@ -29,8 +29,8 @@ Manifest.toml
 !DTN*.mat
 !simul*_post*.mat
 !Problem*.mat
+!errorl*.mat
 !*amplitudes.mat
-!error*.mat
 **/*.asv
 *.m~
 
