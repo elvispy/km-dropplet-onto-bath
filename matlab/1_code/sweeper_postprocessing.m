@@ -12,7 +12,7 @@ for ii = 1:length(files_folder)
     end
     load("dr.mat");
     cd(files_folder(ii).folder);
-    
+    mypwd = split(pwd, "1_code"); mypwd = mypwd{2};
     % Check if etaOri exists (the center of the bath)
     if isempty(dir("oscillation*.mat")) == false % || true
         
@@ -64,7 +64,7 @@ for ii = 1:length(files_folder)
         tcont = tend-tImpact;
         CRref = -Uend/Uo;
         
-        max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", pwd); end
+        max_def = min(south); if max_def == -1; max_def = NaN; fprintf("Error on %s \n", mypwd); end
         if norm(oscillation_amplitudes) < 1e-5
            save("delete_me.m", "oscillation_amplitudes");
            disp("lol");
@@ -81,7 +81,7 @@ for ii = 1:length(files_folder)
         idx_impact_theory = find(contacts);
         idx_end_theory    = find(liftoffs);
         if isempty(idx_end_theory)
-            fprintf("No liftoff found for %s\n", pwd);
+            fprintf("No liftoff in %s\n", mypwd);
             liftoff_times = nan;
             t_cont_theory = nan;
             contact_times = nan;
@@ -97,7 +97,7 @@ for ii = 1:length(files_folder)
         end
         
         if length(idx_end_theory) > 1
-            fprintf("Second bounce found for %s\n", pwd);     
+            fprintf("Second bounce in %s\n", mypwd);     
         end
         try    
             CR_theory = -Uend_theory/Uo_theory;
@@ -107,7 +107,7 @@ for ii = 1:length(files_folder)
         
         L = diff(etas)/dr;
         max_gradient = max(abs(L(:)));
-        if max_gradient > 1; warning("Gradient too big for %s\n", pwd); end
+        if max_gradient > 1; warning("Big gradient in %s\n", mypwd); end
         save('simulation_postprocessing.mat', "Uo", "tend", ...
             "Uend", "max_def", "CRref", "tcont", "max_gradient", "Uo_theory", ...
             'Uend_theory', 't_cont_theory', 'contact_times', 'liftoff_times', ...

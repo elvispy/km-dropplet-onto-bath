@@ -855,7 +855,8 @@ simul_time = toc(tstart);
 save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 "WeS", "Cang", "tend", "nsteps", "dtb", "L_unit", "T_unit", "M_unit", ...
 "PROBLEM_CONSTANTS", "simul_time");
-fprintf("Finished simulation on %s. Time elapsed: %0.2f minutes\n", pwd, simul_time/60);
+mypwd = split(pwd, "1_code"); mypwd = mypwd{2};
+fprintf("Finished simulation on %s. Time elapsed: %0.2f minutes\n", mypwd, simul_time/60);
 cd(currfold)
 
 

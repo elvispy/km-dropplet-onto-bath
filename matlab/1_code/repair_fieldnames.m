@@ -1,4 +1,4 @@
-files = dir("**\*.mat");
+files = dir("**/*.mat");
 
 for ii = 1:length(files)
     cd(files(ii).folder)
