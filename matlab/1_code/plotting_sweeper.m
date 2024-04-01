@@ -29,7 +29,7 @@ Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = [];
 coef_restitution = []; N = [];
 plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N);
 standalone = false;
-saving = true;
+saving = false;
 
 for ii = 1:length(files)
     
