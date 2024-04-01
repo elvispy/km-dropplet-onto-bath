@@ -45,7 +45,7 @@ function angle = theta_from_cylindrical(r, A_l)
         f_objective = @(theta) sin(theta) .* (1 + zeta(theta)) - r(ii);
 
         if ii>=5 
-            theta = makima(r((ii-1):(ii-4)), angles((ii-1):(ii-4)), r(ii));
+            theta = interp1(r((ii-4):(ii-1)), angle((ii-4):(ii-1)), r(ii), 'makima', 'extrap');
         else
             theta = pi - asin(min(1, r(ii)));
         end
@@ -62,7 +62,7 @@ function angle = theta_from_cylindrical(r, A_l)
                 %theta = rand() * pi/2 + pi/2;
             end
         end
-        if n == 350; warning("Theta_from_cylindrical didnt converge"); end
+        if n >= 340; warning("Theta_from_cylindrical didnt converge"); end
         angle(ii) = theta;
     end
 

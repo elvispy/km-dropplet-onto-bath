@@ -96,7 +96,6 @@ parfor ii = 1:height(simulations_cgs)
         try
             solve_motion(simulations_cgs.U(ii), nan, simulations_cgs.modes(ii), ...
                 simulations_cgs.convergence_tol(ii), pwd, false);
-                
         catch ME
             cd(final_folders(ii))
             fprintf("Couldn't run simulation with the following parameters: \n Velocity: %g \n Modes: %g \n", ...
