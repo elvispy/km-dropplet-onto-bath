@@ -217,10 +217,6 @@ exit = false;
 %% Main Loop
 try
     while (t<tend) && exit == false
-    %     if toc > 120
-    %         break;
-    %     end
-
 
         tentative_index = tentative_index+1;
         t = tvec(tentative_index+1);
@@ -244,7 +240,7 @@ try
         RmaxOld = r_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, tentative_index)), oscillation_amplitudes(:, tentative_index));
 
         %(i.e. where the tangent plane to the droplet is vertical)
-        nlmax(tentative_index) = floor(RmaxOld/dr)+1;%max number of contact points
+        nlmax(tentative_index) = max(floor(RmaxOld/dr)+1, numl(tentative_index));%max number of contact points
 
         thetaVec = theta_from_cylindrical(dr*(0:(nlmax(tentative_index)-1)), oscillation_amplitudes(:, tentative_index)); % zeros(1,nlmax(jj));%initialising vector of angles of pressed positions
 

@@ -5,37 +5,37 @@ addpath(fullfile(pwd, "simulation_code" ));
 p = uigetdir();
 cd(p);
 
-errored = false;
+global errored
+errored = ~isfile('z.mat');
 try
 
     load('ProblemConditions.mat');
 catch
     load('U0.mat');
-    %load('Ang.mat'); Cang = Ang * pi / 180;
     load('Fr.mat');
-    disp("Couldn't find Problem COnditions");
+    disp("Couldn't find Problem Conditions");
 end
-load('vz.mat'); Vo = abs(vz(1));
+load_vars('vz.mat'); Vo = abs(vz(1));
 
 
 try
-    load('etas.mat', 'etas');
+    load_vars('etas.mat');
     etaMatPer = etas;
 catch
     files = dir(fullfile(pwd, "etaMatPer*.mat"));
     N = length(files);
     etaAux = [];
     for i = 1:N
-        load(files(i).name);
+        load_vars(files(i).name);
         etaAux = [etaAux, etaMatPer];
     end
     etaMatPer = etaAux;
 end
-load('z.mat')
-load('etaOri.mat')
-load('tvec.mat')
+load_vars('z.mat')
+load_vars('etaOri.mat')
+load_vars('tvec.mat')
 
-load('oscillation_amplitudes.mat');
+load_vars('oscillation_amplitudes.mat');
 Rv = zeros(1, size(oscillation_amplitudes, 2));
 for ii = 1:size(oscillation_amplitudes, 2)
     Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
@@ -120,8 +120,12 @@ etaOriplot = etaOri(1:end-1);
 zmin = min(min(etaMatPer));
 zmax = max(max(etaMatPer));
 
-
-vidObj = VideoWriter('WavesAndDrop.mp4','MPEG-4');
+if errored
+    file_name = 'errored_WavesAndDrop.mp4';
+else
+    file_name = 'WavesAndDrop.mp4';
+end
+vidObj = VideoWriter(file_name,'MPEG-4');
 set(vidObj,'FrameRate',20)
 open(vidObj);
 
@@ -178,17 +182,16 @@ close(vidObj);
 function load_vars(str)
     global errored
     
-    if isfile(str) && errored == false
-        a_before = who;
-        load(str);
-        a_after = who;
-        for ii = 1:length(a_after)
-            if any(strcmp(a_before, a_after{ii})) == true; continue; end
-            asssignin('base', a_after{ii}, eval(a_after{ii}));
-        end
-    else
-        errored = true;
+    if errored == true
+        str = "errored_" + str; 
     end
+    
+    vars = load(str);
+    fn = fieldnames(vars);
+    for ii = 1:length(fn)
+        assignin('caller', fn{ii}, vars.(fn{ii}));
+    end
+    
 end
 
 
