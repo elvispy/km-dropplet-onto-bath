@@ -17,7 +17,7 @@ RhoS = 1; % must multiply by x1000
 SigmaS = 72.20; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(59, 39, 6)';
+U = [65, 63, 61, 59]'; %inspace(59, 39, 6)';
 modes = 15;
 tol = 5e-5;
 
