@@ -5,22 +5,29 @@
 
 % STEP 1: Define which simulations are to be run. 
 
+ddate = datestr(datetime(), 30); % 30 = ISO 8601
+diary(sprintf("../0_data/manual/Logger/sweeper_water_%s.txt", ddate));
+disp("------------");
+fprintf("%s \n %s\n", datestr(datetime()), mfilename('fullpath'));
 
-D = 50;
-Quant = 100;
 
-rho = 1; % must multiply by x1000
-sigma = 72.20; % must multiply by x100
-nu = 9.78E-3; % Multiply by x10000
-muair = 0;
-RhoS = 1; % must multiply by x1000
-SigmaS = 72.20; % must multiply by x100
-R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
-Ang = 180;
-U = linspace(57, 47, 6)'; %inspace(59, 39, 6)';
-modes = 21;
-tol = 5e-5;
+%% Setting simulation parameters
+D = 50 %#ok<*NOPTS>
+Quant = 100
+rho = 1 % must multiply by x1000
+sigma = 72.20 % must multiply by x100
+nu = 9.78E-3 % Multiply by x10000
+muair = 0
+RhoS = 1 % must multiply by x1000
+SigmaS = 72.20 % must multiply by x100
+R = 0.035 % linspace(0.02, 0.05, 5)'; % must multiply by x10
+Ang = 180
+U = linspace(57, 47, 6)' %inspace(59, 39, 6)';
+modes = 21
+tol = 5e-5
 
+
+% Creating table for all simulations
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx, tolidx] = ...
     ndgrid(1:length(D), 1:length(Quant), 1:length(rho), 1:length(sigma), ...
@@ -56,7 +63,7 @@ simulations_cgs.folder = repmat("", nrow, 1);
 %           -> R(0350)mm 
 %               - RoMaker
 %               -> ImpDefCornerAng(180)U(28)
-%                   -> N(20)
+%                   -> N=(20)tol=(5.00e-5)
 %                       - Simulation files (.mat) + logger files...
 
 for ii = 1:height(simulations_cgs)
@@ -87,6 +94,7 @@ addpath(safe_folder, '-begin');
 %    "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
 final_folders = simulations_cgs.folder;
+%% Starting simulation
 parfor ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(final_folders(ii));
@@ -118,7 +126,7 @@ delete(gcp); % Deleting current parallel workers
 if ~ispc && system('python3 --version') ~= 0; setenv('PATH', [getenv('PATH') ':/usr/local/bin/']); end
 
 system('python3 sending_email.py'); % Sending email to notify that's finished
-
+diary off % turning logger off
 
 function final_folder = create_folder_stucture(entry)
     base =  pwd;
