@@ -1,0 +1,6 @@
+{Unrecognized function or variable 'frpintf'.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('sweeper_water_2024', 'D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\sweeper_water_2024.m', 10)" style="font-weight:bold">sweeper_water_2024</a> (<a href="matlab: opentoline('D:\GITRepos\km-dropplet-onto-bath\matlab\1_code\sweeper_water_2024.m',10,0)">line 10</a>)
+frpintf("------------")
+} 
+sweeper_water_2024
