@@ -31,6 +31,7 @@ Manifest.toml
 !Problem*.mat
 !errorl*.mat
 !*amplitudes.mat
+!**/ImpDef*39/N=20*/**
 **/*.asv
 *.m~
 

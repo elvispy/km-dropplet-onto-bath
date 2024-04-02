@@ -1,9 +1,8 @@
 %clc
 %clear
 close all;
-addpath(fullfile(pwd, "simulation_code" ));
-
-p = uigetdir();
+addpath(fullfile(pwd, "..", "simulation_code"));
+p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % uigetdir();
 cd(p);
 
 global errored
@@ -121,14 +120,14 @@ etaOriplot = etaOri(1:end-1);
 zmin = min(min(etaMatPer));
 zmax = max(max(etaMatPer));
 
-if errored
-    file_name = 'errored_WavesAndDrop.mp4';
-else
-    file_name = 'WavesAndDrop.mp4';
-end
-vidObj = VideoWriter(file_name,'MPEG-4');
-set(vidObj,'FrameRate',20)
-open(vidObj);
+% if errored
+%     file_name = 'errored_WavesAndDrop.mp4';
+% else
+%     file_name = 'WavesAndDrop.mp4';
+% end
+% vidObj = VideoWriter(file_name,'MPEG-4');
+% set(vidObj,'FrameRate',20)
+% open(vidObj);
 
 Gamma = 0; %%
 wzero = 1; %%
@@ -136,12 +135,19 @@ thetaZero = 0; %%
 zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb; %(1:end-1);
 
-for ii = floor(linspace(1, size(etaMatPer,2), 300))
+subplots = 7;
+figure('Position', [100, 100, 1024, 400]);
+subplotWidths = 0.8;
+subplotHeight = 0.8;
+for ii = floor(linspace(1, size(etaMatPer,2), subplots))
 
 
     thetaplot = linspace(0, pi, 100);%-%-0:thetaVec(end)/400:thetaVec(end);
     %-%-xsTop = xsoftheta(thetaplot,A2New,A3New);
     %-%-zsTop = zsoftheta(thetaplot,A2New,A3New);
+    position = [(i-1)*subplotWidths/subplots + (1-subplotWidths)/2, (1-subplotHeight)/2, subplotWidths/subplots, subplotHeight];
+    subplot('Position', position);
+    
     zsTop = zs_from_spherical(thetaplot, oscillation_amplitudes(:, ii));
     xsTop = r_from_spherical(thetaplot, oscillation_amplitudes(:, ii)); 
     plot([-xsTop(end:-1:2), xsTop],[zsTop(end:-1:2), zsTop]+z(ii),'k','Linewidth',2);
@@ -157,27 +163,27 @@ for ii = floor(linspace(1, size(etaMatPer,2), 300))
     xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     ylabel('   $\frac{z}{R_o}\ \ \ $   ','interpreter','Latex','FontName','Times',...
         'FontSize',24,'rotation',0)
-    t = (ii-1)/360;
-    to = floor(t);
-    t1 = floor(10*(t-to));
-    t2 = round(100*(t-to-t1/10));
-    if t2 == 10
-        t2=0;
-        t1=t1+1;
-    end
-    if t1 == 10
-        t1 = 0;
-        to = to+1;
-    end
+%     t = (ii-1)/360;
+%     to = floor(t);
+%     t1 = floor(10*(t-to));
+%     t2 = round(100*(t-to-t1/10));
+%     if t2 == 10
+%         t2=0;
+%         t1=t1+1;
+%     end
+%     if t1 == 10
+%         t1 = 0;
+%         to = to+1;
+%     end
 
     title(sprintf("$ t/t_\\sigma =\\ $ %3.2f", tvec(ii)),'FontSize',18,...
             'interpreter','latex','FontName','Times')    
     drawnow
-    currFrame = getframe(gcf);
-    writeVideo(vidObj,currFrame);
+    %currFrame = getframe(gcf);
+    %writeVideo(vidObj,currFrame);
     hold off
 end
-close(vidObj);
+%close(vidObj);
 
 
 function load_vars(str)
