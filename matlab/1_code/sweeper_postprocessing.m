@@ -2,7 +2,9 @@
 % metrics of the simulation.
 
 % STEP 3: Actually run the simulations. 
-
+diary ../0_data/manual/Logger/sweeper_postprocessing_logger.txt
+disp("-------");
+fprintf("%s \n %s", datestr(datetime()), mfilename('fullpath'));
 files_folder = dir("**/etaOri.mat");
 for ii = 1:length(files_folder)
     cd(files_folder(ii).folder);
@@ -115,3 +117,4 @@ for ii = 1:length(files_folder)
 
     end
 end
+diary off
