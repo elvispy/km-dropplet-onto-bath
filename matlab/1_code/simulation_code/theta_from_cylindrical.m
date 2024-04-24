@@ -55,9 +55,9 @@ function angle = theta_from_cylindrical(r, A_l)
         while abs(f_objective(theta)) >= tol_theta && n < 350
             theta = mod(theta - f_objective(theta)/f_prime(theta) - 1e-4, pi/2) + 1e-4 + pi/2; % If solution is close to pi, theta is unstable with mod function (therefore 1e-4 added)
             n = n + 1;
-            if n == 50
+            if n == 200
                 theta = 3.141592653589793;
-            elseif n == 100
+            elseif n == 300
                 theta = pi - asin(min(1, r(ii)));
                 %theta = rand() * pi/2 + pi/2;
             end
