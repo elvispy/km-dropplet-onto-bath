@@ -140,8 +140,8 @@ subplots = 5;
 subplotWidths = 0.9;
 subplotHeight = 0.85;
 idxs = floor(linspace(1, size(etaMatPer,2)*0.715, subplots));
-base = 150;
-figure('Position', [5, 5, base*subplots/subplotWidth, 3*base/subplotHeight+200]);
+base = 200;
+saving_figure = figure('Position', [50, 50, base*subplots/subplotWidths+200, 3*base/subplotHeight]);
 for jj = 1:subplots
     ii = idxs(jj);
 
@@ -168,9 +168,9 @@ for jj = 1:subplots
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
-        %ylabel('   $\frac{z}{R_o}\ \ \ $   ','interpreter','Latex','FontName','Times',...
-        %    'FontSize',24,'rotation',0)
-        %set(gca, 'Ytick', 0);
+        lol = ylabel('$z / R_o $ vs $x/ R_o$','interpreter','Latex','FontName','Times',...
+            'FontSize',20,'rotation',90);
+        lol.Position(1) = -3.5;
     else
         
     end
@@ -190,19 +190,19 @@ for jj = 1:subplots
     % Pressure field distribution
     f = zeta_generator(pressure_amplitudes(:, ii));
     pfield = f(thetaplot) - sum(pressure_amplitudes(:, ii));
-    
+    pmean = mean(pfield(1:50));
     position = [(jj-1)*subplotWidths/subplots + (1-subplotWidths)/2, ...
         1/3 * subplotHeight + (1-subplotHeight)/2, subplotWidths/subplots, subplotHeight/3];
     subplot('Position', position);
-    plot(thetaplot*180/pi, pfield);
+    plot(thetaplot*180/pi, pfield-pmean);
     set(gca,'xlim',[0 180], 'ylim', [-0.5, 2], 'Xtick', [45, 90, 135], ...
         'Ytick', [0 1 2], 'FontName','Times','FontSize',14);
     grid on
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
-        ylabel('$p(\theta)$ vs $\theta$','interpreter','Latex','FontName','Times',...
-            'FontSize',24,'rotation',90)
+        ll = ylabel('$p(\theta)$ vs $\theta$','interpreter','Latex','FontName','Times',...
+            'FontSize',24,'rotation',90);
     else
         yticklabels("");
         %set(gca,'ytick',[]);
@@ -219,17 +219,17 @@ for jj = 1:subplots
         (1-subplotHeight)/2-0.04, subplotWidths/subplots, subplotHeight/3];
     subplot('Position', position);
     bar(0:NN, [-sum(pressure_amplitudes(:, ii)); pressure_amplitudes(:, ii)]);
-    set(gca, 'ylim', [-0.7, 0.7], 'Xtick', [0, floor(NN/2)], 'Ytick', [-.5 0 .5], ...
+    set(gca, 'ylim', [-0.7, 0.7], 'Xtick', [0, floor(NN/2), NN], 'Ytick', [-.5 0 .5], ...
         'FontName','Times','FontSize',14);
     grid on
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
-        ylabel('$B_{\ell}$ vs $\ell $','interpreter','Latex','FontName','Times',...
-            'FontSize',24,'rotation',90)
+        yy = ylabel('$B_{\ell}$ vs $\ell $','interpreter','Latex','FontName','Times',...
+            'FontSize',24,'rotation',90);
+        yy.Position(1) = -2.5; % ll.Position(1);
     else
         yticklabels("");
-        %set(gca,'ytick',[]);
     end
     a = gca;
     a.XRuler.TickLabelGapOffset = -4;
@@ -237,8 +237,10 @@ for jj = 1:subplots
     hold off
 end
 
+saveas(saving_figure, "../../0_data/manual/impact_panel", 'eps');
+savefig(saving_figure, "../../0_data/manual/impact_panel.fig");
 
-%close(vidObj);
+
 
 
 function load_vars(str)
