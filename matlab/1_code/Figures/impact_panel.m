@@ -2,6 +2,7 @@
 %clear
 close all;
 addpath(fullfile(pwd, "..", "simulation_code"));
+curr = pwd;
 p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % uigetdir();
 cd(p);
 
@@ -10,6 +11,11 @@ errored = ~isfile('z.mat');
 try
 
     load('ProblemConditions.mat'); NN = N;
+    disp("Starting impact panel for the following parameters:");
+    fprintf("Re = %g\n", Re);
+    fprintf("We = %g\n", We);
+    fprintf("Fr = %g\n", Fr);
+    fprintf("U0 = %g cm/s\n", U0);
 catch
     load('U0.mat');
     load('Fr.mat');
@@ -37,6 +43,7 @@ load_vars('tvec.mat')
 
 load_vars('oscillation_amplitudes.mat');
 load_vars('pressure_amplitudes.mat');
+load_vars('numl.mat');
 Rv = zeros(1, size(oscillation_amplitudes, 2));
 for ii = 1:size(oscillation_amplitudes, 2)
     Rv(ii) = zs_from_spherical(pi, oscillation_amplitudes(:, ii));
@@ -78,36 +85,6 @@ load('zs.mat','zs')
 %xplot = dr*(0:nr-1); save('xplot.mat','xplot')%I might remove or relocate this
 load('xplot.mat')
 
-%cd(['rho',num2str(1000*rho),'sigma',num2str(round(100*sigma)),'nu',num2str(round(10000*nu)),'muair',num2str(muair)])
-
-%cd(['RhoS',num2str(rhoS*1000),'SigmaS',num2str(round(100*sigmaS))])
-%load('Ma.mat','Ma')%Dimensionless mass of sphere
-%load('Ra.mat','Ra')%Density ratio
-
-%%
-% cd ..
-% load('Ro.mat');
-% 
-% cd ..
-% load('rhoS.mat');
-
-%cd ..
-%load('r.mat')
-%load('nr.mat')
-%load('dr.mat')
-%load('zs.mat','zs')
-%load('Gamma.mat')
-%load('wzero.mat')
-%load('thetaZero.mat')
-%load('xplot.mat')
-
-%cd(['Rho',num2str(rhoS*1000)])
-
-%cd(['ImpDefAng',num2str(round((pi-Cang)*180/pi)),'U',num2str(U0)])
-%load('Rv.mat')
-%Rv = ones(size(etaMatPer, 2), 1);
-%load('Fr.mat')
-
 
 
 cd(p);
@@ -138,10 +115,10 @@ zbplot=zb; %(1:end-1);
 
 subplots = 5;
 subplotWidths = 0.9;
-subplotHeight = 0.85;
+subplotHeight = 0.8;
 idxs = floor(linspace(1, size(etaMatPer,2)*0.715, subplots));
 base = 200;
-saving_figure = figure('Position', [50, 50, base*subplots/subplotWidths+200, 3*base/subplotHeight]);
+saving_figure = figure('Position', [50, 50, base*subplots/subplotWidths+300, 3*base/subplotHeight+100]);
 for jj = 1:subplots
     ii = idxs(jj);
 
@@ -180,7 +157,7 @@ for jj = 1:subplots
     
     
 
-    title(sprintf("$ t/t_\\sigma =\\ $ %3.2f", tvec(ii)),'FontSize',18,...
+    title(sprintf("$ t/T_s =\\ $ %3.2f", tvec(ii)),'FontSize',18,...
             'interpreter','latex','FontName','Times')    
     drawnow
     %currFrame = getframe(gcf);
@@ -188,6 +165,7 @@ for jj = 1:subplots
     hold off
     
     % Pressure field distribution
+    
     f = zeta_generator(pressure_amplitudes(:, ii));
     pfield = f(thetaplot) - sum(pressure_amplitudes(:, ii));
     pmean = mean(pfield(1:50));
@@ -195,8 +173,11 @@ for jj = 1:subplots
         1/3 * subplotHeight + (1-subplotHeight)/2, subplotWidths/subplots, subplotHeight/3];
     subplot('Position', position);
     plot(thetaplot*180/pi, pfield-pmean);
+    hold on
     set(gca,'xlim',[0 180], 'ylim', [-0.5, 2], 'Xtick', [45, 90, 135], ...
         'Ytick', [0 1 2], 'FontName','Times','FontSize',14);
+    %angle = 180/pi*theta_from_cylindrical(numl(ii)/100, oscillation_amplitudes(:, ii));
+    %xline(angle, '--r');
     grid on
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
@@ -237,8 +218,12 @@ for jj = 1:subplots
     hold off
 end
 
-saveas(saving_figure, "../../0_data/manual/impact_panel", 'eps');
-savefig(saving_figure, "../../0_data/manual/impact_panel.fig");
+cd(curr);
+saveas(saving_figure, "../../0_data/manual/impact_panel", 'fig');
+print(saving_figure, '-depsc', '-r300', "../../0_data/manual/impact_panel.eps");
+
+
+
 
 
 

@@ -79,14 +79,14 @@ cd(c);
 %cd ..
 cd("../../0_data/manual");
 
-FreeSurf = plot(tvec_p,etaOri(index_to_plot),'color',deep_blue,'LineWidth',4);
+FreeSurf = plot(tvec_p,etaOri(index_to_plot),'color',deep_blue,'LineWidth',4, 'LineStyle', '--');
 
 South = plot(tvec_p,z(index_to_plot)+south(index_to_plot),'color',verdinho,'LineWidth',2);
 North = plot(tvec_p,z(index_to_plot)+north(index_to_plot),'color',verdinho,'LineWidth',2);
 
-Center = plot(tvec_p,z(index_to_plot),'k','LineWidth',4);
+Center = plot(tvec_p,z(index_to_plot),'k--','LineWidth',4);
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',26)
+xlabel('   $t/T_s $   ','interpreter','LaTeX','FontSize',26)
 ylabel('$z/R$','interpreter','LaTeX','FontSize',26,'Rotation',90)
 text(-1,2.1,"(a)", 'FontSize', 20);
 grid on
@@ -100,7 +100,7 @@ f2 = figure(2);
 PressedRad = plot(tvec_p,dr*numl(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
 
 set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-xlabel('   $t/t_s $   ','interpreter','LaTeX','FontSize',26)
+xlabel('   $t/T_s $   ','interpreter','LaTeX','FontSize',26)
 ylabel('$r_c/R$','interpreter','LaTeX','FontSize',26,'Rotation',90)
 ylim([0, 1]);
 xlim([0, tvec_p(end)]);
@@ -113,7 +113,7 @@ f3 = figure(3);
 
 max_contact_radius = plot(tvec_p, max_width(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
 set(gca, 'FontSize', 16);
-xlabel('  $  t/t_s $  ', 'interpreter', 'LaTeX', 'FontSize', 26);
+xlabel('  $  t/T_s $  ', 'interpreter', 'LaTeX', 'FontSize', 26);
 ylabel('$ w/R $', 'interpreter', 'LaTeX', 'FontSize', 26, 'Rotation', 90);
 ylim([0.8, 1.2]);
 xlim([0, tvec_p(end)]);
