@@ -1,4 +1,7 @@
 function [unkn, vel] = solve_ODE_unkown(deformation, pressures, dt, previous_conditions, PROBLEM_CONSTANTS)
+
+    % This function will solve the discrete ordinary differential equation
+    % on the modes of pressures and amplitudes, whichever is missing
     if isstruct(deformation); deformation = deformation.deformation_amplitudes; end; if size(deformation, 2) > 1; deformation = deformation'; end
     if isstruct(pressures);   pressures   = pressures.pressure_amplitudes; end; if size(pressures, 2) > 1; pressures = pressures'; end
     nb_harmonics = previous_conditions{end}.nb_harmonics;
@@ -25,17 +28,25 @@ function [unkn, vel] = solve_ODE_unkown(deformation, pressures, dt, previous_con
         ck = rk^2/(1+rk);
         coefs = [ck, bk, ak]; 
     end
-    om = PROBLEM_CONSTANTS.omegas_frequencies;
-    result = (coefs(end)^2/dt + om.^2 * dt) .* deformation + dt * ((1:nb_harmonics)' .* pressures) ...
-         + sum(coefs(1:(end-1)) .* (coefs(end) *  previous_deformation/dt + previous_velocities), 2);
+
+
+    %omegas = PROBLEM_CONSTANTS.omegas_frequencies;
+    harmonics = (1:nb_harmonics)';
+    amplitudes_coefficients = harmonics .* (harmonics+2) .* (harmonics-1); % amplitude term
+    pressure_coeffs = harmonics; % Pressure term
+    Oh = PROBLEM_CONSTANTS.Oh;
+    vel_coeffs = PROBLEM_CONSTANTS.Oh * 2 * (2*harmonics + 1) .* (harmonics-1); % Viscocity term
+    result = (coefs(end)/dt*(coefs(end) + dt * Oh*vel_coeffs) + amplitudes_coefficients * dt) .* deformation + ...
+        dt * (pressure_coeffs .* pressures) ...
+         + sum(coefs(1:(end-1)) .* ((coefs(end) + dt * Oh*vel_coeffs) .*  previous_deformation/dt + previous_velocities), 2);
      
     if calc_vel
-        unkn = -result./(coefs(end)^2/dt + om.^2 * dt);
+        unkn = -result./(coefs(end)/dt*(coefs(end) + dt * Oh*vel_coeffs) + amplitudes_coefficients * dt);
         vel = (coefs(end) * unkn + sum(coefs(1:(end-1)) .* previous_deformation, 2))/dt;
         vel(1)  = 0; 
-        unkn(1) = 0; 
+        unkn(1) = 0;
     else
-        unkn = -result./(dt * (1:nb_harmonics)');
+        unkn = -result./(dt * harmonics);
         vel = nan;
     end
     if size(unkn, 1) > 1; unkn = unkn'; end
