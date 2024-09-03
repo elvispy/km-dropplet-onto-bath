@@ -1,0 +1,82 @@
+------------
+03-Sep-2024 14:41:42 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                     21.21
+                     23.92
+                     27.73
+
+
+modes =
+
+    21
+
+
+tol =
+
+                     5e-05
+
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('copyfile')" style="font-weight:bold">copyfile</a>
+Cannot copy or move a file or directory onto itself.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('sweeper_water_2024>create_folder_stucture', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m', 149)" style="font-weight:bold">sweeper_water_2024>create_folder_stucture</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m',149,0)">line 149</a>)
+        copyfile(fullfile(safe_folder, "ParRadDTNStops.m"), pwd);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('sweeper_water_2024', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m', 70)" style="font-weight:bold">sweeper_water_2024</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m',70,0)">line 70</a>)
+    simulations_cgs.folder(ii)  = create_folder_stucture(simulations_cgs(ii, :));
+} 
+opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m',149,0)
+DomainMaker
+sweeper_water_2024
