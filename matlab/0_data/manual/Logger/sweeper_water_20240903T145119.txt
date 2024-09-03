@@ -1,0 +1,172 @@
+------------
+03-Sep-2024 14:51:19 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                     21.21
+                     23.92
+                     27.73
+
+
+modes =
+
+    21
+
+
+tol =
+
+                     5e-05
+
+U0
+
+U0 =
+
+                     21.21
+
+U0^ 2
+
+ans =
+
+                  449.8641
+
+U0^2/72.2
+
+ans =
+
+          6.23080470914127
+
+if system_dependent('IsDebugMode')==1, dbquit; end
+plotting_sweeper
+if system_dependent('IsDebugMode')==1, dbcont; end
+if system_dependent('IsDebugMode')==1, dbstep; end
+if system_dependent('IsDebugMode')==1, dbcont; end
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U15
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U16
+if system_dependent('IsDebugMode')==1, dbstep; end
+if system_dependent('IsDebugMode')==1, dbcont; end
+if system_dependent('IsDebugMode')==1, dbcont; end
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U25
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U26
+if system_dependent('IsDebugMode')==1, dbcont; end
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U35
+[Warning: Unable to read file 'U0.mat'. No such file or directory.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plotting_sweeper', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m', 85)" style="font-weight:bold">plotting_sweeper</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/plotting_sweeper.m',85,0)">line 85</a>)] 
+/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D25Quant100/rho1000sigma7220nu98muair0/rhoS1000sigmaS7220/R0350mm/ImpDefCornerAng180U36
+westar = @(U0) rho * U0.^2 * Ro / sigma;
+westar(43)
+
+ans =
+
+         0.896329639889197
+
+westar(47)
+
+ans =
+
+          1.07084487534626
+
+westar(45)
+
+ans =
+
+         0.981648199445983
+
+westar(35)
+
+ans =
+
+         0.593836565096953
+
+westar(39)
+
+ans =
+
+         0.737326869806094
+
+westar(50)
+
+ans =
+
+          1.21191135734072
+
+westar(40)
+
+ans =
+
+         0.775623268698061
+
+westar(39)
+
+ans =
+
+         0.737326869806094
+
+if system_dependent('IsDebugMode')==1, dbquit; end
+westar(49.5)
+
+ans =
+
+          1.18779432132964
+
+sweeper_water_2024

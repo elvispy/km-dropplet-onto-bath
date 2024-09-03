@@ -1,0 +1,72 @@
+------------
+03-Sep-2024 14:57:07 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                        39
+                        45
+                      49.5
+
+
+modes =
+
+    21
+
+
+tol =
+
+                     5e-05
+
+if system_dependent('IsDebugMode')==1, dbquit; end
+sweeper_water_2024

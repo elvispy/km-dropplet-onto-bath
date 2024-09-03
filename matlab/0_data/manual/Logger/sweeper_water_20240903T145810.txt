@@ -1,0 +1,75 @@
+------------
+03-Sep-2024 14:58:10 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                     39.01
+                     45.01
+                     49.51
+
+
+modes =
+
+    21
+
+
+tol =
+
+                     5e-05
+
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 4).
+Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U39.01/N=21tol=5.00e-05
+Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U45.01/N=21tol=5.00e-05
+Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U49.51/N=21tol=5.00e-05

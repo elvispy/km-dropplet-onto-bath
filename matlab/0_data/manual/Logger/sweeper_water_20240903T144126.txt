@@ -1,0 +1,74 @@
+------------
+03-Sep-2024 14:41:26 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                     21.21                     23.92                     27.73
+
+
+modes =
+
+    21
+
+
+tol =
+
+                     5e-05
+
+{Index in position 1 exceeds array bounds (must not exceed 1).
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('sweeper_water_2024', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m', 39)" style="font-weight:bold">sweeper_water_2024</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m',39,0)">line 39</a>)
+    SigmaS(SigmaSidx, :), R(Ridx, :), Ang(Angidx, :), U(Uidx, :), modes(modesidx, :), ...
+} 
+sweeper_water_2024
