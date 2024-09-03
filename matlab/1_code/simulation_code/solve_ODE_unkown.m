@@ -35,10 +35,10 @@ function [unkn, vel] = solve_ODE_unkown(deformation, pressures, dt, previous_con
     amplitudes_coefficients = harmonics .* (harmonics+2) .* (harmonics-1); % amplitude term
     pressure_coeffs = harmonics; % Pressure term
     Oh = PROBLEM_CONSTANTS.Oh;
-    vel_coeffs = PROBLEM_CONSTANTS.Oh * 2 * (2*harmonics + 1) .* (harmonics-1); % Viscocity term
+    vel_coeffs = 2 * (2*harmonics + 1) .* (harmonics-1); % Viscocity term
     result = (coefs(end)/dt*(coefs(end) + dt * Oh*vel_coeffs) + amplitudes_coefficients * dt) .* deformation + ...
         dt * (pressure_coeffs .* pressures) ...
-         + sum(coefs(1:(end-1)) .* ((coefs(end) + dt * Oh*vel_coeffs) .*  previous_deformation/dt + previous_velocities), 2);
+         + sum(coefs(1:(end-1)) .* ((coefs(end) + dt * Oh*vel_coeffs)/dt .*  previous_deformation + previous_velocities), 2);
      
     if calc_vel
         unkn = -result./(coefs(end)/dt*(coefs(end) + dt * Oh*vel_coeffs) + amplitudes_coefficients * dt);
