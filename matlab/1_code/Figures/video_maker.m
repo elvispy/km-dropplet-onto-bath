@@ -1,6 +1,7 @@
 %clc
 clear vidObj
 close all;
+cd ..
 addpath(fullfile(pwd, "simulation_code" ));
 
 p = uigetdir();
