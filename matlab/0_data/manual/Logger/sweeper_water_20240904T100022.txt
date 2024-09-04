@@ -1,0 +1,70 @@
+------------
+04-Sep-2024 10:00:22 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+                      72.2
+
+
+nu =
+
+                   0.00978
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+                      72.2
+
+
+R =
+
+                     0.035
+
+
+Ang =
+
+   180
+
+
+U =
+
+                     45.02
+
+
+modes =
+
+    30
+
+
+tol =
+
+                     5e-05
+
+if system_dependent('IsDebugMode')==1, dbcont; end
+Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U45.02/N=30tol=5.00e-05
