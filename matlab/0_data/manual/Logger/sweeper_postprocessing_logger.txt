@@ -19,3 +19,87 @@ Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R035
 Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U51/N=21tol=5.00e-05
 Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U53/N=21tol=5.00e-05
 Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U54/N=20tol=5.00e-05
+-------
+05-Sep-2024 09:30:12 
+ /Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessingpwd
+
+ans =
+
+    '/'
+
+if system_dependent('IsDebugMode')==1, dbquit; end
+pwd
+
+ans =
+
+    '/'
+
+pwd == pwd
+
+ans =
+
+  <a href="matlab:helpPopup('logical')" style="font-weight:bold">logical</a>
+
+   1
+
+sweeper_postprocessing
+-------
+05-Sep-2024 09:37:31 
+ /Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing{Arrays have incompatible sizes for this operation.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('sweeper_postprocessing', '/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m', 15)" style="font-weight:bold">sweeper_postprocessing</a> (<a href="matlab: opentoline('/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',15,0)">line 15</a>)
+        if pwd == lastpwd; error("Could not find files to perform postprocessing"); end
+
+<a href="matlab:helpview('matlab','error_sizeDimensionsMustMatch')" style="font-weight:bold">Related documentation</a>
+} 
+strcmp(pwd, pwd)
+
+ans =
+
+  <a href="matlab:helpPopup('logical')" style="font-weight:bold">logical</a>
+
+   1
+
+help strcmp
+ <strong>strcmp</strong> - Compare strings
+    This MATLAB function compares s1 and s2 and returns 1 (true) if the two
+    are identical and 0 (false) otherwise.
+
+    Syntax
+      tf = <strong>strcmp</strong>(s1,s2)
+
+    Input Arguments
+      <a href="matlab:web /Applications/MATLAB_R2024a.app/help/matlab/ref/strcmp.html#btwfvmr-s1s2">s1,s2</a> - Input text
+        character vector | character array |
+        cell array of character vectors | string array
+
+    Output Arguments
+      <a href="matlab:web /Applications/MATLAB_R2024a.app/help/matlab/ref/strcmp.html#btwfvmr-tf">tf</a> - True or false result
+        1 | 0 | logical array
+
+    Examples
+      <a href="matlab:openExample('matlab/CompareTwoStringsExample')">Compare Two Character Vectors</a>
+      <a href="matlab:openExample('matlab/CompareStringandCellArrayofStringsExample')">Find Text in Cell Array</a>
+      <a href="matlab:openExample('matlab/CompareTwoCellArraysofStringsExample')">Compare Two Cell Arrays of Character Vectors</a>
+      <a href="matlab:openExample('matlab/CompareStringArraysExample')">Compare String Arrays</a>
+
+    See also <a href="matlab:help regexp -displayBanner">regexp</a>, <a href="matlab:help strcmpi -displayBanner">strcmpi</a>, <a href="matlab:help strfind -displayBanner">strfind</a>, <a href="matlab:help strncmp -displayBanner">strncmp</a>, <a href="matlab:help strncmpi -displayBanner">strncmpi</a>, <a href="matlab:help eq -displayBanner">eq</a>, <a href="matlab:help ne -displayBanner">ne</a>, <a href="matlab:help matches -displayBanner">matches</a>,
+      <a href="matlab:help string.contains -displayBanner">contains</a>
+
+    Introduced in MATLAB before R2006a
+    <a href="matlab:doc strcmp">Documentation for strcmp</a>
+    <a href="matlab:matlab.lang.internal.introspective.overloads.displayOverloads('strcmp')">Other uses of strcmp</a>
+
+sweeper_postprocessing
+-------
+05-Sep-2024 09:38:13 
+ /Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing{Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('sweeper_postprocessing', '/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m', 15)" style="font-weight:bold">sweeper_postprocessing</a> (<a href="matlab: opentoline('/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',15,0)">line 15</a>)
+Could not find files to perform postprocessing
+} 
+sweeper_postprocessing
+-------
+05-Sep-2024 09:38:46 
+ /Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing 
+{Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('sweeper_postprocessing', '/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m', 15)" style="font-weight:bold">sweeper_postprocessing</a> (<a href="matlab: opentoline('/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',15,0)">line 15</a>)
+Could not find files to perform postprocessing
+} 
