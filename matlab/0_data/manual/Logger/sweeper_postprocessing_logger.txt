@@ -103,3 +103,18 @@ sweeper_postprocessing
 {Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('sweeper_postprocessing', '/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m', 15)" style="font-weight:bold">sweeper_postprocessing</a> (<a href="matlab: opentoline('/Users/eaguerov/Documents/Brown/impacts/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',15,0)">line 15</a>)
 Could not find files to perform postprocessing
 } 
+-------
+05-Sep-2024 09:42:20 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing 
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('save')" style="font-weight:bold">save</a>
+Unable to write file simulation_postprocessing.mat: No such file or directory.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('sweeper_postprocessing', '/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m', 116)" style="font-weight:bold">sweeper_postprocessing</a> (<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',116,0)">line 116</a>)
+        save('simulation_postprocessing.mat', "Uo", "tend", ...
+} 
+opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing.m',116,0)
+sweeper_postprocessing
+-------
+05-Sep-2024 09:42:58 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing 
+Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U39/N=20tol=5.00e-05

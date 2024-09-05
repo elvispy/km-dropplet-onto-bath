@@ -23,7 +23,7 @@ SigmaS = 72.20 % must multiply by x100 (cgs)
 R = 0.035 % linspace(0.02, 0.05, 5)'; % must multiply by x10 (cgs)
 Ang = 180
 U = [44, 44.51]' %linspace(57, 47, 6)' %inspace(59, 39, 6)';
-modes = 20
+modes = 21
 tol = 5e-5
 
 
@@ -95,7 +95,7 @@ addpath(safe_folder, '-begin');
 
 final_folders = simulations_cgs.folder;
 %% Starting simulation
-for ii = 1:height(simulations_cgs)
+parfor ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(final_folders(ii));
 
