@@ -2,6 +2,7 @@
 % of restitution, contact time and max deflection.
 
 
+% Filter
 clear data;
 data.D = 50;
 data.Quant = 50;
