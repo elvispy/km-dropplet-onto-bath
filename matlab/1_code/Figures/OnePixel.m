@@ -3,7 +3,10 @@ c = pwd;
 %p = uigetdir();
 addpath(fullfile(pwd, "simulation_code" ));
 p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05");
+p = uigetdir();
 cd(p);
+
+savefile = true; % flag to export files
 
 try
     load('ProblemConditions.mat'); %Cang = Ang * pi / 180;
@@ -92,9 +95,10 @@ text(-1,2.1,"(a)", 'FontSize', 20);
 grid on
 %ylim([0, 1]);
 xlim([0, tvec_p(end)]);
-saveas(f1,sprintf('CenterLineRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
-print(f1,'-depsc','-r300',sprintf('CenterLineRadiusU0%g%.2fmm.eps',U0, 10*Ro))
-
+if savefile
+    saveas(f1,sprintf('CenterLineRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
+    print(f1,'-depsc','-r300',sprintf('CenterLineRadiusU0%g%.2fmm.eps',U0, 10*Ro))
+end
 % Pressed radius
 f2 = figure(2);
 PressedRad = plot(tvec_p,dr*numl(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
@@ -106,9 +110,10 @@ ylim([0, 1]);
 xlim([0, tvec_p(end)]);
 text(-1,.9,"(b)", 'FontSize', 20);
 grid on
-saveas(f2,sprintf('PressedRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
-print(f2,'-depsc','-r300',sprintf('PressedRadius%g%.2fmm.eps',U0, 10*Ro))
-
+if savefile
+    saveas(f2,sprintf('PressedRadiusU0%g%.2fmm.fig',U0, 10*Ro),'fig')
+    print(f2,'-depsc','-r300',sprintf('PressedRadius%g%.2fmm.eps',U0, 10*Ro))
+end
 f3 = figure(3);
 
 max_contact_radius = plot(tvec_p, max_width(index_to_plot), 'color', deep_blue, 'LineWidth', 4);
@@ -119,7 +124,9 @@ ylim([0.8, 1.2]);
 xlim([0, tvec_p(end)]);
 text(-1,1.15,"(c)", 'FontSize', 20);
 grid on
-saveas(f3, sprintf("MaximumWidthU0%g%.2fmm.fig", U0, 10*Ro), 'fig');
-print(f3, '-depsc', '-r300', sprintf('MaximumWidthU0%g%.2ffmm.eps', U0, 10*Ro));
+if savefile
+    saveas(f3, sprintf("MaximumWidthU0%g%.2fmm.fig", U0, 10*Ro), 'fig');
+    print(f3, '-depsc', '-r300', sprintf('MaximumWidthU0%g%.2ffmm.eps', U0, 10*Ro));
+end
 %Integral = f*dtvecplot';
 % daspect([.83 .73/5 1])

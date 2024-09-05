@@ -3,7 +3,8 @@
 close all;
 addpath(fullfile(pwd, "..", "simulation_code"));
 curr = pwd;
-p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % uigetdir();
+p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % 
+p = uigetdir();
 cd(p);
 
 global errored
