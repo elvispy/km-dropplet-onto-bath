@@ -71,3 +71,1287 @@ Starting parallel pool (parpool) using the 'local' profile ...
 Connected to the parallel pool (number of workers: 4).
 Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44/N=21tol=5.00e-05
 Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44.51/N=21tol=5.00e-05
+if system_dependent('IsDebugMode')==1, dbcont; end
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.658347e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.829672e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  2.027013e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 456)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.829672e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  2.027013e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.658347e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.508889e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Finished simulation on /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44/N=21tol=5.00e-05. Time elapsed: 221.78 minutes
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.306922e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 447)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.447882e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 451)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.184545e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 473)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate. RCOND =  1.077788e-16.
+> In solvenDDCusp (line 31)
+  In solve_motion (line 485)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+
+Warning detected. Will proceed with going back
+Couldn't run simulation with the following parameters: 
+ Velocity: 44.51 
+ Modes: 21 
+Warning: The format 'yyyyMMddmmss' contains a field for minute (m) in what appears to be a date portion. You might have intended to use the symbol for month (M) rather than for minute (m). See the <a href="matlab:doc('datetime.Format')">datetime.Format property</a> for a complete description of the identifiers used in datetime formats.
+> In verifyFormat (line 26)
+  In datetime/subsasgnDot (line 25)
+  In datetime/subsasgn (line 23)
+  In solve_motion (line 851)
+  In parallel_function>make_general_channel/channel_general (line 847)
+  In remoteParallelFunction (line 67)
+Finished simulation on /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44.51/N=21tol=5.00e-05. Time elapsed: 996.83 minutes
+Parallel pool using the 'local' profile is shutting down.
+Python 3.9.5
