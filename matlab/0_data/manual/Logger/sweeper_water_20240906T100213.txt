@@ -1,0 +1,75 @@
+------------
+06-Sep-2024 10:02:13 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+   72.2000
+
+
+nu =
+
+    0.0098
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+   72.2000
+
+
+R =
+
+    0.0350
+
+
+Ang =
+
+   180
+
+
+U =
+
+   44.5200
+
+
+modes =
+
+    21
+
+
+tol =
+
+   5.0000e-05
+
+if system_dependent('IsDebugMode')==1, dbcont; end
+Starting simulation on /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44.52/N=21tol=5.00e-05
+Finished simulation on /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U44.52/N=21tol=5.00e-05. Time elapsed: 496.47 minutes
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 4).
+Parallel pool using the 'local' profile is shutting down.
+Python 3.9.5
