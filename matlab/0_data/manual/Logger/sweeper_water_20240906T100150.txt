@@ -1,0 +1,71 @@
+------------
+06-Sep-2024 10:01:50 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024
+
+D =
+
+    50
+
+
+Quant =
+
+   100
+
+
+rho =
+
+     1
+
+
+sigma =
+
+   72.2000
+
+
+nu =
+
+    0.0098
+
+
+muair =
+
+     0
+
+
+RhoS =
+
+     1
+
+
+SigmaS =
+
+   72.2000
+
+
+R =
+
+    0.0350
+
+
+Ang =
+
+   180
+
+
+U =
+
+   44.5100
+
+
+modes =
+
+    21
+
+
+tol =
+
+   5.0000e-05
+
+<a href="matlab: opentoline('/Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_water_2024.m',98,1)">98  </a>for ii = 1:height(simulations_cgs)
+if system_dependent('IsDebugMode')==1, dbquit; end
+sweeper_water_2024
