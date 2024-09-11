@@ -126,3 +126,7 @@ Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R035
 09-Sep-2024 09:08:45 
  /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing 
 Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U39/N=20tol=5.00e-05
+-------
+11-Sep-2024 09:44:22 
+ /Users/harrislab/Documents/impact/elvis/km-dropplet-onto-bath/matlab/1_code/sweeper_postprocessing 
+Second bounce in /D50Quant100/rho1000sigma7220nu98muair0/RhoS1000SigmaS7220/R0350mm/ImpDefCornerAng180U39/N=20tol=5.00e-05
