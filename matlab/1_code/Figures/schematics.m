@@ -2,7 +2,7 @@
 close all;
 addpath(fullfile(pwd, "..", "simulation_code"));
 curr = pwd;
-p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % uigetdir();
+p = fullfile(pwd, "..", "D50Quant100", "rho1000sigma7220nu98muair0", "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U39", "N=20tol=5.00e-05"); % uigetdir();
 cd(p);
 
 global errored
@@ -84,7 +84,7 @@ load('zs.mat','zs')
 %xplot = dr*(0:nr-1); save('xplot.mat','xplot')%I might remove or relocate this
 load('xplot.mat')
 cd(curr);
-load('var.mat');
+%load('var.mat');
 cd(p);
 
 
