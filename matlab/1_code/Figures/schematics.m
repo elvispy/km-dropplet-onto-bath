@@ -93,7 +93,8 @@ cd(p);
 myFont = "Arial";
 n=8000;
 t=0:2*pi/n:2*pi;
-r = (1 + sum(aa .* collectPl(length(aa), cos(t)), 1));
+lol = oscillation_amplitudes(:, 400);
+r = (1 + sum(lol .* collectPl(length(lol), cos(t)), 1));
 x = r .* sin(t);
 disloc = -0.25;
 y = r .* cos(t) + disloc;
@@ -107,15 +108,12 @@ set(myax,'Xlim',[-mylims mylims],'Xtick',[],'Ytick',[]);
 %set(myax, 'Ylim', [-1.4, -1.4+2*mylims]);
 
 %S(t)
-%t1 = 5*pi/4:2*pi/n:7*pi/4;
 epsi = 1.4;
 idx1 = floor((4-epsi)/8*n):floor((4+epsi)/8*n);
 x1 = x(idx1);
 y1 = y(idx1);
 plot(x1,y1-.08,'color',[.5, .5, .5], 'LineWidth', 5);%[0/256, 191/255, 255/255],'LineWidth',4)
 
-%[xSt, ySt] = gca_to_Normalized(myax, [x1(1) - 0.25, x1(1) + 0.02], ...
-%    [y1(1) + 0.02, y1(1)-0.12]);
 [xSt, ySt] = gca_to_Normalized(myax, [x1(end) + 0.02, x1(end) + 0.29], ...
     [y1(1) - 0.28, y1(1)-0.30]);
 annotation('textarrow', xSt, ySt, 'HeadLength', 10, ...
