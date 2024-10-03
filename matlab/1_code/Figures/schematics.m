@@ -5,6 +5,7 @@ curr = pwd;
 p = fullfile(pwd, "..", "D50Quant100", "rho1000sigma7220nu98muair0", "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U39", "N=20tol=5.00e-05"); % uigetdir();
 cd(p);
 
+saving = false;
 global errored
 errored = ~isfile('z.mat');
 try
@@ -93,7 +94,7 @@ cd(p);
 myFont = "Arial";
 n=8000;
 t=0:2*pi/n:2*pi;
-lol = oscillation_amplitudes(:, 400);
+lol = oscillation_amplitudes(:, 300);
 r = (1 + sum(lol .* collectPl(length(lol), cos(t)), 1));
 x = r .* sin(t);
 disloc = -0.25;
@@ -219,9 +220,10 @@ legend([aa, bb], ["$z = 0$", "Centre of mass"], ...
 %    'FontSize', 11,  'interpreter', 'latex', 'AutoUpdate', 'off');
 cd(curr);
 
-saveas(saving_figure, "../../0_data/manual/schematics", 'fig');
-print(saving_figure, '-depsc', '-r300', "../../0_data/manual/schematics.eps");
-
+if saving == true
+    saveas(saving_figure, "../../0_data/manual/schematics", 'fig');
+    print(saving_figure, '-depsc', '-r300', "../../0_data/manual/schematics.eps");
+end
 
 function [X, Y] = gca_to_Normalized(ca, xs, ys)
     % (xs(i), ys(i)) represents a point. For annotation function, xs(1),
