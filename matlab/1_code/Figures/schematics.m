@@ -94,7 +94,7 @@ cd(p);
 myFont = "Arial";
 n=8000;
 t=0:2*pi/n:2*pi;
-lol = oscillation_amplitudes(:, 300);
+lol = oscillation_amplitudes(:, 20);
 r = (1 + sum(lol .* collectPl(length(lol), cos(t)), 1));
 x = r .* sin(t);
 disloc = -0.25;

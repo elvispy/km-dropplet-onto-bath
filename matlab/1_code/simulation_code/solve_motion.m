@@ -168,7 +168,7 @@ if exist('z.mat', 'file') == 2
 end
 
 
-%U0 = 38; %impact velocity in cm/s (unit of velocity for the problem)
+%U0 = 38; %impact velocity in cm/s (unit 0of velocity for the problem)
 Ang = 180; %contact angle to be imposed
 
 currfold = pwd;
