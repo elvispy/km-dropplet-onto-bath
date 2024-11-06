@@ -5,9 +5,15 @@
 
 % STEP 1: Define which simulations are to be run. 
 
-D = 25;
-Quant = 100;
+ddate = datestr(datetime(), 30); % 30 = ISO 8601
+diary(sprintf("../0_data/manual/Logger/sweeper_water_%s.txt", ddate));
+disp("------------");
+fprintf("%s \n %s\n", datestr(datetime()), mfilename('fullpath'));
 
+
+%% Setting simulation parameters
+D = 50 %#ok<*NOPTS>
+Quant = 100
 rho = 0.96; % must multiply by x1000
 sigma = 20.50; % must multiply by x100
 nu = 5E-2; % Multiply by x10000
@@ -16,10 +22,11 @@ RhoS = 0.96; % must multiply by x1000
 SigmaS = 20.50; % must multiply by x100
 R = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
 Ang = 180;
-U = linspace(10, 40, 7)'; % Has to be column vector
-modes = 15;
+U = [39]'; % Has to be column vector
+modes = 20;
 tol = 5e-5;
 
+% Creating table for all simulations
 [Didx, Quantidx, rhoidx, sigmaidx, muairidx, nuidx, ...
     RhoSidx, SigmaSidx, Ridx, Angidx, Uidx, modesidx, tolidx] = ...
     ndgrid(1:length(D), 1:length(Quant), 1:length(rho), 1:length(sigma), ...
@@ -55,7 +62,7 @@ simulations_cgs.folder = repmat("", nrow, 1);
 %           -> R(0350)mm 
 %               - RoMaker
 %               -> ImpDefCornerAng(180)U(28)
-%                   -> N(20)
+%                   -> N=(20)tol=(5.00e-5)
 %                       - Simulation files (.mat) + logger files...
 
 for ii = 1:height(simulations_cgs)
@@ -86,24 +93,16 @@ addpath(safe_folder, '-begin');
 %    "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U38");
 
 final_folders = simulations_cgs.folder;
-parfor ii = 1:height(simulations_cgs)
+%% Starting simulation
+for ii = 1:height(simulations_cgs)
     %Check if etaOri exists (the center of the bath)
     cd(final_folders(ii));
 
     if force_sweep == true || isempty(dir("oscillation*.mat")) == true
-%         for file = aux_files
-%             try
-%                 copyfile(fullfile(safe_folder, file), pwd)    
-%             catch ME
-%                 if simulations_cgs.U(ii) ~= 38
-%                    throw("Unexpected error ocurred"); 
-%                 end
-%             end
-%         end
+
         try
             solve_motion(simulations_cgs.U(ii), nan, simulations_cgs.modes(ii), ...
                 simulations_cgs.convergence_tol(ii), pwd, false);
-                
         catch ME
             cd(final_folders(ii))
             fprintf("Couldn't run simulation with the following parameters: \n Velocity: %g \n Modes: %g \n", ...
@@ -111,6 +110,9 @@ parfor ii = 1:height(simulations_cgs)
             a = datetime('now'); a.Format = 'yyyyMMddmmss';
             parsave(sprintf("error_logU0=%g-%s.mat", simulations_cgs.U(ii), a), ME);
         end
+    else
+        fprintf("Not running simulation with the following parameters (already done): \n Velocity: %g \n Modes: %g \n", ...
+                simulations_cgs.U(ii), simulations_cgs.modes(ii)); 
     end
     
 
@@ -119,8 +121,11 @@ end
 cd(root);
 delete(gcp); % Deleting current parallel workers
 
-system('python sending_email.py'); % Sending email to notify that's finished
+% Load Python3 in MACOS based on https://www.mathworks.com/matlabcentral/answers/359408-trouble-with-a-command-in-matlab-s-system
+if ~ispc && system('python3 --version') ~= 0; setenv('PATH', [getenv('PATH') ':/usr/local/bin/']); end
 
+system('python3 sending_email.py'); % Sending email to notify that's finished
+diary off % turning logger off
 
 function final_folder = create_folder_stucture(entry)
     base =  pwd;
@@ -128,7 +133,7 @@ function final_folder = create_folder_stucture(entry)
     
     % Defining folder structure
     physical_space = sprintf("D%gQuant%g", entry.D, entry.Quant);
-    fluid_parameters = sprintf("rho%gsigma%gnu%.3gmuair%g", entry.rho*1000, entry.sigma*100, entry.nu*10000, entry.muair);
+    fluid_parameters = sprintf("rho%gsigma%gnu%.0fmuair%g", entry.rho*1000, entry.sigma*100, entry.nu*10000, entry.muair);
     sphere_parameters = sprintf("rhoS%gsigmaS%g", entry.RhoS*1000, entry.SigmaS*100);
     radius_folder = sprintf("R%04.4gmm", entry.R*10000);
     velocity_folder = sprintf("ImpDefCornerAng%gU%.4g", entry.Ang, entry.U);
