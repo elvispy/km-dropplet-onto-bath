@@ -101,7 +101,7 @@ zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb; %(1:end-1);
 
 saving_figure = figure();
-saving_figure.Position = [100 100 600 400];
+saving_figure.Position = [100 100 600*0.55 400*0.55];
 N = floor(size(etaMatPer, 2)*0.8); M = floor(1.2/dr);
 pfield_radial = zeros(M, N);
 indexes = floor(linspace(1, size(etaMatPer,2), N));
@@ -123,23 +123,32 @@ end
 % Plot the matrix using pcolor
 NN = ceil(1/dr);
 pfield_radial(pfield_radial > 2) = 2; 
-p = pcolor(dr * (0:(M-1)), tvec(indexes) , pfield_radial');
+p = pcolor(dr * (0:(M-1)), tvec(indexes) , pfield_radial', 'DisplayName', 'Pressure field');
+%set(gca, 'FontSize', 16);
 hold on
-plot(numl(indexes) * dr, tvec(indexes), 'r--', 'LineWidth',1)
+
+plot(numl(indexes) * dr, tvec(indexes), 'r--', 'LineWidth',2.5, 'DisplayName','Contact point');
+legend('Location', 'northeast', 'FontSize',16, 'FontName','Cambria Math')
 % Enhance the plot
 p.EdgeColor = 'none';            % Remove gridlines for a smoother look
 jet2 = jet; jet2(1, :) = 1;
 colormap(flipud(bone));                   % Choose a visually striking colormap (jet, parula, etc.)
-cb = colorbar;                        % Add a colorbar for reference
+cb = colorbar; cb.FontSize = 14; 
+cb.YTick = [0 .5 1 1.5 2]; % Add a colorbar for reference
 shading interp;                  % Interpolate shading for a smoother gradient
-ylabel(cb, '$p/p_0$','interpreter','Latex','FontName','Times',...
-    'FontSize',20,'rotation',90)
+
 % Add labels and title
 set(gca,'FontName','Times','FontSize',14);
-xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',20)
-ylabel('$t/t_{\sigma}$','interpreter','Latex','FontName','Times',...
+
+xlim([0, 0.9]); xticks([0 .3 .6 .9]); 
+ylim([0, 4]); yticks([0 1 2 3 4]);
+ax = gca;
+ax.XAxis.FontSize = 14; ax.YAxis.FontSize = 14;
+%ylabel(cb, '$p/p_0$','interpreter','Latex','FontName','Times',...
+%    'FontSize',20,'rotation',90)
+xlabel('   $r/R_s$   ','interpreter','Latex','FontName','Times','FontSize',20)
+ylabel('$t/T_s$','interpreter','Latex','FontName','Times',...
     'FontSize',20,'rotation',90)
-xlim([0, 1]); ylim([0, 5]);
 %title('Contact radius and pressure field evolution');
 
 % Adjust axes

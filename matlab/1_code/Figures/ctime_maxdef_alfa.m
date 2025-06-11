@@ -87,6 +87,8 @@ for ii = 1:length(files)
     end
 
 end
+plotting_data = plotting_data(plotting_data.N == 20 | plotting_data.Westar > 1.2, :);
+%plotting_data = plotting_data(abs(plotting_data.N - 20) < 3 | plotting_data.Westar > 1.2, :);
 if ~isempty(plotting_data)
     if max(plotting_data.Bo) ~= min(plotting_data.Bo) || max(plotting_data.Oh) ~= min(plotting_data.Oh)
         warning("Bohn and Oh numbers not uniform across data");
@@ -114,7 +116,7 @@ if ~isempty(plotting_data)
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
         set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
         xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); xlim([0, 2]);
-        ylabel('   $z / R_o \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 2.5]);
+        ylabel('   $z / R_s \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 2.5]);
         title(sprintf("Maximum deflection for \n Bo = %.2g, Oh = %.2e", plotting_data.Bo(1), plotting_data.Oh(1)),'interpreter','LaTeX','FontSize',20);
 
 
@@ -139,32 +141,37 @@ if ~isempty(plotting_data)
         b = b.Children;
         
 
-        scatter(b(1), plotting_data.Westar,plotting_data.max_deflection,'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',2.5);
-        scatter(b(2), plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',2.5);
-        scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',2.5);
+        scatter(b(1), plotting_data.Westar,plotting_data.max_deflection, 'MarkerEdgeColor',  [ 0.4660    0.6740    0.1880],'LineWidth',2.5);
+        scatter(b(2), plotting_data.Westar,plotting_data.contact_time, 'MarkerEdgeColor',    [ 0.4660    0.6740    0.1880],'LineWidth',2.5);
+        scatter(b(3), plotting_data.Westar,plotting_data.coef_restitution, 'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',2.5);
         
         if saving == true
             id = datetime('now'); id.Format = 'yyyyMMddmmss';
 
             f_maxdef = figure(2); f_maxdef.Position(1:2) = [25, 150]; 
             copyobj(b(1), f_maxdef); a = gca;
-            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.42, 1.65, "(a)", 'FontSize', 20);
-            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 20);
+            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.32, 1.065, "(a)", 'FontSize', 22);
+            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 24); xlim([0, 2]); ylim([0, 1.2]);
+            h = ylabel('$\delta/R_s$', 'interpreter', 'LaTeX', 'FontSize', 24); h.Position(2) = 0.6;
+            set(gca, 'FontSize', 22);
             print(f_maxdef, '-depsc', '-r300', sprintf("../../0_data/manual/maximum_deflection%s.eps", id));
             savefig(f_maxdef, sprintf("../../0_data/manual/maximum_deflection%s.fig", id));
 
             f_contact = figure(3); f_contact.Position(1:2) = [550, 150]; 
             copyobj(b(2), f_contact);a = gca;
-            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.38, 6.6, "(b)", 'FontSize', 20);
-            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 20);
-            ylabel('$t_c/T_s $', 'interpreter', 'LaTeX', 'FontSize', 20);
+            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.38, 5.75, "(b)", 'FontSize', 22);
+            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 24); xlim([0, 2]); ylim([4, 6]);
+            h = ylabel('$t_c/T_s $', 'interpreter', 'LaTeX', 'FontSize', 24); h.Position(2) = 5;
+            set(gca, 'FontSize', 22);
             print(f_contact, '-depsc', '-r300', sprintf("../../0_data/manual/contact_time%s.eps", id));
             savefig(f_contact, sprintf("../../0_data/manual/contact_time%s.fig", id));
 
             f_CR = figure(4); f_CR.Position(1:2) = [1050, 150]; 
             copyobj(b(3), f_CR);a = gca;
-            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.5, .65, "(c)", 'FontSize', 20);
-            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 20);
+            a.Position = [0.2, 0.1, 0.6, 0.9]; text(-.3, .55, "(c)", 'FontSize', 22);
+            xlabel('$We^*$', 'interpreter', 'LaTeX', 'FontSize', 24); xlim([0, 2]); ylim([0.2, 0.6]);
+            h= ylabel('$\alpha$', 'interpreter', 'LaTeX', 'FontSize', 24); h.Position(2) = .4;
+            set(gca, 'FontSize', 22);
             savefig(f_CR, sprintf("../../0_data/manual/coef_res%s.fig", id));
             print(f_CR, '-depsc', '-r300', sprintf("../../0_data/manual/coef_res%s.eps", id));
         end

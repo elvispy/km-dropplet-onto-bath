@@ -145,7 +145,7 @@ aa = plot([x2(end) -0], [ZERO, ZERO], '--','color',[.8 .8 .8],'LineWidth',1);%fr
 [xht, yht] = gca_to_Normalized(myax, [sin(3*pi/4)*.99, ZERO], [(cos(3*pi/4)+1)*.99 + CENTER, ZERO+1+CENTER]);
 annotation('doublearrow',xht, yht, ...
     'Head1Length', 9, 'Head2Length', 0, ...
-    'Head1Style', 'vback3', 'Head2Style', 'vback3' ,'Linewidth',2.5 )
+    'Head1Style', 'vback3', 'Head2Style', 'vback3' ,'Linewidth',1 )
 text(sin(3*pi/4)*0.27, .5+CENTER, "$R_s$", ...
     'Fontsize', 20, 'FontName', myFont, 'interpreter', 'latex')
 
@@ -156,8 +156,8 @@ annotation('doublearrow', xht1, yht1, 'Head1Length', 0, 'Head2Length', 0, ...
     'Head1Style', 'vback3', 'Linewidth', .75);
 
 [xht2, yht2] = gca_to_Normalized(myax, [sin(pi/4)*.99, ZERO], [(cos(pi/4)+1)*.99 + CENTER, ZERO+1+CENTER]);
-annotation('doublearrow', xht2, yht2, 'Head1Length', 0, 'Head2Length', 0, ...
-    'Head1Style', 'vback3', 'Linewidth', .75);
+annotation('doublearrow', xht2, yht2, 'Head1Length', 7, 'Head2Length', 0, ...
+    'Head1Style', 'vback3', 'Linewidth', 1);
 
 % Plot angle arc using annotation for the angle (phi)
 theta = linspace(0, pi/4, 20);
@@ -166,7 +166,8 @@ y_arc = 0.15*cos(theta) + 1 + CENTER;
 plot(x_arc, y_arc, 'k', 'LineWidth', 1.5);
 
 % Text annotation for the angle \varphi
-text(ZERO +.05, ZERO + 1 + CENTER + 0.25, '$\varphi$', 'FontSize', 20, 'Interpreter', 'latex');
+text(ZERO +.05, ZERO + 1 + CENTER + 0.25, '$\theta$', 'FontSize', 20, 'Interpreter', 'latex');
+text(sin(pi/4)*.50, (cos(pi/4)+1)*.85, '$\xi(t, \theta)$', 'FontSize', 16, 'Interpreter', 'latex');
 %annotation('doublearrow', x_arc(end-1:end), y_arc(end-1:end), 'Head1Length', 9, 'Head2Length', 0, ...
 %   'Head1Style', 'vback3', 'Linewidth', .75);
 %r_c(t)

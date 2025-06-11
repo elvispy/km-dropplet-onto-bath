@@ -94,32 +94,51 @@ zmax = max(max(etaMatPer));
 % set(vidObj,'FrameRate',10)
 % open(vidObj);
 
-Gamma = 0; %%
-wzero = 1; %%
-thetaZero = 0; %%
-zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
-zbplot=zb; %(1:end-1);
+%Gamma = 0; %%
+%wzero = 1; %%
+%thetaZero = 0; %%
+%zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
+%zbplot=zb; %(1:end-1);
 
 saving_figure = figure();
-saving_figure.Position = [100 100 600 400];
+saving_figure.Position = [100, 300, 1000*0.6, 420*0.6];
 N = floor(size(etaMatPer, 2)*0.8); M = floor(1.2/dr);
 pfield_radial = zeros(M, N);
 indexes = floor(linspace(1, size(etaMatPer,2), N));
 plot_oscillations = oscillation_amplitudes(:, indexes);
+
 hold on;
-for ii = 2:size(oscillation_amplitudes, 1)
-    plot(tvec(indexes), plot_oscillations(ii, :), 'DisplayName',num2str(ii));
-    %jj = indexes(ii);
-    %f = zeta_generator(oscillation_amplitudes(:, jj));
 
-    %thetaplots = theta_from_cylindrical(dr .* (0:numl(jj)), oscillation_amplitudes(:, jj));
-    %pfield_now = f(thetaplots) - sum(pressure_amplitudes(:, jj));
-    %pmean = mean(f(linspace(0, pi/10, 20)) - sum(pressure_amplitudes(:, jj)));
+detatch_points = find(numl(1:end-1) ~= 0 & numl(2:end) == 0);
+connect_points = find(numl(1:end-1) == 0 & numl(2:end) ~= 0);
+%xline(tvec(detatch_points(1)), 'k--', 'LineWidth', 3, 'DisplayName', 'Contact ends');
+for ii = 1:length(connect_points)
+    dpname = '';
+    if ii == 1
+        dpname = 'Contact region';
+    end
     
-    %pfield_radial(1:(numl(jj)+1), ii) = pfield_now'-pmean;
-
-
+    p = patch([tvec(connect_points(ii)) tvec(connect_points(ii)) tvec(detatch_points(ii)) tvec(detatch_points(ii))], ...
+        [-.35 .35 .35 -.35], [234 182 118]/256, 'FaceAlpha', 0.15, 'EdgeColor', [.5 .5 .5], ...
+        'DisplayName', dpname);
+    if ii ~= 1
+        set(get(get(p, 'Annotation'), 'LegendInformation'), 'IconDisplayStyle', 'off');
+    end
 end
+
+idxs = 2:20;
+idxs = idxs(max(abs(plot_oscillations(1:idxs(end), :)), [] , 2) > 5e-3); %2.^(1:floor(log2(nb_harmonics)));
+%cmap = colormap('spring'); %disp(size(cmap));
+%numColors = size(cmap, 1);
+lol = jet(length(idxs)+2);
+colororder(flipud(lol(3:end, :)));%cmap(floor(linspace(1, numColors, length(idxs))), :));
+%disp(size(times)); disp(size(deformation_amplitudes));
+%plot(tvec(indexes), (plot_oscillations(idxs, :)), 'LineWidth',2);
+
+for ii = 2:11
+     plot(tvec(indexes), plot_oscillations(ii, :), 'LineWidth', 5-3*log10(ii),  'DisplayName', sprintf("$A_{%d}(t)$", ii));
+end
+
 
 % Create a figure
 
@@ -138,11 +157,17 @@ end
 %ylabel(cb, '$p/p_0$','interpreter','Latex','FontName','Times',...
 %    'FontSize',20,'rotation',90)
 % Add labels and title
-set(gca,'FontName','Times','FontSize',14);
-xlabel('  $t/t_{\sigma}$   ','interpreter','Latex','FontName','Times','FontSize',20)
-ylabel(' $x/R_o$','interpreter','Latex','FontName','Times',...
-    'FontSize',20,'rotation',90)
-legend()
+set(gca,'FontName','Times','FontSize',18);
+xlabel('  $t/T_s$   ','interpreter','Latex','FontName','Times','FontSize',22)
+ylabel(' $r/R_s$','interpreter','Latex','FontName','Times',...
+    'FontSize',22,'rotation',90)
+%legend(arrayfun(@(i) sprintf("Mode %d", i), idxs), 'FontSize', 15);
+hl = legend('show', 'Location','eastoutside', 'Interpreter', 'latex', 'FontSize', 14);
+%set(hl, 'Interpreter', 'latex');
+yl = get(gca, 'YLim'); yl = [-.8*max(abs(yl)), .8*max(abs(yl))];
+set(gca, 'YLim', yl); set(gca, 'XLim', [tvec(1) tvec(end)]);
+  
+grid on
 %xlim([0, 1]); ylim([0, 5]);
 %title('Contact radius and pressure field evolution');
 
@@ -150,8 +175,8 @@ legend()
 %axis tight;                      % Fit the plot closely around the data
 
 cd(curr);
-saveas(saving_figure, "../../0_data/manual/amplitude_plotter", 'fig');
-print(saving_figure, '-depsc', '-r300', "../../0_data/manual/amplitude_plotter.eps");
+saveas(saving_figure, "../../0_data/manual/amplitude_plotter_paper", 'fig');
+print(saving_figure, '-depsc', '-r300', "../../0_data/manual/amplitude_plotter_paper.eps");
 
 
 function load_vars(str)
