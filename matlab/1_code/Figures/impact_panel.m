@@ -142,29 +142,31 @@ for jj = 1:subplots
     
     grid on
     l = 3;
-    set(gca,'xlim',[-l l],'ylim',[-(l-1) (l+1)], 'Xtick',[-2 0 2],'FontName','Times','FontSize',14);
+    set(gca,'xlim',[-l l],'ylim',[-(l-1) (l+1)], 'Xtick',[-2 0 2],...
+        'Ytick', [-2, 0, 2], 'FontName','Times','FontSize',20);
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
-        lol = ylabel('$z / R_o $ vs $x/ R_o$','interpreter','Latex','FontName','Times',...
-            'FontSize',20,'rotation',90);
+        lol = ylabel('$z / R_s $ vs $x/ R_s$','interpreter','Latex','FontName','Times',...
+            'FontSize',26,'rotation',90);
         lol.Position(1) = -3.5;
     else
-        
+        yticklabels("");
     end
-    yticklabels("");
+    
         a = gca;
     a.XRuler.TickLabelGapOffset = -4; 
     
     
 
-    title(sprintf("$ t/T_s =\\ $ %3.2f", tvec(ii)),'FontSize',18,...
+    title(sprintf("$ t/T_s =\\ $ %3.2f", tvec(ii)),'FontSize',26,...
             'interpreter','latex','FontName','Times')    
     drawnow
     %currFrame = getframe(gcf);
     %writeVideo(vidObj,currFrame);
     hold off
     
+
     % Pressure field distribution
     
     f = zeta_generator(pressure_amplitudes(:, ii));
@@ -173,10 +175,10 @@ for jj = 1:subplots
     position = [(jj-1)*subplotWidths/subplots + (1-subplotWidths)/2, ...
         1/3 * subplotHeight + (1-subplotHeight)/2, subplotWidths/subplots, subplotHeight/3];
     subplot('Position', position);
-    plot(thetaplot*180/pi, pfield-pmean);
+    plot(thetaplot*180/pi, pfield-pmean, 'LineWidth', 2);
     hold on
     set(gca,'xlim',[0 180], 'ylim', [-0.5, 2], 'Xtick', [45, 90, 135], ...
-        'Ytick', [0 1 2], 'FontName','Times','FontSize',14);
+        'Ytick', [0 1 2], 'FontName','Times','FontSize',20);
     %angle = 180/pi*theta_from_cylindrical(numl(ii)/100, oscillation_amplitudes(:, ii));
     %xline(angle, '--r');
     grid on
@@ -184,7 +186,7 @@ for jj = 1:subplots
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
         ll = ylabel('$p(\theta)$ vs $\theta$','interpreter','Latex','FontName','Times',...
-            'FontSize',24,'rotation',90);
+            'FontSize',26,'rotation',90);
     else
         yticklabels("");
         %set(gca,'ytick',[]);
@@ -202,13 +204,13 @@ for jj = 1:subplots
     subplot('Position', position);
     bar(0:NN, [-sum(pressure_amplitudes(:, ii)); pressure_amplitudes(:, ii)]);
     set(gca, 'ylim', [-0.7, 0.7], 'Xtick', [0, floor(NN/2), NN], 'Ytick', [-.5 0 .5], ...
-        'FontName','Times','FontSize',14);
+        'FontName','Times','FontSize',20);
     grid on
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
         yy = ylabel('$B_{\ell}$ vs $\ell $','interpreter','Latex','FontName','Times',...
-            'FontSize',24,'rotation',90);
+            'FontSize',26,'rotation',90);
         yy.Position(1) = -2.5; % ll.Position(1);
     else
         yticklabels("");
@@ -220,7 +222,7 @@ for jj = 1:subplots
 end
 
 cd(curr);
-saveas(saving_figure, "../../0_data/manual/impact_panel", 'fig');
+saveas(saving_figure, "../../0_data/manual/impact_panel", 'svg');
 print(saving_figure, '-depsc', '-r300', "../../0_data/manual/impact_panel.eps");
 
 

@@ -5,7 +5,7 @@ curr = pwd;
 p = fullfile(pwd, "..", "D50Quant100", "rho1000sigma7220nu98muair0", "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U39", "N=20tol=5.00e-05"); % uigetdir();
 cd(p);
 
-saving = false;
+saving = true;
 global errored
 errored = ~isfile('z.mat');
 try
@@ -88,17 +88,14 @@ cd(curr);
 %load('var.mat');
 cd(p);
 
-
-
-
 myFont = "Arial";
 n=8000;
-t=0:2*pi/n:2*pi;
-lol = oscillation_amplitudes(:, 20);
-r = (1 + sum(lol .* collectPl(length(lol), cos(t)), 1));
-x = r .* sin(t);
+theta=0:2*pi/n:2*pi;
+lol = oscillation_amplitudes(:, 300);
+r = (1 + sum(lol .* collectPl(length(lol), cos(theta)), 1));
+x = r .* sin(theta);
 disloc = -0.25;
-y = r .* cos(t) + disloc;
+y = r .* cos(theta) + disloc;
 saving_figure = figure;
 plot(x,y,'k','LineWidth',4);
 myax = gca; mypos = myax.Position;
@@ -118,7 +115,7 @@ plot(x1,y1-.08,'color',[.5, .5, .5], 'LineWidth', 5);%[0/256, 191/255, 255/255],
 [xSt, ySt] = gca_to_Normalized(myax, [x1(end) + 0.02, x1(end) + 0.29], ...
     [y1(1) - 0.28, y1(1)-0.30]);
 annotation('textarrow', xSt, ySt, 'HeadLength', 10, ...
-'HeadStyle', 'vback3', 'String', '$S(t)$', 'Interpreter', 'latex', ...
+'HeadStyle', 'vback2', 'String', '$S(t)$', 'Interpreter', 'latex', ...
 'LineWidth', 1.5, 'FontSize', 14);
 hold on
 
@@ -147,7 +144,7 @@ plot([x1(1),-x1(1)],[ZERO ZERO],'-.','color',[.3 .3 .3],'LineWidth',4);%'color',
 [xAt, yAt] = gca_to_Normalized(myax, [x1(end)+.3, x1(end) + .5] ...
     , [ZERO - 0.15, ZERO-0.05]);
 annotation('textarrow', xAt, yAt, ...
-    'HeadLength', 10, 'HeadStyle', 'vback3', 'String', '$A(t)$', ...
+    'HeadLength', 10, 'HeadStyle', 'vback2', 'String', '$A(t)$', ...
     'Interpreter', 'latex', 'LineWidth', 1.5, 'FontSize', 14);
 
 [leftxAt, leftyAt] = gca_to_Normalized(myax, [x1(1)+.01, x1(1)+.01] ...
@@ -162,14 +159,14 @@ annotation('arrow', rightxAt, rightyAt, 'Color', [.7 .7 .7], ...
 % h(t)
 %Centre mark
 val = 1/30;
-bb = scatter(0, disloc, 20, 'k', "filled"); 
+bb = scatter(0, disloc, 40, 'k', "filled"); 
 %plot([-val, val], [val+disloc, -val+disloc], 'k');
 %plot([-val, val], [-val+disloc, val+disloc], 'k');
 
 plot([-0.02 -.15],[disloc disloc], 'Color', [.7 .7 .7], 'LineWidth', 1.1);%bottom measure transporter for h
-[xht, yht] = gca_to_Normalized(myax, [-.13 -.13], [disloc, ZERO]);
-annotation('doublearrow',xht, yht, ...
-    'Head1Length', 5, 'Head2Length', 0, ...
+[xxi, yxi] = gca_to_Normalized(myax, [-.13 -.13], [disloc, ZERO]);
+annotation('doublearrow',xxi, yxi, ...
+    'Head1Length', 7, 'Head2Length', 0, ...
     'Head1Style', 'vback3', 'Head2Style', 'vback3' ,'Linewidth',1 )
 text(-.4, disloc*.6, "$h(t)$", ...
     'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex')
@@ -188,6 +185,25 @@ annotation('arrow', Xproyrct, Yproyrct, 'Color', [.7 .7 .7], ...
 text(-x1(end)/3, .2, "$r_c(t)$", ...
     'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex');
 
+
+%\xi(t, \theta)
+[xxi, yxi] = gca_to_Normalized(myax, [ZERO-0.02, x1(end-10)+.3], [disloc-0.02, y1(end-10)-.15]);
+%annotation('arrow',xxi, yxi, ...
+%    'HeadLength', 7, 'HeadStyle', 'vback3','Linewidth', 1)
+annotation('doublearrow',xxi, yxi, ...
+    'Head1Length', 0, 'Head2Length', 7, ...
+    'Head1Style', 'vback3', 'Head2Style', 'vback3' ,'Linewidth',1 );
+text((x1(end-10)+.3)/2, -0.64, "$\xi(t, \theta)$", ...
+    'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex')
+
+% \eta(r, t)
+[leftxAt, leftyAt] = gca_to_Normalized(myax, [x1(500)+.01, x1(500)+.01], ...
+    [ZERO-0.04, y1(500) + .01]);
+annotation('arrow', leftxAt, leftyAt, ...
+    'HeadLength', 7, 'HeadStyle', 'vback3', 'LineWidth', 1);
+text(x1(500)-0.27, y1(500)*0.5, "$\eta(r, t)$", ...
+    'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex');
+
 % C(t)
 %Ct = plot([x1(1)+.01, -x1(1)-0.01], [y1(1)-.05, y1(1)-.05], 'LineStyle', 'none', ...
 %    'Marker', 's', 'LineWidth', 1.5, 'Color', [.2 .2 .2], ...
@@ -199,14 +215,14 @@ text(-x1(end)/3, .2, "$r_c(t)$", ...
 %    'MarkerSize', 8);
 
 % x', z' axis
-[xht, yht] = gca_to_Normalized(myax, [0 0], [disloc, disloc/2]);
-annotation('arrow',xht, yht, ...
+[xxi, yxi] = gca_to_Normalized(myax, [0 0], [disloc, disloc/2]);
+annotation('arrow',xxi, yxi, ...
     'HeadLength', 3, 'HeadStyle', 'vback3','Linewidth', 2)
 text(.04, disloc*0.4, "$z'$", ...
     'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex')
 
-[xht, yht] = gca_to_Normalized(myax, [ZERO ZERO-disloc/2], [disloc, disloc]);
-annotation('arrow',xht, yht, ...
+[xxi, yxi] = gca_to_Normalized(myax, [ZERO ZERO-disloc/2], [disloc, disloc]);
+annotation('arrow',xxi, yxi, ...
     'HeadLength', 3, 'HeadStyle', 'vback3','Linewidth', 2)
 text(-disloc/2, -0.34, "$x'$", ...
     'Fontsize', 14, 'FontName', myFont, 'interpreter', 'latex')

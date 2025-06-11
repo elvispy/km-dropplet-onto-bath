@@ -1,3 +1,5 @@
+%% This script plots 
+
 %clc
 clear vidObj
 close all;
