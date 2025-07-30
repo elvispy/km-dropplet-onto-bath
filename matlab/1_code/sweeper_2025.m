@@ -13,7 +13,7 @@ Quant = 50;               % Unitless
 rho = 0.87;                % (g/cm^3) ? multiply by 1000 for kg/m^3
 sigma = 18.70;             % (dyn/cm) ? multiply by 100 for N/m
 nu = 2E-2;                 % (St = cm^2/s) ? multiply by 1e-4 for m^2/s
-muair = 0;                 % (g/cm·s) if applicable
+muair = 0;                 % (g/cmï¿½s) if applicable
 RhoS = 0.87;               % (g/cm^3) ? multiply by 1000 for kg/m^3
 SigmaS = 18.70;            % (dyn/cm) ? multiply by 100 for N/m
 R = [0.025];% (cm) ? multiply by 0.01 for m

@@ -178,8 +178,7 @@ else
     warning("Couldn't find any simulations with the specified parameters");
 end
 function bool = is_valid(simul, data)
-    % This function checks 
-    bool = true; tolerance = 0.05; % Relative tolerance to accept
+    bool = true; tolerance = 0.1;
     fnames = fieldnames(data);
     for ii = 1:length(fnames)
         fieldname = fnames{ii};
