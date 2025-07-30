@@ -4,7 +4,7 @@
 
 clear data;
 data.D = 50;
-data.Quant = 100;
+data.Quant = 50;
 %rho = 1; % must multiply by x1000
 
 %data.nu = 9.78E-3; % Multiply by x10000
@@ -12,14 +12,13 @@ data.Quant = 100;
 %RhoS = 1; % must multiply by x1000
 %data.sigma = 72.20; % must multiply by x100
 %data.Ro = 0.035; % linspace(0.02, 0.05, 5)'; % must multiply by x10
-
 %Oil
 %data.Bo = 0.056;
 %data.Oh = 0.058;
 
 % Water
-data.Bo = 0.017;
-data.Oh = 0.006;
+%data.Bo = 0.017;
+%data.Oh = 0.006;
 %Ang = 180;
 %U = 18; %linspace(28, 50, 5)';
 
@@ -28,8 +27,8 @@ currfol = pwd;
 Westar = []; Bo = []; Oh = []; max_deflection = []; contact_time = []; 
 coef_restitution = []; N = [];
 plotting_data = table(Westar, Bo, Oh, max_deflection, contact_time, coef_restitution, N);
-standalone = false;
-saving = true;
+standalone = true;
+saving = false;
 
 for ii = 1:length(files)
     
@@ -57,8 +56,9 @@ for ii = 1:length(files)
         load('rho.mat','rho')
         load('sigma.mat','sigma')
         load('nu.mat','nu')
-        load('muair.mat')
+        load('muair.mat', 'muair')
         load('g.mat','g') %gravitational constant
+       
         cd(folder_name);
         Westar = rho * U0.^2 * Ro / sigma;
         Bo = rho * g * Ro.^2 / sigma;
@@ -87,6 +87,9 @@ for ii = 1:length(files)
     end
 
 end
+
+% Just for  the comparison against chase
+
 if ~isempty(plotting_data)
     if max(plotting_data.Bo) ~= min(plotting_data.Bo) || max(plotting_data.Oh) ~= min(plotting_data.Oh)
         warning("Bohn and Oh numbers not uniform across data");
@@ -98,35 +101,40 @@ if ~isempty(plotting_data)
     
         % Coef of Restitution
         figure(1);
-        coef_res = scatter(plotting_data.Westar,plotting_data.coef_restitution,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        coef_res = scatter(plotting_data.Westar,plotting_data.coef_restitution,plotting_data.N*5, 'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
-        set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); xlim([0, 2]);
-        ylabel('   $\alpha \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 0.6]);
+        set(gca,'FontSize',16, 'XScale', 'log'); %,'xlim',[0 16],'ylim',[-2 8])
+        set(gcf, 'Position', [1288 557 560 420]);
+        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); %xlim([0, 2]);
+        ylabel('   $\alpha \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 0.8]);
         title(sprintf("Coefficient of restitution for \n Bo = %.2g, Oh = %.2e", plotting_data.Bo(1), plotting_data.Oh(1)),'interpreter','LaTeX','FontSize',20);
 
 
         % Maximum deflection
         figure(2);
-        max_def = scatter(plotting_data.Westar,plotting_data.max_deflection,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        max_def = scatter(plotting_data.Westar,plotting_data.max_deflection,plotting_data.N*5,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
-        set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); xlim([0, 2]);
+        set(gca,'FontSize',16, 'XScale', 'log'); %,'xlim',[0 16],'ylim',[-2 8])
+        set(gcf, 'Position', [680 557 560 420]);
+        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); %xlim([0, 2]);
         ylabel('   $z / R_o \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 2.5]);
         title(sprintf("Maximum deflection for \n Bo = %.2g, Oh = %.2e", plotting_data.Bo(1), plotting_data.Oh(1)),'interpreter','LaTeX','FontSize',20);
 
 
         % ontact time
         figure(3);
-        contact_time = scatter(plotting_data.Westar,plotting_data.contact_time,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
+        contact_time = scatter(plotting_data.Westar,plotting_data.contact_time,plotting_data.N*5,'MarkerEdgeColor',[ 0.4660    0.6740    0.1880],'LineWidth',4);
         grid on;
         %Center = plot(tvec(1:length(z)),z,'k','LineWidth',4);
-        set(gca,'FontSize',16); %,'xlim',[0 16],'ylim',[-2 8])
-        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); xlim([0, 2]);
+        set(gca,'FontSize',16, 'XScale', 'log'); %,'xlim',[0 16],'ylim',[-2 8])
+        set(gcf, 'Position', [98 557 560 420]);
+        xlabel('   $We$   ','interpreter','LaTeX','FontSize',20); %xlim([0, 2]);
         ylabel('   $t^* \ \ \ $    ','interpreter','LaTeX','FontSize',20,'Rotation',0); ylim([0, 6]);
         title(sprintf("Contact time for \n Bo = %.2g, Oh = %.2e", plotting_data.Bo(1), plotting_data.Oh(1)),'interpreter','LaTeX','FontSize',20);
+        
+
     else
         
         if isfield(data, "Bo") && data.Bo > 0.03
@@ -169,7 +177,7 @@ else
     warning("Couldn't find any simulations with the specified parameters");
 end
 function bool = is_valid(simul, data)
-    bool = true; tolerance = 0.05;
+    bool = true; tolerance = 0.1;
     fnames = fieldnames(data);
     for ii = 1:length(fnames)
         fieldname = fnames{ii};

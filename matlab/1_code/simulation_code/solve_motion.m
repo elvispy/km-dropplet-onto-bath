@@ -198,8 +198,7 @@ fprintf("Starting simulation on %s\n", pwd);
 savingvarNames = { ...
     getVarName(z), ...
     getVarName(etaOri), ...
-    getVarName(etas), ...
-    getVarName(phis), ...
+    getVarName(etas), ... %getVarName(phis), ...
     getVarName(psMatPer), ...
     getVarName(vz), ...
     getVarName(tvec), ...
@@ -605,8 +604,6 @@ try
                 end
             end
 
-
-
             if ll == 100 && reduc == 0
                 tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
                 tentative_index = tentative_index-1;
@@ -650,8 +647,6 @@ try
             % verifying convergence of the pressure field
             elseif reduc == 0 %if there was no reduction of time step
                 if norm(psNew,1) == 0
-                    %-%-B2New = 0;
-                    %-%-B3New = 0;
                     B_l_ps_new = zeros(1, N);
                 else
                     nb_contact_points = numlTent; %nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
@@ -687,16 +682,6 @@ try
                 [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
                     previous_conditions, PROBLEM_CONSTANTS);
 
-                %nb_points = max(length(psTent),length(psNew));%number of points in which the pressure needs to be compared
-
-    %             err = norm([psTent;zeros(length(length(psTent)+1:nb_points),1);amplitudes_tent']-...
-    %                        [psNew ;zeros(length(length(psNew )+1:nb_points),1);amplitudes_new'],1);
-    %                    
-    %             if norm([psNew;amplitudes_new'],1) > 0
-    %                 errorP = err/norm([psNew;amplitudes_new'],1);    
-    %             else
-    %                 errorP = err;
-    %             end
                 errorP = norm(amplitudes_tent-amplitudes_new)/norm(amplitudes_tent);
 
                 if PROBLEM_CONSTANTS.DEBUG_FLAG == true
@@ -753,7 +738,7 @@ try
                         current_to_save = current_to_save + 1;
                     end
 
-                    if zTent > 1.5 && numlTent == 0
+                    if (zTent > 1.5 && numlTent == 0) || (vz(tentative_index+1) < 0 && vz(tentative_index) >=0  && t > 50 * dtb)
                         tend = t;
                     end
 
@@ -781,9 +766,9 @@ try
                         %set(gca,'xlim',[-6 6])
                         drawnow;
                     end
-                else
+                else %i.e. didn't attain convergence yet
 
-                    %i.e. didn't attain convergence yet
+                    
                     %psTent = psNew;
 
                     %#---
