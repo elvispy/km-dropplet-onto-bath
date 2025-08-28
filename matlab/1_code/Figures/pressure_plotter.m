@@ -101,7 +101,7 @@ zb = Gamma/(Fr*wzero^2)*cos(wzero*tvec+thetaZero); %Elevation of the pool
 zbplot=zb; %(1:end-1);
 
 saving_figure = figure();
-saving_figure.Position = [100 100 600*0.55 400*0.55];
+saving_figure.Position = [200 200 600*0.65 400*0.65];
 N = floor(size(etaMatPer, 2)*0.8); M = floor(1.2/dr);
 pfield_radial = zeros(M, N);
 indexes = floor(linspace(1, size(etaMatPer,2), N));
@@ -139,6 +139,9 @@ shading interp;                  % Interpolate shading for a smoother gradient
 
 % Add labels and title
 set(gca,'FontName','Times','FontSize',14);
+set(gca,'defaultTextInterpreter','tex', ...
+          'defaultAxesTickLabelInterpreter','tex', ...
+          'defaultLegendInterpreter','tex');
 
 xlim([0, 0.9]); xticks([0 .3 .6 .9]); 
 ylim([0, 4]); yticks([0 1 2 3 4]);
@@ -146,17 +149,19 @@ ax = gca;
 ax.XAxis.FontSize = 14; ax.YAxis.FontSize = 14;
 %ylabel(cb, '$p/p_0$','interpreter','Latex','FontName','Times',...
 %    'FontSize',20,'rotation',90)
-xlabel('   $r/R_s$   ','interpreter','Latex','FontName','Times','FontSize',20)
-ylabel('$t/T_s$','interpreter','Latex','FontName','Times',...
-    'FontSize',20,'rotation',90)
+xlabel('   r/R_d   ','FontName','Latin Modern Roman','FontSize',16)
+ylabel('t/T_d','FontName','Latin Modern Roman',...
+    'FontSize',16,'rotation',90)
 %title('Contact radius and pressure field evolution');
 
 % Adjust axes
 %axis tight;                      % Fit the plot closely around the data
 
 cd(curr);
+set(gcf,'Renderer','painters');
 saveas(saving_figure, "../../0_data/manual/pressure_plotter", 'fig');
-print(saving_figure, '-depsc', '-r300', "../../0_data/manual/pressure_plotter.eps");
+exportgraphics(saving_figure, "../../0_data/manual/pressure_plotter.eps", 'ContentType','vector');
+
 
 
 function load_vars(str)

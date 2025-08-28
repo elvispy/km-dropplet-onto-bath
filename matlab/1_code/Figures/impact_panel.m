@@ -4,7 +4,8 @@ close all;
 addpath(fullfile(pwd, "..", "simulation_code"));
 curr = pwd;
 p = fullfile(pwd, "..",  "D50Quant100\rho1000sigma7220nu98muair0\RhoS1000SigmaS7220\R0350mm\ImpDefCornerAng180U39\N=20tol=5.00e-05"); % 
-p = uigetdir();
+p = fullfile(pwd, "..", "D50Quant100", "rho1000sigma7220nu98muair0", "RhoS1000SigmaS7220", "R0350mm", "ImpDefCornerAng180U39", "N=20tol=5.00e-05"); % uigetdir();
+%p = uigetdir();
 cd(p);
 
 global errored
@@ -147,7 +148,7 @@ for jj = 1:subplots
     %axis equal
     %xlabel('   $x/R_o$   ','interpreter','Latex','FontName','Times','FontSize',18)
     if jj == 1
-        lol = ylabel('$z / R_s $ vs $x/ R_s$','interpreter','Latex','FontName','Times',...
+        lol = ylabel('$z / R_d $ vs $x/ R_d$','interpreter','Latex','FontName','Times',...
             'FontSize',26,'rotation',90);
         lol.Position(1) = -3.5;
     else
@@ -159,7 +160,7 @@ for jj = 1:subplots
     
     
 
-    title(sprintf("$ t/T_s =\\ $ %3.2f", tvec(ii)),'FontSize',26,...
+    title(sprintf("$ t/T_d =\\ $ %3.2f", tvec(ii)),'FontSize',26,...
             'interpreter','latex','FontName','Times')    
     drawnow
     %currFrame = getframe(gcf);
