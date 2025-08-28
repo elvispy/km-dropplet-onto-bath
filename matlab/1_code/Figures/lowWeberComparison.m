@@ -60,7 +60,7 @@ for ii = 1:length(files)
         load('nu.mat','nu')
         load('muair.mat', 'muair')
         load('g.mat','g') %gravitational constant
-        %nu = muair;
+        if nu <=0; continue; end
         cd(folder_name);
         Westar = rho * U0.^2 * Ro / sigma;
         Bo = rho * g * Ro.^2 / sigma;

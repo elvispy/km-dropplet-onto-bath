@@ -16,9 +16,9 @@ nu = 2E-2;                 % (St = cm^2/s) ? multiply by 1e-4 for m^2/s
 muair = 0;                 % (g/cm·s) if applicable
 RhoS = 0.87;               % (g/cm^3) ? multiply by 1000 for kg/m^3
 SigmaS = 18.70;            % (dyn/cm) ? multiply by 100 for N/m
-R = [0.01, 0.02];% (cm) ? multiply by 0.01 for m
+R = [0.0331];% (cm) ? multiply by 0.01 for m
 Ang = 180;                 % (deg)
-U = linspace(3, 15, 13);   % (cm/s) ? multiply by 0.01 for m/s
+U = 1:20;   % (cm/s) ? multiply by 0.01 for m/s
 modes = [60];                % number of Fourier modes
 tol = 5e-5;                % numerical tolerance (unitless)
 
