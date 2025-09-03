@@ -80,7 +80,7 @@ WeS  = rhoS*Ro^3/(sigmaS * T_unit^2); %This is for the bath/dropplet interaction
 Cang = (Ang/180)*pi; %contact angle to be imposed
 
 %Physical parameter
-tend = 9; %Earliest possible end of simulation in characteristic units
+tend = 20; %Earliest possible end of simulation in characteristic units
 
 %Inintial conditions for the fluid
 t = 0;
