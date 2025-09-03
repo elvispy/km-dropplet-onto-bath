@@ -1,3 +1,160 @@
+% SOLVE_MOTION  Simulate drop?bath impact using spherical-harmonic dynamics.
+%
+%   solve_motion(U0, ~, N, tolP, wd, debug_flag)
+%
+%   This routine advances the coupled motion of a deformable droplet
+%   impacting a bath, modeling the free surface with N spherical-harmonic
+%   modes and iterating a pressure/contact problem at each time step until
+%   convergence. It adaptively refines the time grid when tangency/pressure
+%   checks fail, saves time histories of key fields, and writes a summary of
+%   run conditions on exit.
+%
+%   INPUTS
+%   ------
+%   U0          Impact speed of the droplet [cm/s in CGS]. Converted to
+%               dimensionless units internally using Ro and sigmaS, rhoS.
+%
+%   ~           Unused placeholder (kept for interface consistency).
+%
+%   N           Integer. Number of spherical-harmonic modes retained.
+%
+%   tolP        Positive scalar. Convergence tolerance for the
+%               inner pressure?shape fixed-point loop (relative change of
+%               deformation amplitudes).
+%
+%   wd          Char/string. Path to the working directory where the run?s
+%               parameter subfolders and cache files live. The function
+%               `cd`s into `wd` and navigates relative to it to locate inputs.
+%
+%   debug_flag  Logical. If true, prints per-step diagnostics and live plots
+%               of the surface and contact region.
+%
+%   EXPECTED INPUT FILES (MAT) & DIRECTORY LAYOUT
+%   ---------------------------------------------
+%   The routine expects a parameterized folder tree rooted at `wd`'s parent
+%   directories and loads the following files (all in CGS unless noted):
+%
+%     Ro.mat          : Ro  (sphere/drop radius)
+%     rhoS.mat        : rhoS (sphere density)
+%     sigmaS.mat      : sigmaS (sphere surface tension)
+%     rho.mat         : rho  (fluid density)
+%     sigma.mat       : sigma (fluid surface tension)
+%     nu.mat          : nu   (kinematic viscosity)
+%     muair.mat       : muair (air viscosity; used for path selection)
+%     g.mat           : g    (gravity)
+%
+%     D.mat           : D       (domain diameter in units of Ro)
+%     quant.mat       : quant   (# of dr?s per Ro for output sampling)
+%     nr.mat          : nr      (# radial grid points)
+%     dr.mat          : dr      (radial grid spacing)
+%     Delta.mat       : Delta   (time-integration parameter)
+%     IntMat.mat      : IntMat  (contact-integral stencils)
+%     DTNnew345nr%D%drefp10.mat : DTNnew345 (Dirichlet-to-Neumann operator)
+%
+%     Under folder names keyed by fluid/solid parameters:
+%       Ma.mat        : Ma   (dimensionless mass)
+%       Ra.mat        : Ra   (density ratio for coupling)
+%
+%   The code constructs subfolder names such as:
+%     ./rho{1000*rho}sigma{round(100*sigma)}nu{round(10000*nu)}muair{muair}
+%     /RhoS{rhoS*1000}SigmaS{round(100*sigmaS)}/R0{Ro*10000 in mm}
+%     /ImpDefCornerAng{Ang}U{U0}/N={N}tol={tolP}
+%   and will error if these are missing.
+%
+%   MODEL & NUMERICS (high level)
+%   -----------------------------
+%   ? Non-dimensionalization uses Ro (length), T = sqrt(rhoS*Ro^3/sigmaS)
+%     (time), and corresponding V_unit = Ro/T.
+%   ? Governing deformation coordinates are the first N SH modes with
+%     natural frequencies ?_l = sqrt(l(l+2)(l-1)/WeS).
+%   ? Main outer loop steps time with a baseline dtb ? O(N^{-3/2}) and
+%     adaptively inserts midpoints upon:
+%       - tangency errors at the free surface,
+%       - nearly singular linear systems (lastwarn:
+%         'MATLAB:nearlySingularMatrix'),
+%       - nonconvergence of the contact/pressure iteration.
+%   ? At each time step:
+%       1) Predict deformation via ODE step with tentative pressure
+%          amplitudes B_l.
+%       2) Build/update contact geometry (number of pressed nodes `numl`,
+%          max radius, local slope/tangent).
+%       3) Solve one of several contact cases (0?4 points, interior/boundary)
+%          via `solveDD0` / `solvenDDCusp` to get ?, ?, z, v_z and a new
+%          discrete pressure `ps`.
+%       4) Project `ps` to SH pressure amplitudes B_l and re-integrate the
+%          deformation ODE.
+%       5) Iterate until ?A_new ? A_old?/?A_old? < tolP or refine dt.
+%
+%   OUTPUTS / SIDE EFFECTS
+%   ----------------------
+%   This function does not return variables; it **saves** per-run artifacts
+%   into the current parameter folder:
+%
+%     z.mat                     : center of mass height vs. time
+%     etaOri.mat                : surface height below south pole
+%     etas.mat                  : full surface elevation snapshots (nr × T)
+%     psMatPer.mat              : accepted pressure distributions (cell)
+%     vz.mat                    : center of mass velocity vs. time
+%     tvec.mat                  : (possibly refined) time vector
+%     nlmax.mat                 : max potential contact nodes per step
+%     numl.mat                  : accepted contact nodes per step
+%     oscillation_amplitudes.mat: SH deformation amplitudes (N × T)
+%     pressure_amplitudes.mat   : SH pressure amplitudes (N × T)
+%     Rv.mat                    : south-pole height of the undeformed cap
+%
+%   Additionally:
+%     ProblemConditions.mat : summary of nondimensional numbers, units,
+%                             N, U0, Ang, dtb, runtime, and struct
+%                             PROBLEM_CONSTANTS used in the simulation.
+%     error_logU0=... .mat  : saved if an exception occurs (with ME).
+%     Partial results with prefix 'errored_' are saved on errors.
+%
+%   TERMINATION
+%   -----------
+%   The run ends when either:
+%     ? t reaches an internal cap (default earliest t_end ? 9 non-diml),
+%     ? the drop is in free flight with z > 1.5 and no contact, or
+%     ? v_z changes sign to negative after sufficient elapsed time.
+%
+%   WARNINGS & ERROR HANDLING
+%   -------------------------
+%   ? Nearly singular systems or dt*T_unit < 1e-10 trigger step rollback,
+%     time-grid pruning, and midpoint insertion. After 50 rollbacks, the
+%     run aborts with an error.
+%   ? If the required folder structure/files are missing, the function
+%     throws: "Working directory not ready to perform simulation".
+%
+%   UNITS
+%   -----
+%   Inputs are in CGS where applicable; outputs are saved in dimensionless
+%   form unless obviously dimensional (e.g., raw parameters mirrored from
+%   the .mat files).
+%
+%   DEPENDENCIES (called internally)
+%   --------------------------------
+%     solveDD0, solvenDDCusp, solve_ODE_unkown,
+%     r_from_spherical, zs_from_spherical, theta_from_cylindrical,
+%     calculate_tan, custom_project_amplitudes / project_amplitudes.
+%
+%   EXAMPLE
+%   -------
+%     % Prepare parameter folders/files (see above), then run:
+%     U0 = 38;     % cm/s
+%     N  = 20;     % modes
+%     tolP = 1e-4; % pressure/deformation tolerance
+%     wd = pwd;    % inside the run folder chain
+%     debug = true;
+%     solve_motion(U0, [], N, tolP, wd, debug);
+%
+%   NOTES
+%   -----
+%   ? The function mutates the working directory (cd) but restores the
+%     original folder on exit.
+%   ? Ang (contact angle) is currently fixed to 180° inside the code.
+%   ? If a preexisting 'z.mat' is found, the code is set up to warn about
+%     overwriting (message currently commented).
+
+
 function solve_motion(U0, ~, N, tolP, wd, debug_flag)
 
 %Reset warning
@@ -52,7 +209,7 @@ try
 
     cd(sprintf('R0%gmm',Ro*10000))
 
-    cd(['ImpDefCornerAng',num2str(Ang),'U',num2str(U0)])
+    cd(sprintf("ImpDefCornerAng%gU%.4g", Ang, U0))
     cd(sprintf('N=%dtol=%0.2e', N, tolP));
     
 catch
