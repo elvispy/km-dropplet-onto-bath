@@ -176,6 +176,8 @@ for i = 1:length(unique_Bo)
     idx = plotting_data.Bo == unique_Bo(i);
     
     % Scatter plot for the current subset of data
+    fprintf("Bo = %g, min We = %.2e, max We = %.2e \n", unique_Bo(i), ...
+        min(plotting_data.Westar(idx)), max(plotting_data.Westar(idx)));
     scatter(plotting_data.Westar(idx), plotting_data.contact_time(idx), ...
         100, plotting_data.Oh(idx), markers{mod(i-1, length(markers)) + 1}, 'filled', 'DisplayName', sprintf('Bo = %.2g', unique_Bo(i)));
 end
