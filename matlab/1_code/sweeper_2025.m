@@ -16,11 +16,11 @@ nu = 2E-2;                 % (St = cm^2/s) ? multiply by 1e-4 for m^2/s
 muair = 0;                 % (g/cm·s) if applicable
 RhoS = 0.87;               % (g/cm^3) ? multiply by 1000 for kg/m^3
 SigmaS = 18.70;            % (dyn/cm) ? multiply by 100 for N/m
-R = [0.02];% (cm) ? multiply by 0.01 for m
+R = [0.025];% (cm) ? multiply by 0.01 for m
 Ang = 180;                 % (deg)
-v = @(we, rho, l, sigma) sqrt(we * sigma / (l * rho));
-We = 0.0012; %logspace(-4, -3, 11); We = We((end-3):(end-3));
-U = v(We, rho, R(2), sigma);   % (cm/s) ? multiply by 0.01 for m/s
+v = @(we, rho, l, sigma) sqrt(we .* sigma ./ (l .* rho));
+We = logspace(-1, 0, 11); We = We(We > 0.26); We = We(1:(end-1));
+U = v(We, rho, R(1), sigma);   % (cm/s) ? multiply by 0.01 for m/s
 
 modes = [60];                % number of Fourier modes
 tol = 5e-5;                % numerical tolerance (unitless)
@@ -73,6 +73,8 @@ if isempty(cartesian_product) == true; cartesian_product = double.empty(0, 10); 
 simulations_cgs = array2table(cartesian_product, ...
     "VariableNames", ["D", "Quant", "rho", "sigma", "nu", "muair", "RhoS", ...
     "SigmaS", "R", "Ang", "U", "modes", "convergence_tol"]);
+
+%simulations_cgs.U = v(We, rho, R, sigma)';
 % Now you can manually add any simulations that you would like to run, such
 % as:
 %  simulations_cgs = [simulations_cgs; ...
