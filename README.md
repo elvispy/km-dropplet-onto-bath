@@ -1,5 +1,10 @@
 # Droplet Rebounds off a Fluid Bath: Kinematic‑Match Simulations and Experiments (MATLAB)
 
+[![arXiv](https://img.shields.io/badge/View%20on%20arXiv-B31B1B?logo=arxiv&labelColor=gray)](https://arxiv.org/abs/2509.22826)
+
+
+
+
 ![Graphical Abstract](matlab/0_data/manual/GraphicalAbstract.jpg)
 
 This repository accompanies the manuscript “Droplet rebounds off a fluid bath: kinematic match simulations and experiments.” It contains MATLAB code and precomputed data to simulate non‑coalescing droplet–bath impacts using the full kinematic‑match (KM) framework, now extended to include droplet deformation. The solver predicts the time‑evolving contact area, pressure distribution, and wave field on both bodies. Automation scripts generate parameterized folder trees, run sweeps (water/oil presets), and aid post‑processing and figure reproduction.
