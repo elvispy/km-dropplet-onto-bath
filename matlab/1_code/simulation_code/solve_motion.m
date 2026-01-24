@@ -257,43 +257,32 @@ function solve_motion(U0, ~, N, tolP, wd, debug_flag, tend_override)
     % --- Nested Functions ---
     
     function res_out = attempt_step_wrapper(prev_k, k, dt, st, PC, N, tolP)
-        % Implements the specific state machine from original code
+        % Generalized state machine for contact point search using k-logic
         
         res_out = struct('err', inf, 'recalculate', true); 
         
         % Helper to find nlprev based on history to capture hysteresis/advancing state
         function np = find_nlprev(target_k)
             % Search backwards from tentative_index for a value different from target_k
-            % numl(1:tentative_index) contains history.
-            
-            % If history is empty (t=0, tentative_index=0... wait tentative_index starts at 0, incremented to 1)
-            % If tentative_index=1, numl(1) is valid (0).
-            
             if tentative_index == 0
                 np = 0; return;
             end
             
-            % Create reversed view or iterate
-            % Original: co = find(numl(tentative_index:-1:1)~=target_k,1);
             hist_vec = numl(tentative_index:-1:1);
             co = find(hist_vec ~= target_k, 1);
             
             if isempty(co)
-                % If all values are target_k (e.g. constant contact)
-                % Default to target_k (which implies nlprev=nl -> Static)
-                % Or should it be 0? 
-                % Original code would crash if co empty?
-                % But numl(1)=0. If target_k > 0, we eventually hit 0.
-                % If target_k = 0, we hit 0s. 
                 np = target_k;
             else
-                % Original: numl(tentative_index-co+1)
                 np = numl(tentative_index - co + 1);
             end
         end
 
         % Helper to run one trial
         function r = try_k(candidate_k)
+             if candidate_k < 0
+                 r = struct('err', inf); return;
+             end
              prev_k_hist = find_nlprev(candidate_k);
              r = attempt_step(prev_k_hist, candidate_k, dt, st, PC, N, tolP); 
              if PC.DEBUG_FLAG
@@ -303,100 +292,50 @@ function solve_motion(U0, ~, N, tolP, wd, debug_flag, tend_override)
              end
         end
 
-        if k == 0
-            % Case: In Flight
-            r0 = try_k(0);
-            if abs(r0.err) < 0.5
-                res_out = r0; res_out.recalculate = false; return;
-            else
-                r1 = try_k(1);
-                r2 = try_k(2);
-                if abs(r1.err) < abs(r2.err)
-                    res_out = r1; res_out.recalculate = false; return;
-                else
-                    % Original: tvec = insert... return reduc=1
-                    res_out.recalculate = true; return;
-                end
-            end
-            
-        elseif k == 1
-            % Case: Point Contact
-            r0 = try_k(0);
-            if abs(r0.err) < 0.5
-                res_out = r0; res_out.recalculate = false; return;
-            else
-                r1 = try_k(1);
-                r2 = try_k(2);
-                if abs(r1.err) < abs(r2.err)
-                     res_out = r1; res_out.recalculate = false; return;
-                else
-                     r3 = try_k(3);
-                     if abs(r2.err) < abs(r3.err)
-                         res_out = r2; res_out.recalculate = false; return;
-                     else
-                         res_out.recalculate = true; return;
-                     end
-                end
-            end
-            
-        elseif k == 2
-             % Case: Two Points
-             r0 = try_k(0); 
-             if abs(r0.err) < 0.5
+        % 1. Evaluate Current State (k) and Neighbors (k-1, k+1)
+        r0 = try_k(k);
+        r_minus = try_k(k-1);
+        r_plus = try_k(k+1);
+
+        err0 = abs(r0.err);
+        errM = abs(r_minus.err);
+        errP = abs(r_plus.err);
+
+        % Optimization: If current state is flight (k=0) and good enough, stay.
+        if k == 0 && err0 < 0.5
+            res_out = r0; res_out.recalculate = false; return;
+        end
+
+        % 2. Compare and Decide
+        if err0 <= errP && err0 <= errM
+             % Current k is best among neighbors.
+             if err0 == inf
                  res_out.recalculate = true; return;
              else
-                 r2 = try_k(2);
-                 r1 = try_k(1);
-                 if abs(r1.err) < abs(r2.err)
-                     res_out = r1; res_out.recalculate = false; return;
-                 else
-                     r3 = try_k(3);
-                     if abs(r2.err) < abs(r3.err)
-                         res_out = r2; res_out.recalculate = false; return;
-                     else
-                         r4 = try_k(4);
-                         if abs(r3.err) < abs(r4.err)
-                             res_out = r3; res_out.recalculate = false; return;
-                         else
-                             res_out.recalculate = true; return;
-                         end
-                     end
-                 end
+                 res_out = r0; res_out.recalculate = false; return;
              end
              
-        else
-            % Case: General Contact (k > 2)
-            % Check neighbors
-            % Actually, wait. Original has logic for "far from boundaries" and "near boundaries".
-            % Boundary is nlmax (which is dynamic).
-            % But the core logic is symmetric locally. Let's implement the generic "downward" first.
-            
-            % Check k vs k-1
-            rk = try_k(k);
-            rkm1 = try_k(k-1);
-            
-            if abs(rkm1.err) < abs(rk.err)
-                % Descent towards fewer points
-                rkm2 = try_k(k-2);
-                if abs(rkm1.err) < abs(rkm2.err)
-                    res_out = rkm1; res_out.recalculate = false; return;
-                else
-                    res_out.recalculate = true; return;
-                end
-            else
-                % Check k vs k+1
-                rkp1 = try_k(k+1);
-                if abs(rk.err) < abs(rkp1.err)
-                    res_out = rk; res_out.recalculate = false; return;
-                else
-                     rkp2 = try_k(k+2);
-                     if abs(rkp1.err) < abs(rkp2.err)
-                         res_out = rkp1; res_out.recalculate = false; return;
-                     else
-                         res_out.recalculate = true; return;
-                     end
-                end
-            end
+        elseif errP < err0 && errP <= errM
+             % k+1 is better. Check stability (k+2).
+             r_plus2 = try_k(k+2);
+             if abs(r_plus2.err) > errP
+                  % k+1 is a local minimum (better than k and k+2)
+                  res_out = r_plus; res_out.recalculate = false; return;
+             else
+                  % k+2 is even better? Step size too large or rapid change. Recalculate.
+                  res_out.recalculate = true; return;
+             end
+
+        else % errM < err0 && errM < errP
+             % k-1 is better. Check stability (k-2).
+             r_minus2 = try_k(k-2);
+             if abs(r_minus2.err) > errM
+                  % k-1 is a local minimum
+                  res_out = r_minus; res_out.recalculate = false; return;
+             else
+                  % k-2 is even better. Recalculate.
+                  res_out.recalculate = true; return;
+             end
         end
     end
 
