@@ -92,14 +92,14 @@
 %
 %     z.mat                     : center of mass height vs. time
 %     etaOri.mat                : surface height below south pole
-%     etas.mat                  : full surface elevation snapshots (nr × T)
+%     etas.mat                  : full surface elevation snapshots (nr Ã— T)
 %     psMatPer.mat              : accepted pressure distributions (cell)
 %     vz.mat                    : center of mass velocity vs. time
 %     tvec.mat                  : (possibly refined) time vector
 %     nlmax.mat                 : max potential contact nodes per step
 %     numl.mat                  : accepted contact nodes per step
-%     oscillation_amplitudes.mat: SH deformation amplitudes (N × T)
-%     pressure_amplitudes.mat   : SH pressure amplitudes (N × T)
+%     oscillation_amplitudes.mat: SH deformation amplitudes (N Ã— T)
+%     pressure_amplitudes.mat   : SH pressure amplitudes (N Ã— T)
 %     Rv.mat                    : south-pole height of the undeformed cap
 %
 %   Additionally:
@@ -150,70 +150,54 @@
 %   -----
 %   ? The function mutates the working directory (cd) but restores the
 %     original folder on exit.
-%   ? Ang (contact angle) is currently fixed to 180° inside the code.
+%   ? Ang (contact angle) is currently fixed to 180Â° inside the code.
 %   ? If a preexisting 'z.mat' is found, the code is set up to warn about
 %     overwriting (message currently commented).
 
 
 function solve_motion(U0, ~, N, tolP, wd, debug_flag)
 
-%Reset warning
 lastwarn('', '');
 
 tstart = tic;
-%data in cgs
 
-if exist('z.mat', 'file') == 2
-   % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
-end
+if nargin < 6 || isempty(debug_flag); debug_flag = false; end
+if nargin < 5 || isempty(wd); wd = pwd; end
+validateattributes(U0, {'numeric'}, {'scalar', 'real', 'finite'});
+validateattributes(N, {'numeric'}, {'scalar', 'integer', 'positive'});
+validateattributes(tolP, {'numeric'}, {'scalar', 'real', 'positive'});
 
-
-%U0 = 38; %impact velocity in cm/s (unit 0of velocity for the problem)
-Ang = 180; %contact angle to be imposed
+Ang = 180; % contact angle to be imposed
 
 currfold = pwd;
+cleanupObj = onCleanup(@() cd(currfold));
+
 try
-    cd(wd);
-    cd ..
-    cd ..
-    load('Ro.mat','Ro')%Sphere's radius in CGS
-
-    cd ..
-    load('rhoS.mat','rhoS')%Sphere density
-    load('sigmaS.mat', 'sigmaS') %Sphere's surface tension
-
-    cd ..
-    load('rho.mat','rho')
-    load('sigma.mat','sigma')
-    load('nu.mat','nu')
-    load('muair.mat', 'muair')
-    load('g.mat','g') %gravitational constant
-
-    cd ..
-    load('D.mat', 'D')%Domain diameter in units of droplet radii
-    load('quant.mat' ,'quant')%number of dr's contained in an undeformed dropelt radius
-    load('nr.mat','nr')
-    load('dr.mat','dr')
-    load('Delta.mat','Delta')
-    load('IntMat.mat','IntMat')
-    load(sprintf('DTNnew345nr%dD%drefp10.mat', nr, D),'DTNnew345')
-    DTN = DTNnew345;
-    clear DTNnew345
-    xplot = dr*(0:nr-1); save('xplot.mat','xplot')%I might remove or relocate this
-
-    cd(['rho',num2str(1000*rho),'sigma',num2str(round(100*sigma)),'nu',num2str(round(10000*nu)),'muair',num2str(muair)])
-
-    cd(['RhoS',num2str(rhoS*1000),'SigmaS',num2str(round(100*sigmaS))])
-    load('Ma.mat','Ma')%Dimensionless mass of sphere
-    load('Ra.mat','Ra')%Density ratio
-
-    cd(sprintf('R0%gmm',Ro*10000))
-
-    cd(sprintf("ImpDefCornerAng%gU%.4g", Ang, U0))
-    cd(sprintf('N=%dtol=%0.2e', N, tolP));
-    
+    params = load_simulation_setup(wd, U0, Ang, N, tolP);
 catch
     error("Working directory not ready to perform simulation");
+end
+
+Ro = params.Ro;
+rhoS = params.rhoS;
+sigmaS = params.sigmaS;
+rho = params.rho;
+sigma = params.sigma;
+nu = params.nu;
+muair = params.muair;
+g_accel = params.g;
+D = params.D;
+quant = params.quant;
+nr = params.nr;
+dr = params.dr;
+Delta = params.Delta;
+IntMat = params.IntMat;
+DTN = params.DTN;
+Ma = params.Ma;
+Ra = params.Ra;
+
+if exist('z.mat', 'file') == 2
+    % error("Exporting data is going to be overwritten. Please re-allocate files to avoid loss of data");
 end
 
 % #--- 
@@ -230,7 +214,7 @@ V_unit = L_unit/T_unit;
 %Dimensionless numbers for equations
 Dr = rhoS/rho; %Sr = sigmaS/sigma;
 Re = L_unit^2/(nu*T_unit);
-Fr = L_unit/(g * T_unit^2);
+Fr = L_unit/(g_accel * T_unit^2);
 We = rho * L_unit.^3 / (sigma * T_unit^2); 
 WeS  = rhoS*Ro^3/(sigmaS * T_unit^2); %This is for the bath/dropplet interaction.
 Westar = rhoS * U0.^2 * Ro / sigmaS; % velocity-based weber number (to compare with literature)
@@ -250,30 +234,33 @@ phio = zeros(nr,1); %initial surface potential
 nsteps = ceil(20/(2*pi) * N^(3/2)); %minimum number of timesteps in one unit of time
 %nsteps = nsteps + 100 - mod(nsteps, 100);
 dtb = 1/nsteps; %basic timestep (gets halved as needed over impacts)
-steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
+%steps = ceil((tend-t)/dtb); %estimated minimum number of timesteps
 
 %Zeroing result storing variables
-etaOri = zeros(1,steps+1);%height of the surface below the south pole
-z = zeros(1,steps+1);%height of the centre of mass
-vz = zeros(1,steps+1);%speed of the centre of mass
-numl = zeros(1,steps+1);%number of pressed mesh points at each time step
 tvec = t:(dtb):(tend+1); tvecOri = tvec;%vector of times assuming no refinement has happened
 %plus some extra time just in case the simulation needs to run longer
 
-dt = tvec(2) - tvec(1); indexes_to_save = zeros(steps + 1, 1);
+nTime = numel(tvec);
+
+etaOri = zeros(1, nTime);%height of the surface below the south pole
+z = zeros(1, nTime);%height of the centre of mass
+vz = zeros(1, nTime);%speed of the centre of mass
+numl = zeros(1, nTime);%number of pressed mesh points at each time step
+
+dt = tvec(2) - tvec(1); indexes_to_save = zeros(nTime, 1);
 current_to_save = 2; indexes_to_save(1) = 1;
-oscillation_amplitudes = zeros(N, steps + 1); % Variable to store
-pressure_amplitudes    = zeros(N, steps + 1); % Pressure amplitudes
-Rv = -ones(1, steps+1);
+oscillation_amplitudes = zeros(N, nTime); % Variable to store
+pressure_amplitudes    = zeros(N, nTime); % Pressure amplitudes
+Rv = -ones(1, nTime);
 % the time dependent amplitude of all the SH
-oscillation_velocities = zeros(N, steps+1);
-nlmax = zeros(1,steps+1);%Variable to store the number of nodes spanned by the deformed droplet
+oscillation_velocities = zeros(N, nTime);
+nlmax = zeros(1, nTime);%Variable to store the number of nodes spanned by the deformed droplet
 %zeroing variable that records each part of the sequence of surface states
 %etaMatPer = zeros(length(etao),nsteps); 
-etas      = zeros(length(etao), steps); etas(:, 1) = etao;
-phis      = zeros(length(etao), steps); phis(:, 1) = phio;
+etas      = zeros(length(etao), nTime); etas(:, 1) = etao;
+phis      = zeros(length(etao), nTime); phis(:, 1) = phio;
 %phiMatPer = zeros(length(phio),nsteps);
-psMatPer = cell(1,nsteps); % ??? why cell
+psMatPer = cell(1, nTime);
 %Storing initial surface state
 %etaMatPer(:,1) = etao;
 %phiMatPer(:,1) = phio;
@@ -281,6 +268,7 @@ psMatPer{1} = zeros(quant+1,1);
 
 %zeroing the ceiling functions
 zs = zeros(nr,1);
+xplot = dr * (0:nr-1);
 
 
 %tolP = 1E-4; %error tolerance for  deformation 
@@ -318,18 +306,18 @@ previous_conditions{1}.center_of_mass_velocity = ...
 previous_conditions{1}.center_of_mass = ...
     previous_conditions{2}.center_of_mass - previous_conditions{2}.center_of_mass_velocity * dt;
 
-g = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
+mode_solution = @(t, idx) current_conditions.deformation_amplitudes(idx) * cos(f(idx) * t) ...
     + current_conditions.deformation_velocities(idx)/(f(idx)+1e-30) * sin(f(idx) * t); 
 
 for idx = 1:N
-    previous_conditions{1}.deformation_amplitudes(idx) = g(-dt, idx);
-    previous_conditions{1}.deformation_velocities(idx) = (g(0, idx) - g(-2*dt/1000, idx))/(2*dt/1000);
+    previous_conditions{1}.deformation_amplitudes(idx) = mode_solution(-dt, idx);
+    previous_conditions{1}.deformation_velocities(idx) = (mode_solution(0, idx) - mode_solution(-2*dt/1000, idx))/(2*dt/1000);
 end
 
 tentative_index = 0; %iteration counter
 going_back = 0;
 
-errortan = zeros(5,steps+1);%tangency error recorder
+errortan = zeros(5, nTime);%tangency error recorder
 ps_accepted = [];
 
 %If there were some initial pressure acting on the surface and sphere I
@@ -355,29 +343,16 @@ fprintf("Starting simulation on %s\n", pwd);
 
 
 % Names of the variables to be stored
-savingvarNames = { ...
-    getVarName(z), ...
-    getVarName(etaOri), ...
-    getVarName(etas), ... %getVarName(phis), ...
-    getVarName(psMatPer), ...
-    getVarName(vz), ...
-    getVarName(tvec), ...
-    getVarName(nlmax), ...
-    getVarName(numl), ...
-    getVarName(oscillation_amplitudes), ...
-    getVarName(pressure_amplitudes), ...
-    getVarName(Rv)...
-};
+savingvarNames = {'z', 'etaOri', 'etas', 'psMatPer', 'vz', 'tvec', ...
+    'nlmax', 'numl', 'oscillation_amplitudes', 'pressure_amplitudes', 'Rv'};
 
-variableValues = cell(size(savingvarNames));
-
-
-exit = false;
 %% Main Loop
 try
-    while (t<tend) && exit == false
+    while t < tend
 
         tentative_index = tentative_index+1;
+        ensure_storage_capacity(tentative_index + 1);
+
         t = tvec(tentative_index+1);
         dt = t - tvec(tentative_index);
 
@@ -403,58 +378,18 @@ try
 
         thetaVec = theta_from_cylindrical(dr*(0:(nlmax(tentative_index)-1)), oscillation_amplitudes(:, tentative_index)); % zeros(1,nlmax(jj));%initialising vector of angles of pressed positions
 
-        % Spherical Harmonics modes
-        if norm(psTent,1) == 0
-
-            B_l_ps_tent = zeros(1, N);
-        else
-            nb_contact_points = numl(tentative_index);% nlmax(tentative_index)-find(flipud(psTent),1)+1; %Number of nodes contact points%
-            %needs to be integrated against SH modes
-
-            if PROBLEM_CONSTANTS.linear_on_theta == true
-                if nb_contact_points > 1
-                    contactAngle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
-                else
-                    contactAngle = (thetaVec(2) + thetaVec(1))/2;
-                end
-                angles = linspace(contactAngle, ...% + (thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))/2
-                            pi, (nb_contact_points +1) * PROBLEM_CONSTANTS.interpolation_number);
-                values = r_from_spherical(angles, oscillation_amplitudes(:, tentative_index));
-                f = @(r) interp1(dr*(0:(nb_contact_points)), ...
-                    [psTent(1:nb_contact_points)', 0], r, 'linear',  0);
-                values = f(values);
-                B_l_ps_tent = custom_project_amplitudes(angles, values, N, NaN, NaN);
-
-            else
-                % Linear on theta not assumed
-                % Defining where the pressure distribution will be
-                % projected
-                if nb_contact_points == length(thetaVec)
-                    angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points - 1))];
-                else
-                    angles = thetaVec(1:(nb_contact_points+1));
-                end
-                f = @(thetas) interp1(angles, [psTent(1:nb_contact_points)', 0], thetas, 'linear',  0); 
-                endpoints = [angles(end), angles(1)];
-                B_l_ps_tent = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
-            end
-        end    
+        nb_contact_points = numl(tentative_index);
+        B_l_ps_tent = project_pressure_amplitudes( ...
+            psTent, nb_contact_points, thetaVec, dr, ...
+            oscillation_amplitudes(:, tentative_index), N, PROBLEM_CONSTANTS);
 
         [amplitudes_tent, ~] = solve_ODE_unkown(nan, B_l_ps_tent, dt, ...
             previous_conditions, PROBLEM_CONSTANTS);
 
-
-        RmaxTent = r_from_spherical(maximum_contact_radius(oscillation_amplitudes(:, tentative_index)), oscillation_amplitudes(:, tentative_index)); 
-
-        nlmaxTent = floor(RmaxTent/dr)+1;
-        thetaVec  = theta_from_cylindrical(dr*(0:(nlmaxTent-1)), oscillation_amplitudes(:, tentative_index)); % zeros(1,nlmaxTent);
-
-        RvTent = zs_from_spherical(pi, amplitudes_tent);
-        zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent;
-        zs((nlmaxTent+1):nr) = Inf;
-
-        tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, amplitudes_tent)';
-        angleDropMP(1:(nlmaxTent)) = atan(tanDrop(1:(nlmaxTent)));
+        [nlmaxTent, thetaVec, zs, RvTent, angleDropMP] = compute_contact_geometry( ...
+            oscillation_amplitudes(:, tentative_index), ...
+            oscillation_amplitudes(:, tentative_index), ...
+            amplitudes_tent, dr, nr);
 
 
         psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
@@ -492,7 +427,7 @@ try
                         zTent = zprob(4);
                         vzTent = vzprob(4);
                     else
-                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                        tvec = insert_midpoint(tvec, tentative_index);
                         tentative_index = tentative_index-1;
                         reduc = 1;
                     end
@@ -536,7 +471,7 @@ try
                             zTent = zprob(4);
                             vzTent = vzprob(4);
                         else
-                            tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                            tvec = insert_midpoint(tvec, tentative_index);
                             tentative_index = tentative_index-1; 
                             reduc = 1;
                         end
@@ -546,7 +481,7 @@ try
                 [~,~,~,~,errortan(1,tentative_index+1)] = ...
                     solveDD0(dt,z(tentative_index),vz(tentative_index),etas(:, tentative_index), phis(:, tentative_index),nr,Re,Delta,DTN,Fr,We,zs,RvTent);
                 if abs(errortan(1,tentative_index+1))<.5
-                    tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                    tvec = insert_midpoint(tvec, tentative_index);
                     tentative_index = tentative_index-1; 
                     reduc = 1;
                 else
@@ -590,7 +525,7 @@ try
                                 zTent = zprob(4);
                                 vzTent = vzprob(4);
                             else
-                                tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                                tvec = insert_midpoint(tvec, tentative_index);
                                 tentative_index = tentative_index-1; 
                                 reduc = 1;
                             end
@@ -619,7 +554,7 @@ try
                         zTent = zprob(2);
                         vzTent = vzprob(2);
                     else
-                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                        tvec = insert_midpoint(tvec, tentative_index);
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
@@ -648,7 +583,7 @@ try
                             zTent = zprob(4);
                             vzTent = vzprob(4);
                         else
-                            tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                            tvec = insert_midpoint(tvec, tentative_index);
                             tentative_index = tentative_index-1; 
                             reduc = 1;
                         end
@@ -676,7 +611,7 @@ try
                         zTent = zprob(2);
                         vzTent = vzprob(2);
                     else
-                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                        tvec = insert_midpoint(tvec, tentative_index);
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
@@ -723,7 +658,7 @@ try
                         zTent = zprob(2);
                         vzTent = vzprob(2);
                     else
-                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                        tvec = insert_midpoint(tvec, tentative_index);
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
@@ -753,19 +688,19 @@ try
                         zTent = zprob(2);
                         vzTent = vzprob(2);
                     else
-                        tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                        tvec = insert_midpoint(tvec, tentative_index);
                         tentative_index = tentative_index-1; 
                         reduc = 1;
                     end
                 else
-                    tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                    tvec = insert_midpoint(tvec, tentative_index);
                     tentative_index = tentative_index-1; 
                     reduc = 1;
                 end
             end
 
             if ll == 100 && reduc == 0
-                tvec = [tvec(1:tentative_index),tvec(tentative_index)/2+tvec(tentative_index+1)/2,tvec(tentative_index+1:end)];
+                tvec = insert_midpoint(tvec, tentative_index);
                 tentative_index = tentative_index-1;
                 reduc = 1;
             end
@@ -806,38 +741,9 @@ try
                 end
             % verifying convergence of the pressure field
             elseif reduc == 0 %if there was no reduction of time step
-                if norm(psNew,1) == 0
-                    B_l_ps_new = zeros(1, N);
-                else
-                    nb_contact_points = numlTent; %nlmaxTent-find(flipud(psNew),1)+1;%Number of nodes in which the pressure needs to be integrated
-                    %against each harmonic 
-                    if PROBLEM_CONSTANTS.linear_on_theta == true
-                        if nb_contact_points > 1
-                            contactAngle = (1.5 * thetaVec(nb_contact_points) - 0.5*thetaVec(nb_contact_points-1));
-                        else
-                            contactAngle = (thetaVec(2) + thetaVec(1))/2;
-                        end
-                        angles = linspace(contactAngle, ...% + (thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))/2
-                                    pi, (nb_contact_points +1) * PROBLEM_CONSTANTS.interpolation_number);
-                        values = r_from_spherical(angles, oscillation_amplitudes(:, tentative_index));
-                        f = @(r) interp1(dr*(0:(nb_contact_points)), ...
-                            [psNew(1:nb_contact_points)', 0], r, 'linear',  0);
-                        values = f(values);
-                        B_l_ps_new = custom_project_amplitudes(angles, values, N, NaN, NaN);
-
-                    else
-                        % Defining where the pressure distribution will be
-                        % projected
-                        if nb_contact_points == length(thetaVec)
-                            angles = [thetaVec(1:(nb_contact_points)), (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
-                        else
-                            angles = thetaVec(1:(nb_contact_points+1));
-                        end
-                        f = @(thetas) interp1(angles, [psNew(1:nb_contact_points)', 0], thetas, 'linear',  0); 
-                        endpoints = [angles(end), angles(1)];
-                        B_l_ps_new = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true); 
-                    end
-                end
+                B_l_ps_new = project_pressure_amplitudes( ...
+                    psNew, numlTent, thetaVec, dr, ...
+                    oscillation_amplitudes(:, tentative_index), N, PROBLEM_CONSTANTS);
 
                 [amplitudes_new, velocities_new] = solve_ODE_unkown(nan, B_l_ps_new, dt, ...
                     previous_conditions, PROBLEM_CONSTANTS);
@@ -889,12 +795,13 @@ try
                     etaOri(tentative_index+1) = eta_accepted(1);
                     etas(:, tentative_index + 1) = eta_accepted;
                     phis(:, tentative_index + 1) = phi_accepted;
+                    psMatPer{tentative_index + 1} = ps_accepted;
 
                     if t >= tvecOri(current_to_save) || t < 10*dtb
                         %etaMatPer(:,current_to_save) = eta_accepted;
                         %phiMatPer(:,current_to_save) = phi_accepted;
                         %psMatPer{current_to_save} = ps_accepted;
-                        indexes_to_save(current_to_save) = tentative_index;
+                        indexes_to_save(current_to_save) = tentative_index + 1;
                         current_to_save = current_to_save + 1;
                     end
 
@@ -936,29 +843,10 @@ try
                     %B_l_ps_tent = B_l_ps_new;
                     %#---
 
-                    RmaxTent = r_from_spherical(maximum_contact_radius(amplitudes_tent), amplitudes_tent);
-
-                    %RmaxTent = r_from_spherical(theta_max_radius(amplitudes_tent), amplitudes_tent);
-                    %-%-RmaxTent = xsoftheta(mod(abs(thetaMax(A2Tent,A3Tent)),pi),A2Tent,A3Tent);
-                    nlmaxTent = floor(RmaxTent/dr)+1;
-
-                    thetaVec = theta_from_cylindrical(dr*(0:(nlmaxTent-1)), oscillation_amplitudes(:, tentative_index));
-
-                    %-%-RvTent = zsoftheta(pi,A2Tent,A3Tent);
-
-                    %#---
-                    RvTent = zs_from_spherical(pi, amplitudes_tent);
-                    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_tent)' - RvTent;
-                    zs((nlmaxTent+1):nr) = Inf;
-                    %#---
-
-                    %-%-zs(1:nlmaxTent) = zsoftheta(thetaVec,A2Tent,A3Tent)-RvTent;
-                    %-%-zs(nlmaxTent+1:end) = Inf;
-
-                    %#---
-                    tanDrop = calculate_tan( dr * (1:nlmaxTent) - dr/2, amplitudes_tent)';
-                    angleDropMP(1:(nlmaxTent)) = atan(tanDrop(1:(nlmaxTent))); %% TODO: Check these for boundary points
-                    %finding angle at tangent direction
+                    [nlmaxTent, thetaVec, zs, RvTent, angleDropMP] = compute_contact_geometry( ...
+                        amplitudes_tent, ...
+                        oscillation_amplitudes(:, tentative_index), ...
+                        amplitudes_tent, dr, nr);
 
                     psprob = zeros(nlmaxTent,5);%zeroing the vector of potential pressures
                 end
@@ -971,19 +859,15 @@ try
 
 
     
-    for ii = 1:length(savingvarNames)
-       variableValues{ii} = eval(savingvarNames{ii}); 
-    end
-
     indexes_to_save = indexes_to_save(1:(current_to_save-1));
+    variableValues = {z, etaOri, etas, psMatPer, vz, tvec, nlmax, numl, ...
+        oscillation_amplitudes, pressure_amplitudes, Rv};
     results_saver("", indexes_to_save, variableValues, savingvarNames);
 
 catch ME
-    for ii = 1:length(savingvarNames)
-       variableValues{ii} = eval(savingvarNames{ii}); 
-    end
-
     indexes_to_save = indexes_to_save(1:(current_to_save-1));
+    variableValues = {z, etaOri, etas, psMatPer, vz, tvec, nlmax, numl, ...
+        oscillation_amplitudes, pressure_amplitudes, Rv};
     results_saver("errored_", indexes_to_save, variableValues, savingvarNames);
     
     
@@ -1002,33 +886,198 @@ save('ProblemConditions.mat', "T", "N", "U0", "Ang", "Re", "Fr", "We", ...
 "PROBLEM_CONSTANTS", "simul_time");
 mypwd = split(pwd, "1_code"); mypwd = mypwd{2};
 fprintf("Finished simulation on %s. Time elapsed: %0.2f minutes\n", mypwd, simul_time/60);
-cd(currfold)
 
+    function ensure_storage_capacity(requiredIndex)
+        currentLen = size(z, 2);
+        if requiredIndex <= currentLen
+            return;
+        end
+        newLen = max(requiredIndex, currentLen + ceil(0.2 * currentLen) + 16);
 
+        etaOri(1, newLen) = 0;
+        z(1, newLen) = 0;
+        vz(1, newLen) = 0;
+        numl(1, newLen) = 0;
+        nlmax(1, newLen) = 0;
+        indexes_to_save(newLen, 1) = 0;
+        errortan(:, newLen) = 0;
+
+        oscillation_amplitudes(:, newLen) = 0;
+        pressure_amplitudes(:, newLen) = 0;
+        oscillation_velocities(:, newLen) = 0;
+        etas(:, newLen) = 0;
+        phis(:, newLen) = 0;
+
+        if numel(Rv) < newLen
+            Rv(1, newLen) = -1;
+            Rv((currentLen+1):newLen) = -1;
+        end
+        if numel(psMatPer) < newLen
+            psMatPer{newLen} = [];
+        end
+    end
+end
+
+function params = load_simulation_setup(wd, U0, Ang, N, tolP)
+    if isstring(wd); wd = char(wd); end
+    validateattributes(wd, {'char'}, {'nonempty'});
+
+    % Expected directory chain if `wd` points to the run folder:
+    %   .../<domain>/<fluid>/<solid>/<R0>/<impact>/<N=...tol=...>
+    run_dir_hint = wd;
+    impact_dir = fileparts(run_dir_hint);
+    r0_dir = fileparts(impact_dir);
+    solid_dir = fileparts(r0_dir);
+    fluid_dir = fileparts(solid_dir);
+    domain_dir = fileparts(fluid_dir);
+
+    Ro = load_matvar(fullfile(r0_dir, 'Ro.mat'), 'Ro');
+    rhoS = load_matvar(fullfile(solid_dir, 'rhoS.mat'), 'rhoS');
+    sigmaS = load_matvar(fullfile(solid_dir, 'sigmaS.mat'), 'sigmaS');
+
+    rho = load_matvar(fullfile(fluid_dir, 'rho.mat'), 'rho');
+    sigma = load_matvar(fullfile(fluid_dir, 'sigma.mat'), 'sigma');
+    nu = load_matvar(fullfile(fluid_dir, 'nu.mat'), 'nu');
+    muair = load_matvar(fullfile(fluid_dir, 'muair.mat'), 'muair');
+    g_accel = load_matvar(fullfile(fluid_dir, 'g.mat'), 'g');
+
+    D = load_matvar(fullfile(domain_dir, 'D.mat'), 'D');
+    quant = load_matvar(fullfile(domain_dir, 'quant.mat'), 'quant');
+    nr = load_matvar(fullfile(domain_dir, 'nr.mat'), 'nr');
+    dr = load_matvar(fullfile(domain_dir, 'dr.mat'), 'dr');
+    Delta = load_matvar(fullfile(domain_dir, 'Delta.mat'), 'Delta');
+    IntMat = load_matvar(fullfile(domain_dir, 'IntMat.mat'), 'IntMat');
+
+    dtn_path = fullfile(domain_dir, sprintf('DTNnew345nr%dD%drefp10.mat', nr, D));
+    DTN = load_matvar(dtn_path, 'DTNnew345');
+
+    % Convenience for downstream plotting/postprocessing scripts.
+    xplot = dr * (0:nr-1);
+    save(fullfile(domain_dir, 'xplot.mat'), 'xplot');
+
+    fluid_name = ['rho', num2str(1000*rho), ...
+        'sigma', num2str(round(100*sigma)), ...
+        'nu', num2str(round(10000*nu)), ...
+        'muair', num2str(muair)];
+    solid_name = ['RhoS', num2str(rhoS*1000), ...
+        'SigmaS', num2str(round(100*sigmaS))];
+    r0_name = sprintf('R0%gmm', Ro*10000);
+    impact_name = sprintf("ImpDefCornerAng%gU%.4g", Ang, U0);
+    run_name = sprintf('N=%dtol=%0.2e', N, tolP);
+
+    run_dir = fullfile(domain_dir, fluid_name, solid_name, r0_name, impact_name, run_name);
+    if exist(run_dir, 'dir') ~= 7
+        error('Run directory not found: %s', run_dir);
+    end
+
+    Ma = load_matvar(fullfile(domain_dir, fluid_name, solid_name, 'Ma.mat'), 'Ma');
+    Ra = load_matvar(fullfile(domain_dir, fluid_name, solid_name, 'Ra.mat'), 'Ra');
+
+    cd(run_dir);
+
+    params = struct( ...
+        "Ro", Ro, ...
+        "rhoS", rhoS, ...
+        "sigmaS", sigmaS, ...
+        "rho", rho, ...
+        "sigma", sigma, ...
+        "nu", nu, ...
+        "muair", muair, ...
+        "g", g_accel, ...
+        "D", D, ...
+        "quant", quant, ...
+        "nr", nr, ...
+        "dr", dr, ...
+        "Delta", Delta, ...
+        "IntMat", IntMat, ...
+        "DTN", DTN, ...
+        "Ma", Ma, ...
+        "Ra", Ra, ...
+        "run_dir", run_dir);
+end
+
+function value = load_matvar(path, var_name)
+    if exist(path, 'file') ~= 2
+        error('Missing file: %s', path);
+    end
+    loaded = load(path, var_name);
+    if ~isfield(loaded, var_name)
+        error('Missing variable %s in %s', var_name, path);
+    end
+    value = loaded.(var_name);
+end
+
+function B_l_ps = project_pressure_amplitudes(ps, nb_contact_points, thetaVec, dr, amplitudes_for_r, N, PROBLEM_CONSTANTS)
+    if isempty(ps) || nb_contact_points < 1 || norm(ps, 1) == 0
+        B_l_ps = zeros(1, N);
+        return;
+    end
+
+    nb_contact_points = min(nb_contact_points, numel(ps));
+
+    if PROBLEM_CONSTANTS.linear_on_theta == true
+        if nb_contact_points > 1 && numel(thetaVec) >= nb_contact_points
+            contactAngle = (1.5 * thetaVec(nb_contact_points) - 0.5 * thetaVec(nb_contact_points-1));
+        elseif numel(thetaVec) >= 2
+            contactAngle = (thetaVec(2) + thetaVec(1)) / 2;
+        else
+            contactAngle = thetaVec(1);
+        end
+
+        angles_qtt = max(2, (nb_contact_points + 1) * PROBLEM_CONSTANTS.interpolation_number);
+        angles = linspace(contactAngle, pi, angles_qtt);
+
+        radii = r_from_spherical(angles, amplitudes_for_r);
+        f = @(r) interp1(dr*(0:nb_contact_points), [ps(1:nb_contact_points)', 0], r, 'linear', 0);
+        values = f(radii);
+        B_l_ps = custom_project_amplitudes(angles, values, N, NaN, NaN);
+    else
+        if nb_contact_points >= numel(thetaVec)
+            if numel(thetaVec) < 2
+                angles = [thetaVec(:)', pi];
+            else
+                angles = [thetaVec(1:nb_contact_points), ...
+                    (2 * thetaVec(nb_contact_points) - thetaVec(nb_contact_points-1))];
+            end
+        else
+            angles = thetaVec(1:(nb_contact_points+1));
+        end
+        f = @(thetas) interp1(angles, [ps(1:nb_contact_points)', 0], thetas, 'linear', 0);
+        endpoints = [angles(end), angles(1)];
+        B_l_ps = project_amplitudes(f, N, endpoints, PROBLEM_CONSTANTS, true);
+    end
+end
+
+function [nlmaxTent, thetaVec, zs, RvTent, angleDropMP] = compute_contact_geometry(amplitudes_for_radius, amplitudes_for_theta, amplitudes_for_shape, dr, nr)
+    RmaxTent = r_from_spherical(maximum_contact_radius(amplitudes_for_radius), amplitudes_for_radius);
+    nlmaxTent = max(1, floor(RmaxTent/dr) + 1);
+    thetaVec = theta_from_cylindrical(dr * (0:(nlmaxTent-1)), amplitudes_for_theta);
+
+    RvTent = zs_from_spherical(pi, amplitudes_for_shape);
+    zs = zeros(nr, 1);
+    zs(1:nlmaxTent) = zs_from_spherical(thetaVec, amplitudes_for_shape)' - RvTent;
+    zs((nlmaxTent+1):nr) = Inf;
+
+    tanDrop = calculate_tan(dr * (1:nlmaxTent) - dr/2, amplitudes_for_shape)';
+    angleDropMP = atan(tanDrop(1:nlmaxTent));
+end
+
+function tvec = insert_midpoint(tvec, idx)
+    tvec = [tvec(1:idx), (tvec(idx) + tvec(idx+1))/2, tvec(idx+1:end)];
 end
 
 function results_saver(prefix, indexes, variables, variableNames)
-    if indexes(2) == 1
-        indexes = indexes(2:end); 
-    end
     for ii = 1:length(variables)
        var = variables{ii};
-       switch length(size(var))
-           case 1
-               var = var(indexes);
-           case 2
-               if iscell(var)
-                   var = var{:, indexes};
-               else
-                   var = var(:, indexes);
-               end
+       if isvector(var)
+           var = var(indexes);
+       elseif iscell(var)
+           var = var(:, indexes);
+       else
+           var = var(:, indexes);
        end
        stru = struct(variableNames{ii}, var);
        save(sprintf('%s%s.mat', prefix, variableNames{ii}), '-struct', 'stru');
     end
     
-end
-
-function out = getVarName(var)
-    out = inputname(1);
 end
