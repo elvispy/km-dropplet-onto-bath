@@ -1,27 +1,7 @@
 using JLD2
 
 const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const RUN_SCRIPT = joinpath(ROOT, "julia", "tests", "run_solver_case.jl")
-
-function arg_value(flag::String, default::String)
-    idx = findfirst(==(flag), ARGS)
-    return idx === nothing ? default : ARGS[idx + 1]
-end
-
-function ensure_baseline_tree(root::AbstractString)
-    if haskey(ENV, "BASELINE_TREE")
-        return ENV["BASELINE_TREE"]
-    end
-    commit = get(ENV, "BASELINE_COMMIT", "6441f10")
-    worktree_dir = arg_value("--baseline-tree", mktempdir())
-    run(`git -C $root worktree add $worktree_dir $commit`)
-    return worktree_dir
-end
-
-function run_case(tree::AbstractString, out_dir::AbstractString, prefix::AbstractString, case_path::AbstractString)
-    cmd = `julia --project=$(joinpath(ROOT, "julia")) $RUN_SCRIPT -- --tree $tree --out $out_dir --prefix $prefix --case-path $case_path`
-    run(cmd)
-end
+include(joinpath(ROOT, "julia", "src", "SolveMotion.jl"))
 
 function assert_exact(name, a, b)
     size(a) == size(b) || error("Size mismatch for $(name)")
@@ -30,15 +10,21 @@ function assert_exact(name, a, b)
     end
 end
 
-baseline_tree = ensure_baseline_tree(ROOT)
-current_tree = ROOT
-case_path = joinpath(ROOT, "julia", "data", "case_d5q20.jld2")
+case_path = get(ENV, "SOLVE_MOTION_CASE_PATH", joinpath(ROOT, "julia", "data", "case_d5q20.jld2"))
+ENV["SOLVE_MOTION_CASE_PATH"] = case_path
+ENV["SOLVE_MOTION_MAX_STEPS"] = get(ENV, "SOLVE_MOTION_MAX_STEPS", "5")
+ENV["SOLVE_MOTION_RANDOM_SEED"] = get(ENV, "SOLVE_MOTION_RANDOM_SEED", "1234")
 
 baseline_out = mktempdir()
 current_out = mktempdir()
 
-run_case(baseline_tree, baseline_out, "baseline_", case_path)
-run_case(current_tree, current_out, "current_", case_path)
+ENV["SOLVE_MOTION_OUTPUT_DIR"] = baseline_out
+ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "baseline_"
+SolveMotion.solve_motion_old(10.0, nothing, 10, 1e-2, nothing, false)
+
+ENV["SOLVE_MOTION_OUTPUT_DIR"] = current_out
+ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "current_"
+SolveMotion.solve_motion(10.0, nothing, 10, 1e-2, nothing, false)
 
 baseline_results = JLD2.load(joinpath(baseline_out, "baseline_results.jld2"))
 current_results = JLD2.load(joinpath(current_out, "current_results.jld2"))
@@ -48,4 +34,4 @@ for name in vars
     assert_exact(name, current_results[name], baseline_results[name])
 end
 
-println("Exact match for baseline vs refactor outputs.")
+println("Exact match for solver_old vs solver outputs.")

@@ -140,6 +140,7 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
         "Westar" => Westar,
     )
 
+    # Helper to split the current interval, append the midpoint, and rewind the index for re-evaluation.
     split_timestep(tvec, idx) = (vcat(tvec[1:idx], (tvec[idx] + tvec[idx + 1]) / 2, tvec[(idx + 1):end]), idx - 1)
 
     function project_pressure_amplitudes(ps, nb_contact_points, thetaVec, shape_amplitudes)
@@ -167,6 +168,7 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
 
     exit_flag = false
     try
+        # Main time-stepping loop drives tentative_index forward until the time horizon or an exit condition.
         while (t < tend) && !exit_flag
             NEAR_SINGULAR[] = false
             tentative_index += 1
@@ -242,20 +244,27 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
             reduc = 0
             ll = 0
 
-            function eval_dd0!(slot)
-                etaprob[:, slot], phiprob[:, slot], zprob[slot], vzprob[slot], errortan[slot, tentative_index + 1] =
-                    solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
-                        phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
-                return errortan[slot, tentative_index + 1]
-            end
-
-            function eval_cusp!(slot, nl)
-                idx_prev = prev_index_for(numl, tentative_index, float(nl))
+            # Evaluate either the zero-contact case (solveDD0) or a cusp with k contacts, recording errortan.
+            function eval_candidate!(slot, k)
+                @debug "Evaluating candidate" t=t dt=dt k=k slot=slot nlmaxTent=nlmaxTent
+                if k == 0
+                    etaprob[:, slot], phiprob[:, slot], zprob[slot], vzprob[slot], errortan[slot, tentative_index + 1] =
+                        solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
+                            phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
+                    if abs(errortan[slot, tentative_index + 1]) >= 0.5
+                        errortan[slot, tentative_index + 1] = Inf
+                    end
+                    @debug "DD0 result" err=errortan[slot, tentative_index + 1] z=zprob[slot] vz=vzprob[slot]
+                    return errortan[slot, tentative_index + 1]
+                end
+                idx_prev = prev_index_for(numl, tentative_index, float(k))
                 etaprob[:, slot], phiprob[:, slot], zprob[slot], vzprob[slot], ps_tmp, errortan[slot, tentative_index + 1] =
-                    solvenDDCusp(numl[idx_prev], nl, dt, z[tentative_index], vz[tentative_index],
+                    solvenDDCusp(numl[idx_prev], k, dt, z[tentative_index], vz[tentative_index],
                         etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                        We, Ma, zs, IntMat[nl, :], angleDropMP, Cang, Dr, RvTent)
-                psprob[1:nl, slot] .= ps_tmp[1:nl]
+                        We, Ma, zs, IntMat[k, :], angleDropMP, Cang, Dr, RvTent)
+                    psprob[1:k, slot] .= ps_tmp[1:k]
+                # Keep per-slot pressure states so later we know which candidate produced what field.
+                @debug "Cusp result" err=errortan[slot, tentative_index + 1] z=zprob[slot] vz=vzprob[slot] k=k
                 return errortan[slot, tentative_index + 1]
             end
 
@@ -266,83 +275,49 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
                 z=zprob[slot],
                 vz=vzprob[slot])
 
+            # Build candidate list centered on the current contact count so we always try k-2..k+2.
             function select_candidate!(numl_curr, nlmaxTent)
-                if numl_curr < 0.5
-                    err_center = eval_dd0!(3)
-                    if abs(err_center) < 0.5
-                        return candidate_from_slot(3, 0.0)
+                numl_int = Int(numl_curr)
+                # Primary comparison order: same k, then +1, then -1, mimicking advance_one_step logic.
+                @debug "Selecting candidate" numl=numl_int nlmaxTent=nlmaxTent
+
+                function err_for(slot, k)
+                    if k < 0 || k > nlmaxTent
+                        errortan[slot, tentative_index + 1] = Inf
+                        return Inf
                     end
-                    err_right = eval_cusp!(4, 1)
-                    err_right2 = eval_cusp!(5, 2)
-                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 1.0) : nothing
-                elseif numl_curr > 0.5 && numl_curr < 1.5
-                    err_left = eval_dd0!(2)
-                    if abs(err_left) < 0.5
-                        return candidate_from_slot(2, 0.0)
-                    end
-                    err_center = eval_cusp!(3, 1)
-                    err_right = eval_cusp!(4, 2)
-                    if abs(err_center) < abs(err_right)
-                        return candidate_from_slot(3, 1.0)
-                    end
-                    err_right2 = eval_cusp!(5, 3)
-                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 2.0) : nothing
-                elseif numl_curr > 1.5 && numl_curr < 2.5
-                    err_left2 = eval_dd0!(1)
-                    if abs(err_left2) < 0.5
+                    return eval_candidate!(slot, k)
+                end
+
+                err_center = err_for(3, numl_int)
+                # Log the errors so we can quickly see which branch is winning under JULIA_DEBUG.
+                err_right = err_for(4, numl_int + 1)
+                err_left = err_for(2, numl_int - 1)
+                @debug "Primary candidate errors" err_left=err_left err_center=err_center err_right=err_right
+
+                    if abs(err_center) <= abs(err_right) && abs(err_center) <= abs(err_left)
+                        # Accept same-k candidate whenever it is better than neighbors.
+                        if !isfinite(err_center)
+                        @debug "All primary candidates invalid; will shrink dt"
                         return nothing
                     end
-                    err_center = eval_cusp!(3, 2)
-                    err_left = eval_cusp!(2, 1)
-                    if abs(err_left) < abs(err_center)
-                        return candidate_from_slot(2, 1.0)
+                    @debug "Selected center candidate" k=numl_int err=err_center
+                    return candidate_from_slot(3, numl_int)
+                elseif abs(err_right) <= abs(err_left)
+                    err_right2 = err_for(5, numl_int + 2)
+                    if abs(err_right) < abs(err_right2)
+                        @debug "Selected right candidate" k=numl_int+1 err=err_right err2=err_right2
+                        return candidate_from_slot(4, numl_int + 1)
                     end
-                    err_right = eval_cusp!(4, 3)
-                    if abs(err_center) < abs(err_right)
-                        return candidate_from_slot(3, 2.0)
-                    end
-                    err_right2 = eval_cusp!(5, 4)
-                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 3.0) : nothing
-                elseif numl_curr > 2.5 && numl_curr < nlmaxTent - 1.5
-                    numl_int = Int(round(numl_curr))
-                    err_center = eval_cusp!(3, numl_int)
-                    err_left = eval_cusp!(2, numl_int - 1)
-                    if abs(err_left) < abs(err_center)
-                        err_left2 = eval_cusp!(1, numl_int - 2)
-                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
-                    end
-                    err_right = eval_cusp!(4, numl_int + 1)
-                    if abs(err_center) < abs(err_right)
-                        return candidate_from_slot(3, numl_curr)
-                    end
-                    err_right2 = eval_cusp!(5, numl_int + 2)
-                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, numl_curr + 1) : nothing
-                elseif numl_curr > nlmax[tentative_index] - 1.5 && numl_curr < nlmaxTent - 0.5
-                    numl_int = Int(round(numl_curr))
-                    err_center = eval_cusp!(3, numl_int)
-                    err_left = eval_cusp!(2, numl_int - 1)
-                    if abs(err_left) < abs(err_center)
-                        err_left2 = eval_cusp!(1, numl_int - 2)
-                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
-                    end
-                    err_right = eval_cusp!(4, numl_int + 1)
-                    return abs(err_center) < abs(err_right) ? candidate_from_slot(3, numl_curr) : candidate_from_slot(4, numl_curr + 1)
-                elseif numl_curr == nlmaxTent
-                    numl_int = Int(round(numl_curr))
-                    err_center = eval_cusp!(3, numl_int)
-                    err_left = eval_cusp!(2, numl_int - 1)
-                    if abs(err_left) < abs(err_center)
-                        err_left2 = eval_cusp!(1, numl_int - 2)
-                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
-                    end
-                    return candidate_from_slot(3, numl_curr)
+                    @debug "Right candidate not better than k+2; will shrink dt" err_right=err_right err_right2=err_right2
+                    return nothing
                 else
-                    numl_int = Int(round(numl_curr))
-                    err_left = eval_cusp!(2, numl_int - 1)
-                    if abs(err_left) < 4
-                        err_left2 = eval_cusp!(1, numl_int - 2)
-                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
+                    err_left2 = err_for(1, numl_int - 2)
+                    if abs(err_left) < abs(err_left2)
+                        @debug "Selected left candidate" k=numl_int-1 err=err_left err2=err_left2
+                        return candidate_from_slot(2, numl_int - 1)
                     end
+                    @debug "Left candidate not better than k-2; will shrink dt" err_left=err_left err_left2=err_left2
                     return nothing
                 end
             end
@@ -352,23 +327,28 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
                 numl_curr = numl[tentative_index]
                 selection = select_candidate!(numl_curr, nlmaxTent)
                 if selection === nothing
-                    tvec, tentative_index = split_timestep(tvec, tentative_index)
-                    reduc = 1
-                else
+                    @debug "Selection invalid; shrinking timestep" t=t dt=dt numl=numl_curr
+                tvec, tentative_index = split_timestep(tvec, tentative_index)
+                reduc = 1
+            else
                     numlTent = selection.numl
                     etaTent = selection.eta
                     phiTent = selection.phi
                     psNew = selection.ps
                     zTent = selection.z
                     vzTent = selection.vz
+                    @debug "Selected candidate accepted" numl=numlTent z=zTent vz=vzTent
                 end
 
                 if ll == 100 && reduc == 0
+                    @debug "Iteration cap reached; shrinking timestep" ll=ll t=t dt=dt
                     tvec, tentative_index = split_timestep(tvec, tentative_index)
                     reduc = 1
                 end
 
+                # If the linear solve becomes unreliable or dt shrinks below physical scales, backtrack.
                 if NEAR_SINGULAR[] || dt * T_unit < 1e-10
+                    @debug "Near singular or tiny dt; backtracking" near_singular=NEAR_SINGULAR[] dt=dt T_unit=T_unit
                     if reduc == 1
                         tentative_index += 1
                     end
@@ -399,6 +379,7 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
                     if PROBLEM_CONSTANTS["DEBUG_FLAG"]
                         @info @sprintf("Inside ll: %0.2g, errP: %0.5g", ll, errorP)
                     end
+                    @debug "Convergence check" ll=ll errP=errorP tolP=tolP
 
                     if errorP < tolP
                         ps_old = ps_accepted

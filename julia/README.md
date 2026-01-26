@@ -1,4 +1,114 @@
-# Julia (Standalone KM Solver)
+# Julia version
+
+## Quick Start 
+
+
+### 1) Install Julia once
+
+Download and install Julia from the official site, then confirm:
+
+```
+julia --version
+```
+
+### 2) One-time setup for this project
+
+Open a terminal in the repo root and run:
+
+```
+julia
+```
+
+Then inside the Julia prompt:
+
+```
+import Pkg
+Pkg.activate("julia")
+Pkg.instantiate()
+```
+
+### 3) Run a single simulation (inside Julia)
+
+From the repo root, start Julia:
+
+```
+julia --project=julia
+```
+
+Then in the Julia prompt:
+
+```
+include("julia/src/SolveMotion.jl")
+SolveMotion.solve_motion(10.0, nothing, 10, 1e-2, nothing, false)
+```
+
+This runs a small case and writes output files to `julia/output/` by default.
+
+### 4) Where the results go (and what’s inside)
+
+By default, outputs are written to `julia/output/` as JLD2 files. These are Julia data files that store dictionaries (key–value pairs).
+
+Default files:
+
+- `results.jld2`: time‑series arrays from the simulation (e.g., `z`, `vz`, `tvec`, `etas`, `numl`, `nlmax`, `oscillation_amplitudes`, `pressure_amplitudes`, `Rv`)
+- `problem_conditions.jld2`: the run configuration and nondimensional parameters (`U0`, `N`, `Fr`, `We`, `WeS`, `dtb`, `tend`, `PROBLEM_CONSTANTS`, etc.)
+
+To inspect a file:
+
+```
+using JLD2
+d = load("julia/output/results.jld2")
+keys(d)
+```
+
+#### Make filenames more meaningful (no API changes)
+
+You can set an output directory and a filename prefix from inside Julia (no shell `export` needed):
+
+```
+ENV["SOLVE_MOTION_OUTPUT_DIR"] = "my_results"
+ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U10_N10_tol1e-2_"
+```
+
+If you want timestamps, add them in Julia:
+
+```
+using Dates
+ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U10_" * Dates.format(now(), "yyyymmdd_HHMMSS") * "_"
+```
+
+### 5) Run a sweep (multiple runs)
+
+In the same Julia session:
+
+```
+for U0 in [5.0, 10.0, 15.0]
+    ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U$(U0)_"
+    SolveMotion.solve_motion(U0, nothing, 10, 1e-2, nothing, false)
+end
+```
+
+#### Helper script: sweep + CSV summary
+
+Use the ready-made script at `julia/scripts/sweep.jl`:
+
+```
+julia --project=julia julia/scripts/sweep.jl
+```
+
+It writes each run to `julia/output/` by default and creates `summary.csv` in the same folder.
+
+### 6) Postprocess results (plots, videos, figures)
+
+This repo writes results to `.jld2` files. You can load them in Julia:
+
+```
+julia --project=julia -e 'using JLD2; d=load("julia/output/results.jld2"); println(keys(d))'
+```
+
+From there, you can use your preferred plotting library to make figures or videos.
+
+---
 
 This folder is a standalone Julia implementation of the kinematic-match (KM) droplet-on-bath impact solver contained in this repository. The Julia runtime does not call MATLAB.
 
