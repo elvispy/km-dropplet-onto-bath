@@ -140,7 +140,30 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
         "Westar" => Westar,
     )
 
-    println(@sprintf("Starting simulation with case %s", case_path))
+    split_timestep(tvec, idx) = (vcat(tvec[1:idx], (tvec[idx] + tvec[idx + 1]) / 2, tvec[(idx + 1):end]), idx - 1)
+
+    function project_pressure_amplitudes(ps, nb_contact_points, thetaVec, shape_amplitudes)
+        if norm(ps, 1) == 0
+            return zeros(Float64, N)
+        end
+        if PROBLEM_CONSTANTS["linear_on_theta"]
+            if nb_contact_points > 1
+                contactAngle = 1.5 * thetaVec[nb_contact_points] - 0.5 * thetaVec[nb_contact_points - 1]
+            else
+                contactAngle = (thetaVec[2] + thetaVec[1]) / 2
+            end
+            angles = range(contactAngle, stop=pi, length=(nb_contact_points + 1) * PROBLEM_CONSTANTS["interpolation_number"])
+            angles_vec = collect(angles)
+            values = r_from_spherical(angles_vec, shape_amplitudes)
+            f_interp = r -> interp1_linear(dr .* collect(0:nb_contact_points),
+                vcat(ps[1:nb_contact_points], 0.0), r, extrap=0.0)
+            values = f_interp.(values)
+            return custom_project_amplitudes(angles_vec, values, N, NaN, NaN)
+        end
+        error("project_amplitudes path is not implemented in this translation")
+    end
+
+    @info @sprintf("Starting simulation with case %s", case_path)
 
     exit_flag = false
     try
@@ -175,7 +198,7 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
             dt = t - tvec[tentative_index]
 
             if PROBLEM_CONSTANTS["DEBUG_FLAG"]
-                println(@sprintf("Outside %0.4g, %0.3e", t - dt, dt))
+                @info @sprintf("Outside %0.4g, %0.3e", t - dt, dt)
             end
 
             etaprob = zeros(Float64, nr, 5)
@@ -193,26 +216,9 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
             thetaVec = theta_from_cylindrical(dr .* collect(0:(nlmax_int - 1)),
                 oscillation_amplitudes[:, tentative_index])
 
-            if norm(psTent, 1) == 0
-                B_l_ps_tent = zeros(Float64, N)
-            else
-                nb_contact_points = Int(round(numl[tentative_index]))
-                if PROBLEM_CONSTANTS["linear_on_theta"]
-                    if nb_contact_points > 1
-                        contactAngle = 1.5 * thetaVec[nb_contact_points] - 0.5 * thetaVec[nb_contact_points - 1]
-                    else
-                        contactAngle = (thetaVec[2] + thetaVec[1]) / 2
-                    end
-                    angles = range(contactAngle, stop=pi, length=(nb_contact_points + 1) * PROBLEM_CONSTANTS["interpolation_number"])
-                    values = r_from_spherical(collect(angles), oscillation_amplitudes[:, tentative_index])
-                    f_interp = r -> interp1_linear(dr .* collect(0:nb_contact_points),
-                        vcat(psTent[1:nb_contact_points], 0.0), r, extrap=0.0)
-                    values = f_interp.(values)
-                    B_l_ps_tent = custom_project_amplitudes(collect(angles), values, N, NaN, NaN)
-                else
-                    error("project_amplitudes path is not implemented in this translation")
-                end
-            end
+            nb_contact_points = Int(round(numl[tentative_index]))
+            B_l_ps_tent = project_pressure_amplitudes(psTent, nb_contact_points, thetaVec,
+                oscillation_amplitudes[:, tentative_index])
 
             amplitudes_tent, _ = solve_ODE_unkown(NaN, B_l_ps_tent, dt, previous_conditions, PROBLEM_CONSTANTS)
 
@@ -236,367 +242,129 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
             reduc = 0
             ll = 0
 
+            function eval_dd0!(slot)
+                etaprob[:, slot], phiprob[:, slot], zprob[slot], vzprob[slot], errortan[slot, tentative_index + 1] =
+                    solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
+                        phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
+                return errortan[slot, tentative_index + 1]
+            end
+
+            function eval_cusp!(slot, nl)
+                idx_prev = prev_index_for(numl, tentative_index, float(nl))
+                etaprob[:, slot], phiprob[:, slot], zprob[slot], vzprob[slot], ps_tmp, errortan[slot, tentative_index + 1] =
+                    solvenDDCusp(numl[idx_prev], nl, dt, z[tentative_index], vz[tentative_index],
+                        etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
+                        We, Ma, zs, IntMat[nl, :], angleDropMP, Cang, Dr, RvTent)
+                psprob[1:nl, slot] .= ps_tmp[1:nl]
+                return errortan[slot, tentative_index + 1]
+            end
+
+            candidate_from_slot(slot, numl_value) = (numl=numl_value,
+                eta=etaprob[:, slot],
+                phi=phiprob[:, slot],
+                ps=psprob[:, slot],
+                z=zprob[slot],
+                vz=vzprob[slot])
+
+            function select_candidate!(numl_curr, nlmaxTent)
+                if numl_curr < 0.5
+                    err_center = eval_dd0!(3)
+                    if abs(err_center) < 0.5
+                        return candidate_from_slot(3, 0.0)
+                    end
+                    err_right = eval_cusp!(4, 1)
+                    err_right2 = eval_cusp!(5, 2)
+                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 1.0) : nothing
+                elseif numl_curr > 0.5 && numl_curr < 1.5
+                    err_left = eval_dd0!(2)
+                    if abs(err_left) < 0.5
+                        return candidate_from_slot(2, 0.0)
+                    end
+                    err_center = eval_cusp!(3, 1)
+                    err_right = eval_cusp!(4, 2)
+                    if abs(err_center) < abs(err_right)
+                        return candidate_from_slot(3, 1.0)
+                    end
+                    err_right2 = eval_cusp!(5, 3)
+                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 2.0) : nothing
+                elseif numl_curr > 1.5 && numl_curr < 2.5
+                    err_left2 = eval_dd0!(1)
+                    if abs(err_left2) < 0.5
+                        return nothing
+                    end
+                    err_center = eval_cusp!(3, 2)
+                    err_left = eval_cusp!(2, 1)
+                    if abs(err_left) < abs(err_center)
+                        return candidate_from_slot(2, 1.0)
+                    end
+                    err_right = eval_cusp!(4, 3)
+                    if abs(err_center) < abs(err_right)
+                        return candidate_from_slot(3, 2.0)
+                    end
+                    err_right2 = eval_cusp!(5, 4)
+                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, 3.0) : nothing
+                elseif numl_curr > 2.5 && numl_curr < nlmaxTent - 1.5
+                    numl_int = Int(round(numl_curr))
+                    err_center = eval_cusp!(3, numl_int)
+                    err_left = eval_cusp!(2, numl_int - 1)
+                    if abs(err_left) < abs(err_center)
+                        err_left2 = eval_cusp!(1, numl_int - 2)
+                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
+                    end
+                    err_right = eval_cusp!(4, numl_int + 1)
+                    if abs(err_center) < abs(err_right)
+                        return candidate_from_slot(3, numl_curr)
+                    end
+                    err_right2 = eval_cusp!(5, numl_int + 2)
+                    return abs(err_right) < abs(err_right2) ? candidate_from_slot(4, numl_curr + 1) : nothing
+                elseif numl_curr > nlmax[tentative_index] - 1.5 && numl_curr < nlmaxTent - 0.5
+                    numl_int = Int(round(numl_curr))
+                    err_center = eval_cusp!(3, numl_int)
+                    err_left = eval_cusp!(2, numl_int - 1)
+                    if abs(err_left) < abs(err_center)
+                        err_left2 = eval_cusp!(1, numl_int - 2)
+                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
+                    end
+                    err_right = eval_cusp!(4, numl_int + 1)
+                    return abs(err_center) < abs(err_right) ? candidate_from_slot(3, numl_curr) : candidate_from_slot(4, numl_curr + 1)
+                elseif numl_curr == nlmaxTent
+                    numl_int = Int(round(numl_curr))
+                    err_center = eval_cusp!(3, numl_int)
+                    err_left = eval_cusp!(2, numl_int - 1)
+                    if abs(err_left) < abs(err_center)
+                        err_left2 = eval_cusp!(1, numl_int - 2)
+                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
+                    end
+                    return candidate_from_slot(3, numl_curr)
+                else
+                    numl_int = Int(round(numl_curr))
+                    err_left = eval_cusp!(2, numl_int - 1)
+                    if abs(err_left) < 4
+                        err_left2 = eval_cusp!(1, numl_int - 2)
+                        return abs(err_left) < abs(err_left2) ? candidate_from_slot(2, numl_curr - 1) : nothing
+                    end
+                    return nothing
+                end
+            end
+
             while abs(errorP) >= tolP && reduc == 0
                 ll += 1
                 numl_curr = numl[tentative_index]
-
-                if numl_curr < 0.5
-                    etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], errortan[3, tentative_index + 1] =
-                        solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
-                            phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
-                    if abs(errortan[3, tentative_index + 1]) < 0.5
-                        numlTent = 0.0
-                        etaTent = etaprob[:, 3]
-                        phiTent = phiprob[:, 3]
-                        psNew = zeros(Float64, nlmaxTent_int)
-                        zTent = zprob[3]
-                        vzTent = vzprob[3]
-                    else
-                        idx_prev = prev_index_for(numl, tentative_index, 1.0)
-                        etaprob[:, 4], phiprob[:, 4], zprob[4], vzprob[4], ps_tmp, errortan[4, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 1, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[1, :], angleDropMP, Cang, Dr, RvTent)
-                        psprob[1, 4] = ps_tmp[1]
-                        idx_prev = prev_index_for(numl, tentative_index, 2.0)
-                        _, _, _, _, _, errortan[5, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[4, tentative_index + 1]) < abs(errortan[5, tentative_index + 1])
-                            numlTent = 1.0
-                            etaTent = etaprob[:, 4]
-                            phiTent = phiprob[:, 4]
-                            psNew = psprob[:, 4]
-                            zTent = zprob[4]
-                            vzTent = vzprob[4]
-                        else
-                            tvec = vcat(tvec[1:tentative_index],
-                                (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                tvec[(tentative_index + 1):end])
-                            tentative_index -= 1
-                            reduc = 1
-                        end
-                    end
-                elseif numl_curr > 0.5 && numl_curr < 1.5
-                    etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], errortan[2, tentative_index + 1] =
-                        solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
-                            phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
-                    if abs(errortan[2, tentative_index + 1]) < 0.5
-                        numlTent = 0.0
-                        etaTent = etaprob[:, 2]
-                        phiTent = phiprob[:, 2]
-                        psNew = zeros(Float64, nlmaxTent_int)
-                        zTent = zprob[2]
-                        vzTent = vzprob[2]
-                    else
-                        idx_prev = prev_index_for(numl, tentative_index, 1.0)
-                        etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], ps_tmp, errortan[3, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 1, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[1, :], angleDropMP, Cang, Dr, RvTent)
-                        psprob[1, 3] = ps_tmp[1]
-                        idx_prev = prev_index_for(numl, tentative_index, 2.0)
-                        etaprob[:, 4], phiprob[:, 4], zprob[4], vzprob[4], psprob[1:2, 4], errortan[4, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[3, tentative_index + 1]) < abs(errortan[4, tentative_index + 1])
-                            numlTent = 1.0
-                            etaTent = etaprob[:, 3]
-                            phiTent = phiprob[:, 3]
-                            psNew = psprob[:, 3]
-                            zTent = zprob[3]
-                            vzTent = vzprob[3]
-                        else
-                            idx_prev = prev_index_for(numl, tentative_index, 3.0)
-                            _, _, _, _, _, errortan[5, tentative_index + 1] =
-                                solvenDDCusp(numl[idx_prev], 3, dt, z[tentative_index], vz[tentative_index],
-                                    etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                    We, Ma, zs, IntMat[3, :], angleDropMP, Cang, Dr, RvTent)
-                            if abs(errortan[4, tentative_index + 1]) < abs(errortan[5, tentative_index + 1])
-                                numlTent = 2.0
-                                etaTent = etaprob[:, 4]
-                                phiTent = phiprob[:, 4]
-                                psNew = psprob[:, 4]
-                                zTent = zprob[4]
-                                vzTent = vzprob[4]
-                            else
-                                tvec = vcat(tvec[1:tentative_index],
-                                    (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                    tvec[(tentative_index + 1):end])
-                                tentative_index -= 1
-                                reduc = 1
-                            end
-                        end
-                    end
-                elseif numl_curr > 1.5 && numl_curr < 2.5
-                    _, _, _, _, errortan[1, tentative_index + 1] =
-                        solveDD0(dt, z[tentative_index], vz[tentative_index], etas[:, tentative_index],
-                            phis[:, tentative_index], nr, Re, Delta, DTN, Fr, We, zs, RvTent)
-                    if abs(errortan[1, tentative_index + 1]) < 0.5
-                        tvec = vcat(tvec[1:tentative_index],
-                            (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                            tvec[(tentative_index + 1):end])
-                        tentative_index -= 1
-                        reduc = 1
-                    else
-                        idx_prev = prev_index_for(numl, tentative_index, 2.0)
-                        etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], psprob[1:2, 3], errortan[3, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[2, :], angleDropMP, Cang, Dr, RvTent)
-                        idx_prev = prev_index_for(numl, tentative_index, 1.0)
-                        etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], ps_tmp, errortan[2, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], 1, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[1, :], angleDropMP, Cang, Dr, RvTent)
-                        psprob[1, 2] = ps_tmp[1]
-                        if abs(errortan[2, tentative_index + 1]) < abs(errortan[3, tentative_index + 1])
-                            numlTent = 1.0
-                            etaTent = etaprob[:, 2]
-                            phiTent = phiprob[:, 2]
-                            psNew = psprob[:, 2]
-                            zTent = zprob[2]
-                            vzTent = vzprob[2]
-                        else
-                            idx_prev = prev_index_for(numl, tentative_index, 3.0)
-                            etaprob[:, 4], phiprob[:, 4], zprob[4], vzprob[4], psprob[1:3, 4], errortan[4, tentative_index + 1] =
-                                solvenDDCusp(numl[idx_prev], 3, dt, z[tentative_index], vz[tentative_index],
-                                    etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                    We, Ma, zs, IntMat[3, :], angleDropMP, Cang, Dr, RvTent)
-                            if abs(errortan[3, tentative_index + 1]) < abs(errortan[4, tentative_index + 1])
-                                numlTent = 2.0
-                                etaTent = etaprob[:, 3]
-                                phiTent = phiprob[:, 3]
-                                psNew = psprob[:, 3]
-                                zTent = zprob[3]
-                                vzTent = vzprob[3]
-                            else
-                                idx_prev = prev_index_for(numl, tentative_index, 4.0)
-                                _, _, _, _, _, errortan[5, tentative_index + 1] =
-                                    solvenDDCusp(numl[idx_prev], 4, dt, z[tentative_index], vz[tentative_index],
-                                        etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                        We, Ma, zs, IntMat[4, :], angleDropMP, Cang, Dr, RvTent)
-                                if abs(errortan[4, tentative_index + 1]) < abs(errortan[5, tentative_index + 1])
-                                    numlTent = 3.0
-                                    etaTent = etaprob[:, 4]
-                                    phiTent = phiprob[:, 4]
-                                    psNew = psprob[:, 4]
-                                    zTent = zprob[4]
-                                    vzTent = vzprob[4]
-                                else
-                                    tvec = vcat(tvec[1:tentative_index],
-                                        (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                        tvec[(tentative_index + 1):end])
-                                    tentative_index -= 1
-                                    reduc = 1
-                                end
-                            end
-                        end
-                    end
-                elseif numl_curr > 2.5 && numl_curr < nlmaxTent - 1.5
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr)
-                    numl_int = Int(round(numl_curr))
-                    etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], psprob[1:numl_int, 3], errortan[3, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int, :], angleDropMP, Cang, Dr, RvTent)
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr - 1)
-                    etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], psprob[1:(numl_int - 1), 2], errortan[2, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int - 1, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int - 1, :], angleDropMP, Cang, Dr, RvTent)
-                    if abs(errortan[2, tentative_index + 1]) < abs(errortan[3, tentative_index + 1])
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr - 2)
-                        _, _, _, _, _, errortan[1, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int - 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int - 2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[2, tentative_index + 1]) < abs(errortan[1, tentative_index + 1])
-                            numlTent = numl_curr - 1
-                            etaTent = etaprob[:, 2]
-                            phiTent = phiprob[:, 2]
-                            psNew = psprob[:, 2]
-                            zTent = zprob[2]
-                            vzTent = vzprob[2]
-                        else
-                            tvec = vcat(tvec[1:tentative_index],
-                                (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                tvec[(tentative_index + 1):end])
-                            tentative_index -= 1
-                            reduc = 1
-                        end
-                    else
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr + 1)
-                        etaprob[:, 4], phiprob[:, 4], zprob[4], vzprob[4], psprob[1:(numl_int + 1), 4], errortan[4, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int + 1, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int + 1, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[3, tentative_index + 1]) < abs(errortan[4, tentative_index + 1])
-                            numlTent = numl_curr
-                            etaTent = etaprob[:, 3]
-                            phiTent = phiprob[:, 3]
-                            psNew = psprob[:, 3]
-                            zTent = zprob[3]
-                            vzTent = vzprob[3]
-                        else
-                            idx_prev = prev_index_for(numl, tentative_index, numl_curr + 2)
-                            _, _, _, _, _, errortan[5, tentative_index + 1] =
-                                solvenDDCusp(numl[idx_prev], numl_int + 2, dt, z[tentative_index], vz[tentative_index],
-                                    etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                    We, Ma, zs, IntMat[numl_int + 2, :], angleDropMP, Cang, Dr, RvTent)
-                            if abs(errortan[4, tentative_index + 1]) < abs(errortan[5, tentative_index + 1])
-                                numlTent = numl_curr + 1
-                                etaTent = etaprob[:, 4]
-                                phiTent = phiprob[:, 4]
-                                psNew = psprob[:, 4]
-                                zTent = zprob[4]
-                                vzTent = vzprob[4]
-                            else
-                                tvec = vcat(tvec[1:tentative_index],
-                                    (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                    tvec[(tentative_index + 1):end])
-                                tentative_index -= 1
-                                reduc = 1
-                            end
-                        end
-                    end
-                elseif numl_curr > nlmax[tentative_index] - 1.5 && numl_curr < nlmaxTent - 0.5
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr)
-                    numl_int = Int(round(numl_curr))
-                    etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], psprob[1:numl_int, 3], errortan[3, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int, :], angleDropMP, Cang, Dr, RvTent)
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr - 1)
-                    etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], psprob[1:(numl_int - 1), 2], errortan[2, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int - 1, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int - 1, :], angleDropMP, Cang, Dr, RvTent)
-                    if abs(errortan[2, tentative_index + 1]) < abs(errortan[3, tentative_index + 1])
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr - 2)
-                        _, _, _, _, _, errortan[1, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int - 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int - 2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[2, tentative_index + 1]) < abs(errortan[1, tentative_index + 1])
-                            numlTent = numl_curr - 1
-                            etaTent = etaprob[:, 2]
-                            phiTent = phiprob[:, 2]
-                            psNew = psprob[:, 2]
-                            zTent = zprob[2]
-                            vzTent = vzprob[2]
-                        else
-                            tvec = vcat(tvec[1:tentative_index],
-                                (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                tvec[(tentative_index + 1):end])
-                            tentative_index -= 1
-                            reduc = 1
-                        end
-                    else
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr + 1)
-                        etaprob[:, 4], phiprob[:, 4], zprob[4], vzprob[4], psprob[1:(numl_int + 1), 4], errortan[4, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int + 1, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int + 1, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[3, tentative_index + 1]) < abs(errortan[4, tentative_index + 1])
-                            numlTent = numl_curr
-                            etaTent = etaprob[:, 3]
-                            phiTent = phiprob[:, 3]
-                            psNew = psprob[:, 3]
-                            zTent = zprob[3]
-                            vzTent = vzprob[3]
-                        else
-                            numlTent = numl_curr + 1
-                            etaTent = etaprob[:, 4]
-                            phiTent = phiprob[:, 4]
-                            psNew = psprob[:, 4]
-                            zTent = zprob[4]
-                            vzTent = vzprob[4]
-                        end
-                    end
-                elseif numl_curr == nlmaxTent
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr)
-                    numl_int = Int(round(numl_curr))
-                    etaprob[:, 3], phiprob[:, 3], zprob[3], vzprob[3], psprob[1:numl_int, 3], errortan[3, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int, :], angleDropMP, Cang, Dr, RvTent)
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr - 1)
-                    etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], psprob[1:(numl_int - 1), 2], errortan[2, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int - 1, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int - 1, :], angleDropMP, Cang, Dr, RvTent)
-                    if abs(errortan[2, tentative_index + 1]) < abs(errortan[3, tentative_index + 1])
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr - 2)
-                        _, _, _, _, _, errortan[1, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int - 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int - 2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[2, tentative_index + 1]) < abs(errortan[1, tentative_index + 1])
-                            numlTent = numl_curr - 1
-                            etaTent = etaprob[:, 2]
-                            phiTent = phiprob[:, 2]
-                            psNew = psprob[:, 2]
-                            zTent = zprob[2]
-                            vzTent = vzprob[2]
-                        else
-                            tvec = vcat(tvec[1:tentative_index],
-                                (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                tvec[(tentative_index + 1):end])
-                            tentative_index -= 1
-                            reduc = 1
-                        end
-                    else
-                        numlTent = numl_curr
-                        etaTent = etaprob[:, 3]
-                        phiTent = phiprob[:, 3]
-                        psNew = psprob[:, 3]
-                        zTent = zprob[3]
-                        vzTent = vzprob[3]
-                    end
+                selection = select_candidate!(numl_curr, nlmaxTent)
+                if selection === nothing
+                    tvec, tentative_index = split_timestep(tvec, tentative_index)
+                    reduc = 1
                 else
-                    idx_prev = prev_index_for(numl, tentative_index, numl_curr - 1)
-                    numl_int = Int(round(numl_curr))
-                    etaprob[:, 2], phiprob[:, 2], zprob[2], vzprob[2], psprob[1:(numl_int - 1), 2], errortan[2, tentative_index + 1] =
-                        solvenDDCusp(numl[idx_prev], numl_int - 1, dt, z[tentative_index], vz[tentative_index],
-                            etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                            We, Ma, zs, IntMat[numl_int - 1, :], angleDropMP, Cang, Dr, RvTent)
-                    if abs(errortan[2, tentative_index + 1]) < 4
-                        idx_prev = prev_index_for(numl, tentative_index, numl_curr - 2)
-                        _, _, _, _, _, errortan[1, tentative_index + 1] =
-                            solvenDDCusp(numl[idx_prev], numl_int - 2, dt, z[tentative_index], vz[tentative_index],
-                                etas[:, tentative_index], phis[:, tentative_index], nr, dr, Re, Delta, DTN, Fr,
-                                We, Ma, zs, IntMat[numl_int - 2, :], angleDropMP, Cang, Dr, RvTent)
-                        if abs(errortan[2, tentative_index + 1]) < abs(errortan[1, tentative_index + 1])
-                            numlTent = numl_curr - 1
-                            etaTent = etaprob[:, 2]
-                            phiTent = phiprob[:, 2]
-                            psNew = psprob[:, 2]
-                            zTent = zprob[2]
-                            vzTent = vzprob[2]
-                        else
-                            tvec = vcat(tvec[1:tentative_index],
-                                (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                                tvec[(tentative_index + 1):end])
-                            tentative_index -= 1
-                            reduc = 1
-                        end
-                    else
-                        tvec = vcat(tvec[1:tentative_index],
-                            (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                            tvec[(tentative_index + 1):end])
-                        tentative_index -= 1
-                        reduc = 1
-                    end
+                    numlTent = selection.numl
+                    etaTent = selection.eta
+                    phiTent = selection.phi
+                    psNew = selection.ps
+                    zTent = selection.z
+                    vzTent = selection.vz
                 end
 
                 if ll == 100 && reduc == 0
-                    tvec = vcat(tvec[1:tentative_index],
-                        (tvec[tentative_index] + tvec[tentative_index + 1]) / 2,
-                        tvec[(tentative_index + 1):end])
-                    tentative_index -= 1
+                    tvec, tentative_index = split_timestep(tvec, tentative_index)
                     reduc = 1
                 end
 
@@ -616,37 +384,20 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
                     previous_conditions[2] = previous_conditions[1]
                     previous_conditions[1] = old_conditions
                     going_back += 1
-                    println("Warning detected. Will proceed with going back")
+                    @warn "Warning detected. Will proceed with going back"
                     if going_back > 50
                         error("Went back too many times. Stopping execution")
                     end
                 elseif reduc == 0
-                    if norm(psNew, 1) == 0
-                        B_l_ps_new = zeros(Float64, N)
-                    else
-                        nb_contact_points = Int(round(numlTent))
-                        if PROBLEM_CONSTANTS["linear_on_theta"]
-                            if nb_contact_points > 1
-                                contactAngle = 1.5 * thetaVec[nb_contact_points] - 0.5 * thetaVec[nb_contact_points - 1]
-                            else
-                                contactAngle = (thetaVec[2] + thetaVec[1]) / 2
-                            end
-                            angles = range(contactAngle, stop=pi, length=(nb_contact_points + 1) * PROBLEM_CONSTANTS["interpolation_number"])
-                            values = r_from_spherical(collect(angles), oscillation_amplitudes[:, tentative_index])
-                            f_interp = r -> interp1_linear(dr .* collect(0:nb_contact_points),
-                                vcat(psNew[1:nb_contact_points], 0.0), r, extrap=0.0)
-                            values = f_interp.(values)
-                            B_l_ps_new = custom_project_amplitudes(collect(angles), values, N, NaN, NaN)
-                        else
-                            error("project_amplitudes path is not implemented in this translation.")
-                        end
-                    end
+                    nb_contact_points = Int(round(numlTent))
+                    B_l_ps_new = project_pressure_amplitudes(psNew, nb_contact_points, thetaVec,
+                        oscillation_amplitudes[:, tentative_index])
 
                     amplitudes_new, velocities_new = solve_ODE_unkown(NaN, B_l_ps_new, dt, previous_conditions, PROBLEM_CONSTANTS)
                     errorP = norm(amplitudes_tent - amplitudes_new) / norm(amplitudes_tent)
 
                     if PROBLEM_CONSTANTS["DEBUG_FLAG"]
-                        println(@sprintf("Inside ll: %0.2g, errP: %0.5g", ll, errorP))
+                        @info @sprintf("Inside ll: %0.2g, errP: %0.5g", ll, errorP)
                     end
 
                     if errorP < tolP
@@ -731,7 +482,7 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
         )
         save_results(joinpath(out_dir, prefix * "errored_results.jld2"), results)
 
-        println(@sprintf("Couldn't run simulation with the following parameters:\n Velocity: %g \n Modes: %g", U0, N))
+        @error @sprintf("Couldn't run simulation with the following parameters:\n Velocity: %g \n Modes: %g", U0, N)
         stamp = Dates.format(now(), "yyyymmddMMSS")
         open(joinpath(out_dir, @sprintf("error_logU0=%g-%s.txt", U0, stamp)), "w") do io
             write(io, string(err))
@@ -760,5 +511,5 @@ function solve_motion(U0, _unused, N, tolP, wd, debug_flag)
         "simul_time" => simul_time,
     )
     save_results(joinpath(out_dir, prefix * "problem_conditions.jld2"), conditions)
-    println(@sprintf("Finished simulation. Time elapsed: %0.2f minutes", simul_time / 60))
+    @info @sprintf("Finished simulation. Time elapsed: %0.2f minutes", simul_time / 60)
 end

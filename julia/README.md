@@ -111,6 +111,16 @@ Useful environment variables:
 - `SOLVE_MOTION_MAX_STEPS`: cap number of time steps (useful for tests)
 - `SOLVE_MOTION_RANDOM_SEED`: deterministic randomness (used in a few fallback branches)
 
+## Precompile + Headless Smoke Run
+
+To warm up compilation and run a 5-step headless smoke test (D5Q20, N=10, U0=10, tolP=1e-2):
+
+```
+julia --project=julia julia/scripts/precompile_small_case.jl
+```
+
+The script forces a headless GR backend via `GKSwstype=100` (if plotting packages are loaded elsewhere) and writes outputs to a temp directory.
+
 ## Testing: MATLAB vs Julia
 
 Test script:

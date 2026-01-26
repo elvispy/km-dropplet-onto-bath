@@ -2,6 +2,7 @@ module SolveMotion
 
 using Dates
 using LinearAlgebra
+using Logging
 using Printf
 using Random
 using JLD2
