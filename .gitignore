@@ -43,3 +43,6 @@ Manifest.toml
 .DS_Store
 
 lol.txt
+
+# Agent coordination local working memory
+.context/
