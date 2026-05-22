@@ -1,254 +1,321 @@
-# Julia version
+# Julia user guide
 
-## Quick Start 
+This folder contains a standalone Julia implementation of the kinematic-match droplet-on-bath solver. It does not call MATLAB at runtime.
 
+The Julia version is the easiest entry point if you want to run small cases, script sweeps, or postprocess results without using the original MATLAB folder tree.
 
-### 1) Install Julia once
+## What you need to know first
 
-Download and install Julia from the official site, then confirm:
+- Units are CGS: cm, g, s.
+- The main entry point is `SolveMotion.solve_motion`.
+- Inputs are loaded from a `.jld2` case file, not from nested MATLAB folders.
+- Outputs are `.jld2` files containing named arrays and dictionaries.
+- The bundled case file is small: `julia/data/case_d5q20.jld2`.
 
+```mermaid
+flowchart LR
+    A[case_d5q20.jld2\ndomain + fluids + DtN] --> B[SolveMotion.solve_motion]
+    B --> C[results.jld2\ntime histories]
+    B --> D[problem_conditions.jld2\nparameters + constants]
+    C --> E[plots, videos, CSV summaries]
 ```
-julia --version
-```
 
-### 2) One-time setup for this project
+## One-time setup
 
-Open a terminal in the repo root and run:
+Open a Julia session from the repository root:
 
-```
+```bash
 julia
 ```
 
-Then inside the Julia prompt:
+Then run this inside Julia:
 
-```
+```julia
 import Pkg
 Pkg.activate("julia")
 Pkg.instantiate()
 ```
 
-### 3) Run a single simulation (inside Julia)
+After this finishes, exit Julia or keep the session open.
 
-From the repo root, start Julia:
+## Run one simulation
 
-```
+From the repository root, start Julia with the project active:
+
+```bash
 julia --project=julia
 ```
 
-Then in the Julia prompt:
+Inside Julia:
 
-```
+```julia
 include("julia/src/SolveMotion.jl")
 SolveMotion.solve_motion(10.0, nothing, 10, 1e-2, nothing, false)
 ```
 
-This runs a small case and writes output files to `julia/output/` by default.
+This means:
 
-### 4) Where the results go (and what’s inside)
+| Argument | Example | Meaning |
+|---|---:|---|
+| `U0` | `10.0` | impact speed in cm/s |
+| second argument | `nothing` | kept for MATLAB API compatibility |
+| `N` | `10` | number of droplet deformation modes |
+| `tolP` | `1e-2` | pressure/deformation convergence tolerance |
+| working directory | `nothing` | use default bundled case/output paths |
+| debug flag | `false` | set `true` for verbose solver logging |
 
-By default, outputs are written to `julia/output/` as JLD2 files. These are Julia data files that store dictionaries (key–value pairs).
+Default output folder:
 
-Default files:
-
-- `results.jld2`: time‑series arrays from the simulation (e.g., `z`, `vz`, `tvec`, `etas`, `numl`, `nlmax`, `oscillation_amplitudes`, `pressure_amplitudes`, `Rv`)
-- `problem_conditions.jld2`: the run configuration and nondimensional parameters (`U0`, `N`, `Fr`, `We`, `WeS`, `dtb`, `tend`, `PROBLEM_CONSTANTS`, etc.)
-
-To inspect a file:
-
-```
-using JLD2
-d = load("julia/output/results.jld2")
-keys(d)
+```text
+julia/output/
 ```
 
-#### Make filenames more meaningful (no API changes)
+## Choose readable output names
 
-You can set an output directory and a filename prefix from inside Julia (no shell `export` needed):
+The solver currently uses environment variables for output names. You do not need to set them in the shell; set them inside Julia before a run:
 
-```
-ENV["SOLVE_MOTION_OUTPUT_DIR"] = "my_results"
+```julia
+ENV["SOLVE_MOTION_OUTPUT_DIR"] = "julia/output/my_first_runs"
 ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U10_N10_tol1e-2_"
+
+SolveMotion.solve_motion(10.0, nothing, 10, 1e-2, nothing, false)
 ```
 
-If you want timestamps, add them in Julia:
+To add a timestamp:
 
-```
+```julia
 using Dates
 ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U10_" * Dates.format(now(), "yyyymmdd_HHMMSS") * "_"
 ```
 
-### 5) Run a sweep (multiple runs)
+This will produce files like:
 
-In the same Julia session:
-
-```
-for U0 in [5.0, 10.0, 15.0]
-    ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U$(U0)_"
-    SolveMotion.solve_motion(U0, nothing, 10, 1e-2, nothing, false)
-end
+```text
+julia/output/my_first_runs/U10_20260522_101500_results.jld2
+julia/output/my_first_runs/U10_20260522_101500_problem_conditions.jld2
 ```
 
-#### Helper script: sweep + CSV summary
+## What is inside the output files?
 
-Use the ready-made script at `julia/scripts/sweep.jl`:
+The files are JLD2 containers. Think of them as named dictionaries saved to disk.
 
-```
-julia --project=julia julia/scripts/sweep.jl
-```
+### `*_results.jld2`
 
-It writes each run to `julia/output/` by default and creates `summary.csv` in the same folder.
+This stores the time-dependent simulation output.
 
-### 6) Postprocess results (plots, videos, figures)
+| Key | Meaning |
+|---|---|
+| `tvec` | saved simulation times |
+| `z` | droplet center-of-mass height |
+| `vz` | droplet center-of-mass velocity |
+| `etaOri` | bath elevation at the origin/contact axis |
+| `etas` | bath elevation field over the radial mesh and saved times |
+| `numl` | accepted number of contact points at each saved time |
+| `nlmax` | maximum geometrically allowed contact points at each saved time |
+| `oscillation_amplitudes` | droplet deformation mode amplitudes |
+| `pressure_amplitudes` | pressure expansion coefficients on the droplet |
+| `Rv` | accepted contact/pressed radius history |
 
-This repo writes results to `.jld2` files. You can load them in Julia:
+### `*_problem_conditions.jld2`
 
-```
-julia --project=julia -e 'using JLD2; d=load("julia/output/results.jld2"); println(keys(d))'
-```
+This stores run metadata and nondimensional parameters.
 
-From there, you can use your preferred plotting library to make figures or videos.
+| Key | Meaning |
+|---|---|
+| `U0`, `N`, `Ang` | impact speed, number of modes, contact angle |
+| `Re`, `Fr`, `We`, `WeS` | nondimensional groups used by the solver |
+| `dtb`, `tend`, `nsteps` | base time step, final time, allocated step count |
+| `L_unit`, `T_unit`, `M_unit` | dimensional scaling units |
+| `PROBLEM_CONSTANTS` | solver constants passed through lower-level routines |
+| `simul_time` | wall-clock runtime in seconds |
 
----
+Inspect any output file from Julia:
 
-This folder is a standalone Julia implementation of the kinematic-match (KM) droplet-on-bath impact solver contained in this repository. The Julia runtime does not call MATLAB.
-
-The original MATLAB project organizes all simulation inputs in a strict folder tree and loads them via relative paths. The Julia port replaces that folder-walk with a single **case file** (`.jld2`) that bundles everything needed to run a configuration (domain operators + physical parameters).
-
-## What The Solver Does (Backbone)
-
-At a high level, the solver advances an axisymmetric droplet impact in time, enforcing KM contact constraints between:
-
-- a deformable droplet represented by a truncated spherical-harmonic (Legendre) expansion, and
-- a weakly viscous bath free surface represented on a 1D radial mesh, coupled to the exterior potential flow through a Dirichlet-to-Neumann (DtN) operator.
-
-At each time step it resolves a coupled contact problem:
-
-1. Predict droplet deformation/modes forward in time given the current pressure amplitudes.
-2. Given the predicted droplet shape, solve for bath surface/potential and the contact pressure distribution that enforces kinematic match and tangency constraints.
-3. Project the resulting contact pressure into spherical-harmonic amplitudes and iterate until the deformation update is self-consistent (nonlinear fixed point). If the nonlinear solve becomes unstable, the solver reduces the time step.
-
-Important note from the original codebase: `psMatPer` (when present in MATLAB outputs) is not the exact `p_s` used in the paper; it is typically `p_s` minus the capillary jump term, which matters for post-processing.
-
-## DtN Matrix: How It Is Generated + Where It Lives
-
-The DtN matrix depends only on the radial domain size/discretization (e.g., `D`, `nr`, `dr`, and refinement settings). It is expensive to compute and is treated as cached data.
-
-### MATLAB generation
-
-Generated by:
-
-- `matlab/1_code/D*/ParRadDTNStops.m`
-
-This script constructs `DTNnew345` via numerical integration of the DtN kernel, with special quadrature near the singularity at the origin and optional parallelism. It writes a `.mat` file in the domain folder named:
-
-- `DTNnew345nr{nr}D{D}refp{refp}.mat`
-
-Example already in the repo:
-
-- `matlab/1_code/D5Quant20/DTNnew345nr50D5refp10.mat`
-
-### Julia storage
-
-Julia does not compute DtN at runtime. The DtN matrix is stored inside the Julia case file:
-
-- `julia/data/case_d5q20.jld2` (key `DTN`)
-
-That file also contains `Delta`, `IntMat`, `nr`, `dr`, etc. If you change the domain discretization, you must provide a consistent DtN matrix and rebuild a compatible case file.
-
-## Building A Case File (Standalone)
-
-The Julia folder includes a generator that builds the full case file without MATLAB, including the DtN matrix:
-
-- `julia/scripts/build_case.jl`
-
-It uses environment variables to configure parameters. Defaults match the bundled `case_d5q20.jld2`:
-
-```
-CASE_D=5
-CASE_QUANT=20
-CASE_RHO=1
-CASE_SIGMA=72.2
-CASE_NU=9.78e-3
-CASE_MUAIR=0
-CASE_G=981
-CASE_RHOS=1
-CASE_SIGMAS=72.2
-CASE_RO=0.035
-CASE_REFP=10
-CASE_NUM_BATCHES=20
-CASE_THREADED=true
-CASE_OUTPUT=julia/data/case_d5q20.jld2
+```julia
+using JLD2
+results = load("julia/output/U10_N10_tol1e-2_results.jld2")
+keys(results)
+results["tvec"]
+results["z"]
 ```
 
-Run it with:
+## Run a sweep and create a CSV summary
 
-```
-julia --project=julia julia/scripts/build_case.jl
-```
+Use the helper script:
 
-It writes a `.jld2` case file that `SolveMotion.load_case(...)` can consume directly.
-
-## Project Layout (Julia)
-
-- `julia/Project.toml`, `julia/Manifest.toml`: Julia environment
-- `julia/src/SolveMotion.jl`: module entrypoint (`module SolveMotion`, includes subfiles, exports)
-- `julia/src/types.jl`: `CaseData`, `Condition`, small helpers/constants
-- `julia/src/case.jl`: case-file loading (`load_case`, default search path)
-- `julia/src/interp.jl`: interpolation helpers (`interp1_linear`, `interp1_makima`)
-- `julia/src/legendre.jl`: Legendre polynomial utilities (basis + derivatives)
-- `julia/src/geometry.jl`: spherical/axisymmetric geometry helpers (r/z conversions, tangents, max contact radius)
-- `julia/src/projection.jl`: pressure projection onto droplet modes (`custom_project_amplitudes`)
-- `julia/src/linear.jl`: linear solve helper (tracks near-singularity)
-- `julia/src/contact.jl`: contact/bath solvers (`solveDD0`, `solvenDDCusp`)
-- `julia/src/ode.jl`: deformation ODE update (`solve_ODE_unkown`)
-- `julia/src/utils.jl`: misc helpers + JLD2 save wrapper
-- `julia/src/solver.jl`: main time integrator (`solve_motion`)
-- `julia/data/`: bundled case(s), currently `case_d5q20.jld2`
-- `julia/tests/`: MATLAB-vs-Julia comparison test
-
-## Running A Simulation (Julia)
-
-The main API matches MATLAB’s signature closely:
-
-- `SolveMotion.solve_motion(U0, nothing, N, tolP, nothing, debug_flag)`
-
-By default it loads `julia/data/case_d5q20.jld2` (via a small search around `julia/src/`).
-
-Useful environment variables:
-
-- `SOLVE_MOTION_OUTPUT_DIR`: where to write outputs (JLD2)
-- `SOLVE_MOTION_OUTPUT_PREFIX`: filename prefix for outputs
-- `SOLVE_MOTION_MAX_STEPS`: cap number of time steps (useful for tests)
-- `SOLVE_MOTION_RANDOM_SEED`: deterministic randomness (used in a few fallback branches)
-
-## Precompile + Headless Smoke Run
-
-To warm up compilation and run a 5-step headless smoke test (D5Q20, N=10, U0=10, tolP=1e-2):
-
-```
-julia --project=julia julia/scripts/precompile_small_case.jl
+```julia
+include("julia/scripts/sweep.jl")
 ```
 
-The script forces a headless GR backend via `GKSwstype=100` (if plotting packages are loaded elsewhere) and writes outputs to a temp directory.
+By default it runs three impact speeds:
 
-## Testing: MATLAB vs Julia
+```julia
+U0s = [5.0, 10.0, 15.0]
+```
 
-Test script:
+and writes:
 
-- `julia/tests/compare_small_case.jl`
+```text
+julia/output/*_results.jld2
+julia/output/*_problem_conditions.jld2
+julia/output/summary.csv
+```
 
-It runs MATLAB headless (`matlab -nodisplay -nojvm -batch`) to generate reference outputs for a small case, then runs the Julia solver for the same parameters and compares key arrays for numerical equality within tolerances. Set `TEST_U0` to vary impact speed:
+If you want to customize the sweep, open `julia/scripts/sweep.jl` and edit the final call to `run_sweep_and_summarize(...)`, for example:
 
-- `TEST_U0=10 julia --project=julia julia/tests/compare_small_case.jl`
+```julia
+run_sweep_and_summarize(; outdir="julia/output/sweep_U", U0s=[6.0, 8.0, 10.0], N=10, tolP=1e-2)
+```
 
-## Where The Original MATLAB Inputs Live (Reference)
+Then include the script again from Julia. The CSV summary currently records one row per `problem_conditions.jld2` file with the filename, `U0`, `N`, `tend`, and `simul_time`.
 
-The MATLAB solver expects a strict folder tree under `matlab/1_code/`:
+## Make a quick plot
 
-- domain folder: `matlab/1_code/D{D}Quant{Quant}/` (contains `DTN*.mat`, `Delta.mat`, `IntMat.mat`, etc.)
-- fluid props: `rho...sigma...nu...muair.../`
-- droplet props: `RhoS...SigmaS.../`
-- radius: `R0####mm/`
-- impact: `ImpDefCornerAng{Ang}U{U0}/N={N}tol={tol}/`
+This example plots droplet height versus time. It assumes you have installed a plotting package such as `Plots.jl`.
 
-In Julia, these are condensed into the single case file (`.jld2`) plus runtime parameters (`U0`, `N`, `tolP`).
+```julia
+import Pkg
+Pkg.add("Plots")   # one time only
+
+using JLD2, Plots
+r = load("julia/output/U10_N10_tol1e-2_results.jld2")
+plot(r["tvec"], r["z"], xlabel="time", ylabel="z", label="COM height")
+```
+
+For videos, load `etas`, `z`, `Rv`, and the case mesh from the case file, then animate frames with your preferred plotting backend. The current Julia folder does not yet provide a polished video-making script.
+
+## Precompile for faster first runs
+
+Julia can spend noticeable time compiling functions the first time you run a case. To warm up the solver on a tiny run:
+
+```julia
+include("julia/scripts/precompile_small_case.jl")
+```
+
+For repeated development, run this once after package installation or after large code changes.
+
+## Case files
+
+The default case file is:
+
+```text
+julia/data/case_d5q20.jld2
+```
+
+It bundles:
+
+- radial domain size and mesh spacing (`D`, `nr`, `dr`)
+- bath operators (`Delta`, `IntMat`, `DTN`)
+- bath and droplet physical parameters
+- default radius and surface-tension/density parameters
+
+You can load it directly:
+
+```julia
+include("julia/src/SolveMotion.jl")
+case = SolveMotion.load_case("julia/data/case_d5q20.jld2")
+```
+
+## Build a new case file
+
+Use this only when you need a new domain/resolution or physical parameter bundle.
+
+```julia
+include("julia/scripts/build_case.jl")
+```
+
+The generator reads configuration from environment variables. Defaults reproduce the bundled D5Q20-style case. Important options include:
+
+```julia
+ENV["CASE_D"] = "5"
+ENV["CASE_QUANT"] = "20"
+ENV["CASE_RHO"] = "1"
+ENV["CASE_SIGMA"] = "72.2"
+ENV["CASE_NU"] = "9.78e-3"
+ENV["CASE_RO"] = "0.035"
+ENV["CASE_OUTPUT"] = "julia/data/my_case.jld2"
+```
+
+Then run:
+
+```julia
+include("julia/scripts/build_case.jl")
+```
+
+The DtN matrix is expensive to compute. Prefer the bundled case unless you need a genuinely new domain.
+
+## Source-file guide
+
+```text
+julia/src/SolveMotion.jl     module entry point
+julia/src/solver.jl          main solve_motion time integrator
+julia/src/solver_old.jl      retained baseline for refactor comparisons
+julia/src/contact.jl         solveDD0 and solvenDDCusp contact solvers
+julia/src/ode.jl             droplet deformation update
+julia/src/projection.jl      pressure projection onto Legendre modes
+julia/src/geometry.jl        spherical/cylindrical geometry helpers
+julia/src/case.jl            case-file loading
+julia/src/case_builder.jl    case-file construction
+julia/src/dtn.jl             DtN generation utilities
+```
+
+## Regression checks
+
+The exact refactor comparison runs the current solver against `solver_old.jl` on a small case:
+
+```bash
+julia --project=julia julia/tests/compare_refactor_exact.jl
+```
+
+A small MATLAB/Julia comparison helper also exists:
+
+```bash
+julia --project=julia julia/tests/compare_small_case.jl
+```
+
+That second check requires MATLAB to be callable from the same environment that launched Julia.
+
+## Troubleshooting
+
+### `Package JLD2 not found`
+
+Activate and instantiate the Julia project:
+
+```julia
+import Pkg
+Pkg.activate("julia")
+Pkg.instantiate()
+```
+
+Or start Julia with:
+
+```bash
+julia --project=julia
+```
+
+### Output files overwrite each other
+
+Set a unique prefix before each run:
+
+```julia
+using Dates
+ENV["SOLVE_MOTION_OUTPUT_PREFIX"] = "U10_" * Dates.format(now(), "yyyymmdd_HHMMSS") * "_"
+```
+
+### First run is slow
+
+Run the precompile helper once:
+
+```julia
+include("julia/scripts/precompile_small_case.jl")
+```
+
+### MATLAB exists in Terminal but Julia cannot spawn it
+
+VS Code and GUI-launched apps sometimes inherit a different `PATH` than your terminal. Start VS Code from the terminal, or launch Julia from the same terminal where `matlab -h` works.
+
+## Current limitations
+
+- The Julia folder focuses on running and saving simulations; polished figure/video reproduction is still mostly in MATLAB.
+- The default output names are generic unless you set `SOLVE_MOTION_OUTPUT_PREFIX`.
+- Large cases are computationally expensive; start with D5Q20, `N=10`, and loose tolerances before scaling up.

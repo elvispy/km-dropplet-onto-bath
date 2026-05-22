@@ -1,117 +1,200 @@
-# Droplet Rebounds off a Fluid Bath: Kinematic‑Match Simulations and Experiments (MATLAB)
+# Droplet rebounds off a fluid bath at low Weber numbers
 
-[![arXiv](https://img.shields.io/badge/View%20on%20arXiv-B31B1B?logo=arxiv&labelColor=gray)](https://arxiv.org/abs/2509.22826)
+[![JFM](https://img.shields.io/badge/Journal%20of%20Fluid%20Mechanics-2026%3B1031%3AA6-blue)](https://doi.org/10.1017/jfm.2026.11291)
+[![arXiv](https://img.shields.io/badge/arXiv-2509.22826-B31B1B?logo=arxiv&labelColor=gray)](https://arxiv.org/abs/2509.22826)
 
+This repository contains the simulation code and supporting data for the kinematic-match (KM) model introduced in:
 
+> E. A. Aguero, C. A. Galeano-Rios, C. Ragazzo, C. T. Gabbard, D. M. Harris, and P. A. Milewski, "Droplet rebounds off a fluid bath at low Weber numbers," Journal of Fluid Mechanics 1031, A6 (2026).
 
+The code simulates non-coalescing, axisymmetric impacts of droplets on deep liquid baths in the low-Weber-number regime. The model treats both the droplet and the bath as deformable, predicts the evolving pressed/contact area, pressure distribution, bath wave field, and droplet motion, and was used to compare against experiments and previous simulations.
 
-![Graphical Abstract](matlab/0_data/manual/GraphicalAbstract.jpg)
+![Graphical abstract](matlab/0_data/manual/GraphicalAbstract.jpg)
 
-This repository accompanies the manuscript “Droplet rebounds off a fluid bath: kinematic match simulations and experiments.” It contains MATLAB code and precomputed data to simulate non‑coalescing droplet–bath impacts using the full kinematic‑match (KM) framework, now extended to include droplet deformation. The solver predicts the time‑evolving contact area, pressure distribution, and wave field on both bodies. Automation scripts generate parameterized folder trees, run sweeps (water/oil presets), and aid post‑processing and figure reproduction.
+## What problem does this code solve?
 
-All inputs use CGS units (cm–g–s). Folder names encode parameters to keep runs organized and reproducible.
+A small droplet can bounce from a liquid bath without coalescing if a thin gas layer persists during impact. The KM model used here does not resolve that gas film directly. Instead, it replaces the film by an idealized pressure-transmitting contact region and enforces the geometric and kinematic constraints that the two liquid interfaces must satisfy while they remain separated.
 
-## Paper Context
-- Scope: Non‑coalescing, axisymmetric droplet impacts on a deep bath at low Weber number, where surface tension and weak viscosity dominate.
-- Model: Full KM with spherical‑harmonic deformation of the droplet, weakly viscous bath, and natural geometric/kinematic contact constraints. No explicit gas‑film resolution is used.
-- Results: Detailed predictions (pressed area, pressures, wave field) that compare favorably with prior and new experiments for sub‑millimetric droplets at low impact speed.
+The published model extends earlier KM work that treated the impactor as rigid. Here, the droplet surface is represented spectrally with Legendre modes, while the bath is represented on a radial mesh and coupled to a Dirichlet-to-Neumann (DtN) operator. This lets the solver resolve droplet deformation, bath deformation, pressure localization, and the moving contact boundary.
 
-## What’s Included
-- Core solver routines (SH dynamics, contact/pressure solver, DtN coupling).
-- Sweep scripts for water/oil setups with logging and optional email notifications.
-- Precomputed matrices/templates to avoid recomputing the DtN operator for common domains/resolution.
-- Post-processing utilities and figure scripts.
+```mermaid
+flowchart LR
+    A[Impact setup\nR, U0, fluids, bath domain] --> B[KM time step]
+    B --> C[Try contact sizes q]
+    C --> D[Pressure/deformation iteration]
+    D --> E[Accept contact radius\nor halve dt]
+    E --> F[Outputs\nz, vz, eta, pressure, modes, contact points]
+```
 
-## Repository Layout
-- `matlab/1_code/simulation_code/`
-  - Core functions, e.g. `solve_motion.m`, `solveDD0.m`, `solvenDDCusp.m`, `solve_ODE_unkown.m`, `r_from_spherical.m`, `zs_from_spherical.m`, `theta_from_cylindrical.m`, `custom_project_amplitudes.m`, `zeta_generator.m`.
-- `matlab/1_code/sweeper_water_2024.m`, `matlab/1_code/sweeper_oil_2024.m`
-  - Parameter-sweep drivers that prepare folder trees and call `solve_motion`.
-- `matlab/1_code/D*/`
-  - Domain templates and cached data (e.g., `DomainMaker.m`, `ParRadDTNStops.m`, `DTN*.mat`). These serve as “safe” templates for generating new runs.
-- `matlab/1_code/Figures/`
-  - Figure scripts and extracted data for plotting (e.g., `impact_panel.m`).
-- `matlab/0_data/`
-  - `manual/` for figures/logs, `external/` for reference data. Logs typically go to `manual/Logger/`.
-- `Read_me.txt`
-  - Legacy notes describing the older workflow (still useful context).
+## Repository map
+
+```text
+km-droplet-onto-bath/
+├── README.md                         # This file
+├── matlab/
+│   ├── 0_data/                       # figures, logs, external/reference data
+│   └── 1_code/
+│       ├── simulation_code/          # original MATLAB solver and helpers
+│       ├── D*/                       # domain templates and cached DtN matrices
+│       ├── sweeper_water_2024.m      # water sweep driver
+│       ├── sweeper_oil_2024.m        # oil sweep driver
+│       └── Figures/                  # paper/postprocessing plotting scripts
+└── julia/
+    ├── src/                          # standalone Julia port
+    ├── data/case_d5q20.jld2          # bundled small case file
+    ├── scripts/                      # case building, precompile, sweep helpers
+    └── tests/                        # parity/regression checks
+```
+
+Use the MATLAB code if you want the original paper workflow and full historical folder tree. Use the Julia code if you want a standalone, easier-to-script solver that does not call MATLAB at runtime.
 
 ## Requirements
-- MATLAB (R2020b+ recommended). No special toolboxes are strictly required; Parallel Computing Toolbox is optional.
-- Python 3 optional for email notifications (used by `sending_email.py`). On macOS, you may need to fix SSL certs (see `certificate_install.py`).
-- Disk space: runs produce `.mat` files per step; DtN matrices can be large.
 
-## Quickstart: Run a Water or Oil Sweep
-1) Start MATLAB and set the working directory:
-   - `cd matlab/1_code`
-2) Open and edit either `sweeper_water_2024.m` or `sweeper_oil_2024.m` to choose:
-   - Domain and resolution: `D`, `Quant`
-   - Fluid: `rho`, `sigma`, `nu`, `muair`
-   - Drop (solid) props: `RhoS`, `SigmaS`
-   - Radius: `R` (cm; folder names reflect mm)
-   - Impact setup: `Ang` (deg), `U` (cm/s), `modes` (SH count), `tol` (convergence)
-3) Run the sweeper script in MATLAB. It will:
-   - Create the parameterized folder tree.
-   - Prepare any missing `.mat` inputs using template makers (`DomainMaker.m`, `BathMaker.m`, `DropFluidMaker.m`, `RoMaker.m`).
-   - Call `simulation_code/solve_motion.m` for each parameter set.
-   - Write logs under `../0_data/manual/Logger/` and results in the leaf run folders.
+- MATLAB for the original solver and paper-era sweep/postprocessing scripts.
+- Julia 1.10+ for the standalone Julia port.
+- Disk space for cached operators and simulation outputs; DtN matrices and field histories can be large.
+- Optional Python tooling only for older helper scripts such as email notifications.
 
-Re-running a sweeper will skip runs that already have results; set `force_sweep = false/true` inside the script as needed.
+## Core workflow
 
-## Quickstart: Single Run (Manual)
-If you prefer not to use a sweeper, you can set up and run a single configuration manually.
-
-1) Create the domain and base data (inside a chosen `DXXQuantYY/`):
-   - Run `DomainMaker.m` (generates `D.mat`, `nr.mat`, `dr.mat`, `Delta.mat`, `IntMat.mat`, etc.).
-   - A precomputed DtN matrix `DTNnew345nr%D%drefp10.mat` is typically present. Avoid recomputing `ParRadDTNStops.m` unless necessary.
-2) Create fluid property folder and files (inside `rhoXXXXsigmaYYYYnuZZZZmuairW/`):
-   - Edit and run `BathMaker.m` to write `rho.mat`, `sigma.mat`, `nu.mat`, `muair.mat`, `g.mat`.
-3) Create solid (drop) property folder and files (inside `RhoSXXXXSigmaSYYYY/`):
-   - Edit and run `DropFluidMaker.m` to write `rhoS.mat`, `sigmaS.mat`, etc.
-4) Create the radius folder `R0####mm/` and run `RoMaker.m` to write `Ro.mat`.
-5) Create the run folder and call the solver:
-   - Make `ImpDefCornerAng{Ang}U{U0}/N={N}tol={tol}/` and `cd` into it.
-   - Run, e.g.: `solve_motion(U0, [], N, tol, pwd, false)`
-
-Tip: `solve_motion.m` navigates up the folder tree to load all required `.mat` files. If the folder naming convention is followed, it “just works”.
-
-## Folder Convention & Units (CGS)
-The sweeper/manual setup expects the following folder pattern under a given domain:
+```mermaid
+flowchart TD
+    P[Choose physical case\nfluid, radius, impact speed] --> D[Choose domain\nD, Quant, DtN matrix]
+    D --> R[Run solve_motion]
+    R --> O[Read output arrays]
+    O --> M[Postprocess\ncontact time, restitution, pressure, videos]
 ```
+
+All physical inputs use CGS units unless explicitly stated otherwise: centimeters, grams, seconds.
+
+## MATLAB workflow
+
+The MATLAB solver stores inputs and outputs in a parameter-encoded folder tree. The path is part of the simulation metadata.
+
+```text
 D{D}Quant{Quant}/
-  rho{1000*rho}sigma{round(100*sigma)}nu{round(10000*nu)}muair{muair}/
-    RhoS{1000*rhoS}SigmaS{round(100*sigmaS)}/
-      R0{Ro*10000 in mm}/
+  rho{...}sigma{...}nu{...}muair{...}/
+    RhoS{...}SigmaS{...}/
+      R0{####}mm/
         ImpDefCornerAng{Ang}U{U0}/
           N={N}tol={tol}/
 ```
-- Examples (water): `rho1000sigma7220nu98muair0`, `RhoS1000SigmaS7220`, `R0350mm`, `ImpDefCornerAng180U44.52`, `N=21tol=5.00e-05`.
-- Inputs in CGS: `rho`~g/cm^3 (enter 1 for water), `sigma`~dyn/cm (enter 72.20), `nu`~cm^2/s (enter 0.00978), `U0`~cm/s, `R` in cm.
 
-## Outputs
-Each run folder contains:
-- Time histories: `z.mat`, `vz.mat`, `etaOri.mat`, `tvec.mat`, `numl.mat`, `nlmax.mat`.
-- Fields and amplitudes: `etas.mat`, `psMatPer.mat`, `oscillation_amplitudes.mat`, `pressure_amplitudes.mat`, `Rv.mat`.
-- Summary: `ProblemConditions.mat` (nondimensional numbers, units, N, U0, Ang, dtb, and `PROBLEM_CONSTANTS`).
-- On errors: `error_logU0=... .mat` and partial snapshots prefixed with `errored_`.
+Example leaf folder:
 
-Post-processing helpers (examples):
-- `SurfceSlicesAndDroplet.m` (surface + drop visualization)
-- `PressViewer.m` (pressure visualization)
-- `Figures/impact_panel.m` (figure reproduction)
+```text
+D5Quant20/.../R0350mm/ImpDefCornerAng180U10/N=10tol=1.00e-02/
+```
 
-## Tips & Notes
-- DtN matrices are expensive to compute. Use the included `DTN*.mat` in the domain folders; only run `ParRadDTNStops.m` if you understand the cost and requirements.
-- Sweeper scripts also support logging and optional email notifications when runs finish. To enable email, place a Gmail app-password at `matlab/0_data/credentials/lol.txt` and ensure Python 3 + SSL certs are set up. See `matlab/1_code/sending_email.py` and `matlab/1_code/certificate_install.py`.
-- Many scripts assume the folder tree exists. If something is missing, re-run the relevant `*Maker.m` script in the right folder.
-- Default contact angle is 180° (`Ang = 180`).
+### Run a sweep
 
-## Legacy Notes
-`Read_me.txt` contains the original description of the folder system and an older entry-point (`VertPolarExact*.m`). The modern workflow routes runs through `simulation_code/solve_motion.m` and the 2024 sweepers.
+1. Start MATLAB.
+2. Change directory to `matlab/1_code`.
+3. Open one of the sweep drivers:
+   - `sweeper_water_2024.m`
+   - `sweeper_oil_2024.m`
+4. Edit the parameter lists near the top of the file.
+5. Run the script.
 
-## Cite This Work
-If you use this code or reproduce results, please cite the companion paper. A BibTeX entry will be added upon publication. In the meantime, cite as “Agüero, Galeano‑Rios, Ragazzo, Gabbard, Harris, Milewski (2025), Droplet rebounds off a fluid bath: kinematic match simulations and experiments.”
+The sweeper creates missing folders, prepares required `.mat` inputs, calls `simulation_code/solve_motion.m`, and writes results in each run folder. Re-running a sweep can skip existing results or force recomputation depending on the script settings.
+
+### Run one MATLAB case manually
+
+After creating the folder tree and required `.mat` inputs, move into the leaf run folder and call:
+
+```matlab
+solve_motion(U0, [], N, tol, pwd, false)
+```
+
+For example:
+
+```matlab
+solve_motion(10, [], 10, 1e-2, pwd, false)
+```
+
+### MATLAB outputs
+
+Each successful run folder typically contains:
+
+| File | Meaning |
+|---|---|
+| `z.mat`, `vz.mat`, `tvec.mat` | droplet center-of-mass height, velocity, and saved times |
+| `etaOri.mat`, `etas.mat` | bath surface elevation at saved times |
+| `numl.mat`, `nlmax.mat` | accepted number of contact points and maximum geometrically possible contact points |
+| `pressure_amplitudes.mat` | Legendre pressure coefficients acting on the droplet |
+| `oscillation_amplitudes.mat` | droplet deformation mode amplitudes |
+| `Rv.mat` | contact/pressed radius history |
+| `psMatPer.mat` | stored pressure-like field used by legacy postprocessing; note that it is offset from the exact paper pressure by the capillary jump term |
+| `ProblemConditions.mat` | nondimensional numbers, units, solver settings, and constants |
+
+Useful postprocessing entry points include:
+
+- `matlab/1_code/SurfceSlicesAndDroplet.m` for surface/drop visualization
+- run-folder-local `PressViewer.m` files in some legacy result folders for pressure visualization
+- `matlab/1_code/Figures/` for paper-style plotting scripts
+- `matlab/1_code/sweeper_postprocessing.m` for batch processing existing runs
+
+## Julia workflow
+
+The Julia implementation is self-contained under `julia/`. It replaces MATLAB's folder-walk input system with JLD2 case files.
+
+Quick run from the repository root:
+
+```julia
+import Pkg
+Pkg.activate("julia")
+Pkg.instantiate()
+
+include("julia/src/SolveMotion.jl")
+SolveMotion.solve_motion(10.0, nothing, 10, 1e-2, nothing, false)
+```
+
+By default this uses `julia/data/case_d5q20.jld2` and writes to `julia/output/`.
+
+For sweeps and a CSV summary, use:
+
+```julia
+include("julia/scripts/sweep.jl")
+```
+
+See `julia/README.md` for the full Julia user guide, including output naming, JLD2 inspection, case-file construction, and regression checks.
+
+## Numerical model in one paragraph
+
+At each time step the solver searches over nearby candidate contact radii, represented by an integer number of radial contact points. For each candidate it solves a coupled pressure/deformation problem: the bath responds through precomputed linear operators and the droplet responds through spherical-harmonic deformation modes. Candidates that violate non-intersection constraints are rejected; the accepted candidate minimizes the tangent/contact residual. If the contact area would jump too far in one step, the time step is reduced and the step is recomputed.
+
+## Cached DtN matrices
+
+DtN matrices are expensive to generate. The MATLAB domain folders under `matlab/1_code/D*/` include cached operators for known domains. The Julia case file `julia/data/case_d5q20.jld2` bundles the D5Q20 operator and related domain data for a small reproducible case.
+
+Do not regenerate DtN matrices unless you need a new domain or resolution and understand the cost.
+
+## Citation
+
+If you use this code or data, cite the published paper:
+
+```bibtex
+@article{aguero2026droplet,
+  title   = {Droplet rebounds off a fluid bath at low Weber numbers},
+  author  = {Aguero, Elvis A. and Galeano-Rios, Carlos A. and Ragazzo, Clodoaldo and Gabbard, Chase T. and Harris, Daniel M. and Milewski, Paul A.},
+  journal = {Journal of Fluid Mechanics},
+  volume  = {1031},
+  pages   = {A6},
+  year    = {2026},
+  doi     = {10.1017/jfm.2026.11291}
+}
+```
+
+The arXiv version is `arXiv:2509.22826`.
+
+## Known cautions
+
+- This code assumes non-coalescing impacts; it does not model gas-film rupture, wetting, or breakup.
+- Most scripts assume CGS units.
+- Many MATLAB scripts rely on the folder convention above.
+- Some historical scripts remain in the repository for reproducibility; prefer the 2024 sweepers and `simulation_code/solve_motion.m` for new MATLAB runs.
+- The Julia port is intended to be standalone and easier to automate, but the MATLAB code remains the original paper lineage.
 
 ## Contact
-Questions or issues with running the code?
-- Open an issue on this repository
+
+Open an issue on this repository for questions about running the code or reproducing simulations.
