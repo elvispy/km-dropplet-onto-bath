@@ -19,12 +19,14 @@ The published model extends earlier KM work that treated the impactor as rigid. 
 
 ```mermaid
 flowchart LR
-    A[Impact setup\nR, U0, fluids, bath domain] --> B[KM time step]
-    B --> C[Try contact sizes q]
-    C --> D[Pressure/deformation iteration]
-    D --> E[Accept contact radius\nor halve dt]
-    E --> F[Outputs\nz, vz, eta, pressure, modes, contact points]
+    A[Setup] --> B[Step]
+    B --> C[Contact]
+    C --> D[Pressure]
+    D --> E[Accept]
+    E --> F[Output]
 ```
+
+Reading the schematic left to right: choose the impact case, advance one KM time step, test candidate contact sizes, solve the pressure/deformation coupling, accept the step or reduce `dt`, then save the physical fields and modal histories.
 
 ## Repository map
 
