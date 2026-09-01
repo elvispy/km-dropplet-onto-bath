@@ -46,3 +46,27 @@ lol.txt
 
 # Agent coordination local working memory
 .context/
+
+# --- repo hygiene (managed) ---
+.DS_Store
+Thumbs.db
+.sesskey
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+build/
+dist/
+*.egg-info/
+.vscode/
+.idea/
+*.sqlite
+*.sqlite3
+.context/
+AGENTS.md
+GEMINI.md
+STATUS.md
+PLAN.md
+*_SUMMARY.md
+HANDOFF*.md
